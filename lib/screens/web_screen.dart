@@ -95,16 +95,8 @@ class _WebScreenState extends State<WebScreen> {
     var canGoBack = await _controller.canGoBack();
     if(canGoBack) {
       _controller.goBack();
-      if (Platform.isAndroid) {
-        return false;
-      } else {
-        return null;
-      }
+      return false;
     }
-    if (Platform.isAndroid) {
-      return true;
-    } else {
-      return null;
-    }
+    return true;
   }
 }
