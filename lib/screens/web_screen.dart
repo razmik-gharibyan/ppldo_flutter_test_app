@@ -3,7 +3,8 @@ import 'dart:io';
 
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
-import 'package:ppldo_flutter_test_app/repo/connection/connection_checker.dart';
+import 'package:ppldo_flutter_test_app/bloc/bloc_provider.dart';
+import 'package:ppldo_flutter_test_app/bloc/connectivity_bloc.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class WebScreen extends StatefulWidget {
@@ -18,39 +19,17 @@ class _WebScreenState extends State<WebScreen> {
 
   // Constants
   final String _initialUrl = "https://dev.ppl.do";
-  // Tools
-  ConnectionChecker _connectionChecker;
   // Vars
   WebViewController _controller;
-  StreamSubscription _subscription;
-  bool _noInternet = true;
+  // Bloc
+  ConnectivityBloc _connectivityBloc;
 
   @override
   void initState() {
     super.initState();
+    _connectivityBloc = BlocProvider.of<ConnectivityBloc>(context);
     if (Platform.isAndroid) WebView.platform = SurfaceAndroidWebView();
-    _connectionChecker = ConnectionChecker();
-    _connectionChecker.checkConnectionStatus();
-    final result = _connectionChecker.connectivityStream;
-    result.listen((event) {
-      if (event == ConnectivityResult.none) {
-        setState(() {
-          _noInternet = true;
-        });
-      } else {
-        setState(() {
-          _noInternet = false;
-        });
-      }
-    });
-
-  }
-
-  @override
-  void dispose() {
-    _subscription.cancel();
-    _connectionChecker.dispose();
-    super.dispose();
+    _connectivityBloc.checkConnectionStatus();
   }
 
   @override
@@ -63,30 +42,38 @@ class _WebScreenState extends State<WebScreen> {
           backgroundColor: Colors.green,
           title: Text("ppldonet test application"),
         ),
-        body: _noInternet
-              ? Stack(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    color: Colors.red,
-                    child: Text(
-                      "No network connection",
-                      textAlign: TextAlign.center,
+        body: StreamBuilder<ConnectivityResult>(
+            stream: _connectivityBloc.connectivityStream,
+            builder: (ctx, snapshot) {
+              final connectivityResult = snapshot.data;
+              if (connectivityResult == ConnectivityResult.none) {
+                return Stack(
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      color: Colors.red,
+                      child: Text(
+                        "No network connection",
+                        textAlign: TextAlign.center,
+                      ),
                     ),
-                  ),
-                  Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                ],
-              )
-              : WebView(
+                    Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ],
+                );
+              } else {
+                return WebView(
                   initialUrl: _initialUrl,
                   javascriptMode: JavascriptMode.unrestricted,
                   onWebViewCreated: (WebViewController webViewController) {
                     _controller = webViewController;
-                  },
+                    },
                   gestureNavigationEnabled: true,
-                )
+                );
+              }
+            }
+        )
       ),
     );
   }
