@@ -9,14 +9,14 @@ class ConnectivityBloc extends Bloc {
 
   final _connectivityController = StreamController<ConnectivityResult>();
 
-  Sink<ConnectivityResult> get _inConnectivityController => _connectivityController.sink;
-  Stream<ConnectivityResult> get connectivityStream => _connectivityController.stream;
+  Sink<ConnectivityResult> get _inDeepLinkController => _connectivityController.sink;
+  Stream<ConnectivityResult> get deepLinkStream => _connectivityController.stream;
 
   void checkConnectionStatus() {
     final connectivity = Connectivity();
     _timer = Timer.periodic(new Duration(milliseconds: 2000), (timer) async {
       final result = await connectivity.checkConnectivity();
-      _inConnectivityController.add(result);
+      _inDeepLinkController.add(result);
     });
   }
 
