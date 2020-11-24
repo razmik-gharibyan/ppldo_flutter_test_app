@@ -75,13 +75,15 @@ class _WebScreenState extends State<WebScreen> {
                       ],
                     );
                   } else {
-                    return WebView(
-                      initialUrl: _initialUrl,
-                      javascriptMode: JavascriptMode.unrestricted,
-                      onWebViewCreated: (WebViewController webViewController) {
-                        _controller = webViewController;
-                      },
-                      gestureNavigationEnabled: true,
+                    return SafeArea(
+                      child: WebView(
+                        initialUrl: _initialUrl,
+                        javascriptMode: JavascriptMode.unrestricted,
+                        onWebViewCreated: (WebViewController webViewController) {
+                          _controller = webViewController;
+                        },
+                        gestureNavigationEnabled: true,
+                      ),
                     );
                   }
                 }
