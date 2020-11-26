@@ -83,6 +83,9 @@ class _WebScreenState extends State<WebScreen> {
                           _controller = webViewController;
                         },
                         gestureNavigationEnabled: true,
+                        navigationDelegate: (NavigationRequest request) {
+                          return _handleUrlRequests(request);
+                        },
                       ),
                     );
                   }
@@ -92,6 +95,14 @@ class _WebScreenState extends State<WebScreen> {
         )
       ),
     );
+  }
+
+  NavigationDecision _handleUrlRequests(NavigationRequest request) {
+    if (request.url.endsWith(".pdf")) {
+      _controller.loadUrl("https://docs.google.com/gview?embedded=true&url=${request.url}");
+      return NavigationDecision.prevent;
+    }
+    return NavigationDecision.navigate;
   }
 
   Future<bool> _onBackPressed() async {
