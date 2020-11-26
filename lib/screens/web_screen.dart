@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:ppldo_flutter_test_app/bloc/bloc_provider.dart';
 import 'package:ppldo_flutter_test_app/bloc/connectivity_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/deeplink_bloc.dart';
+import 'package:ppldo_flutter_test_app/bloc/js_communication_bloc.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class WebScreen extends StatefulWidget {
@@ -25,15 +26,19 @@ class _WebScreenState extends State<WebScreen> {
   // Bloc
   ConnectivityBloc _connectivityBloc;
   DeepLinkBloc _deepLinkBloc;
+  JSCommunicationBloc _jsCommunicationBloc;
 
   @override
   void initState() {
     super.initState();
     _connectivityBloc = BlocProvider.of<ConnectivityBloc>(context);
     _deepLinkBloc = DeepLinkBloc();
+    _jsCommunicationBloc = JSCommunicationBloc();
     if (Platform.isAndroid) WebView.platform = SurfaceAndroidWebView();
     _deepLinkBloc.initUniLinks();
     _connectivityBloc.checkConnectionStatus();
+    _jsCommunicationBloc.startSession();
+    _listenForJSEvents();
   }
 
   @override
@@ -81,6 +86,7 @@ class _WebScreenState extends State<WebScreen> {
                         javascriptMode: JavascriptMode.unrestricted,
                         onWebViewCreated: (WebViewController webViewController) {
                           _controller = webViewController;
+                          _getCookies();
                         },
                         gestureNavigationEnabled: true,
                         navigationDelegate: (NavigationRequest request) {
@@ -95,6 +101,28 @@ class _WebScreenState extends State<WebScreen> {
         )
       ),
     );
+  }
+  
+  void _listenForJSEvents() {
+    _jsCommunicationBloc.cookieTimerStream.listen((event) {
+      if (event) {
+        _getCookies();
+      }
+    });
+  }
+
+  void _getCookies() async {
+    final String cookie = await _controller.evaluateJavascript("document.cookie");
+    if (cookie != null && cookie.isNotEmpty && cookie != "null" && cookie != "\"\"") {
+      final token = _getTokenFromCookies(cookie);
+    }
+  }
+
+  String _getTokenFromCookies(String cookie) {
+    const tokenSearchText = "token=";
+    final tokenStartIndex = cookie.lastIndexOf(tokenSearchText);
+    final tokenEndIndex = tokenStartIndex + tokenSearchText.length;
+    return cookie.substring(tokenEndIndex);
   }
 
   NavigationDecision _handleUrlRequests(NavigationRequest request) {

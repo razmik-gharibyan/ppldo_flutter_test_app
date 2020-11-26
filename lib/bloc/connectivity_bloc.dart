@@ -14,7 +14,7 @@ class ConnectivityBloc extends Bloc {
 
   void checkConnectionStatus() {
     final connectivity = Connectivity();
-    _timer = Timer.periodic(new Duration(milliseconds: 2000), (timer) async {
+    _timer = Timer.periodic(new Duration(seconds: 2), (timer) async {
       final result = await connectivity.checkConnectivity();
       _inDeepLinkController.add(result);
     });
