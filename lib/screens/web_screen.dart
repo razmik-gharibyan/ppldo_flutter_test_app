@@ -2,11 +2,15 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:connectivity/connectivity.dart';
+import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:ppldo_flutter_test_app/bloc/bloc_provider.dart';
 import 'package:ppldo_flutter_test_app/bloc/connectivity_bloc.dart';
+import 'package:ppldo_flutter_test_app/bloc/contacts_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/deeplink_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/js_communication_bloc.dart';
+import 'package:ppldo_flutter_test_app/helper/permission_helper.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class WebScreen extends StatefulWidget {
@@ -22,23 +26,35 @@ class _WebScreenState extends State<WebScreen> {
   // Constants
   final String _initialUrl = "https://dev.ppl.do";
   // Vars
+  PermissionStatus _contactsPermissionStatus;
+  bool _permissionCheckedOnce = false;
+  // Tools
+  PermissionHelper _permissionHelper;
   WebViewController _controller;
   // Bloc
   ConnectivityBloc _connectivityBloc;
   DeepLinkBloc _deepLinkBloc;
   JSCommunicationBloc _jsCommunicationBloc;
+  ContactsBloc _contactsBloc;
 
   @override
   void initState() {
     super.initState();
+    // -- Init Bloc --
     _connectivityBloc = BlocProvider.of<ConnectivityBloc>(context);
     _deepLinkBloc = DeepLinkBloc();
     _jsCommunicationBloc = JSCommunicationBloc();
+    _contactsBloc = ContactsBloc();
+    // -- Init tools --
+    _permissionHelper = PermissionHelper();
+    // -- Init operations --
     if (Platform.isAndroid) WebView.platform = SurfaceAndroidWebView();
     _deepLinkBloc.initUniLinks();
+    // -- Listen for changes --
     _connectivityBloc.checkConnectionStatus();
     _jsCommunicationBloc.startSession();
     _listenForJSEvents();
+    _listenForContacts();
   }
 
   @override
@@ -104,7 +120,7 @@ class _WebScreenState extends State<WebScreen> {
   }
   
   void _listenForJSEvents() {
-    _jsCommunicationBloc.cookieTimerStream.listen((event) {
+    _jsCommunicationBloc.cookieTimerStream.listen((bool event) {
       if (event) {
         _getCookies();
       }
@@ -115,6 +131,12 @@ class _WebScreenState extends State<WebScreen> {
     final String cookie = await _controller.evaluateJavascript("document.cookie");
     if (cookie != null && cookie.isNotEmpty && cookie != "null" && cookie != "\"\"") {
       final token = _getTokenFromCookies(cookie);
+      if (token != null && token.isNotEmpty) {
+        if (!_permissionCheckedOnce) {
+          _getPermissions();
+          _permissionCheckedOnce = true;
+        }
+      }
     }
   }
 
@@ -123,6 +145,19 @@ class _WebScreenState extends State<WebScreen> {
     final tokenStartIndex = cookie.lastIndexOf(tokenSearchText);
     final tokenEndIndex = tokenStartIndex + tokenSearchText.length;
     return cookie.substring(tokenEndIndex);
+  }
+
+  void _getPermissions() async {
+    _contactsPermissionStatus = await _permissionHelper.getPermissionStatus();
+    if (_contactsPermissionStatus == PermissionStatus.granted) {
+      _contactsBloc.startContactsSession();
+    }
+  }
+
+  void _listenForContacts() {
+    _contactsBloc.contactsStream.listen((List<Contact> contacts) {
+
+    });
   }
 
   NavigationDecision _handleUrlRequests(NavigationRequest request) {

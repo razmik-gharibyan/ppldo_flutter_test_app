@@ -27,6 +27,8 @@ dependencies:
   connectivity: ^2.0.2
   provider: ^4.3.2+2
   uni_links: ^0.4.0
+  contacts_service: ^0.4.6
+  permission_handler: ^5.0.1+1
 
 
   # The following adds the Cupertino Icons font to your application.
