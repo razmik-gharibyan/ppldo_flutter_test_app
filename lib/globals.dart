@@ -1,0 +1,1 @@
+final String mainUrl = "https://api-dev.ppl.do/graphql";

@@ -1,4 +1,4 @@
-package com.example.ppldo_flutter_test_app
+package net.ppldo.android
 
 import io.flutter.embedding.android.FlutterActivity
 

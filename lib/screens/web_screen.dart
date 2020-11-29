@@ -6,11 +6,13 @@ import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:ppldo_flutter_test_app/bloc/bloc_provider.dart';
+import 'package:ppldo_flutter_test_app/bloc/cloud_messaging_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/connectivity_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/contacts_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/deeplink_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/js_communication_bloc.dart';
 import 'package:ppldo_flutter_test_app/helper/permission_helper.dart';
+import 'package:ppldo_flutter_test_app/services/cloud_messaging_service.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class WebScreen extends StatefulWidget {
@@ -25,17 +27,20 @@ class _WebScreenState extends State<WebScreen> {
 
   // Constants
   final String _initialUrl = "https://dev.ppl.do";
-  // Vars
-  PermissionStatus _contactsPermissionStatus;
-  bool _permissionCheckedOnce = false;
-  // Tools
+  // Tools and Services
   PermissionHelper _permissionHelper;
   WebViewController _controller;
+  CloudMessagingService _cloudMessagingService;
   // Bloc
   ConnectivityBloc _connectivityBloc;
   DeepLinkBloc _deepLinkBloc;
   JSCommunicationBloc _jsCommunicationBloc;
+  CloudMessagingBloc _cloudMessagingBloc;
   ContactsBloc _contactsBloc;
+  // Vars
+  PermissionStatus _contactsPermissionStatus;
+  bool _permissionCheckedOnce = false;
+  String _deviceToken;
 
   @override
   void initState() {
@@ -44,17 +49,26 @@ class _WebScreenState extends State<WebScreen> {
     _connectivityBloc = BlocProvider.of<ConnectivityBloc>(context);
     _deepLinkBloc = DeepLinkBloc();
     _jsCommunicationBloc = JSCommunicationBloc();
+    _cloudMessagingBloc = CloudMessagingBloc();
     _contactsBloc = ContactsBloc();
     // -- Init tools --
     _permissionHelper = PermissionHelper();
+    _cloudMessagingService = CloudMessagingService();
     // -- Init operations --
     if (Platform.isAndroid) WebView.platform = SurfaceAndroidWebView();
     _deepLinkBloc.initUniLinks();
+    _cloudMessagingBloc.initCloudMessaging();
     // -- Listen for changes --
     _connectivityBloc.checkConnectionStatus();
     _jsCommunicationBloc.startSession();
     _listenForJSEvents();
     _listenForContacts();
+  }
+
+  @override
+  void didChangeDependencies() async {
+    super.didChangeDependencies();
+    _deviceToken = await _cloudMessagingBloc.getDeviceToken();
   }
 
   @override
@@ -135,6 +149,9 @@ class _WebScreenState extends State<WebScreen> {
         if (!_permissionCheckedOnce) {
           _getPermissions();
           _permissionCheckedOnce = true;
+          if (_deviceToken != null && _deviceToken.isNotEmpty) {
+            await _cloudMessagingService.postDeviceToken(token, _deviceToken);
+          }
         }
       }
     }
@@ -144,7 +161,7 @@ class _WebScreenState extends State<WebScreen> {
     const tokenSearchText = "token=";
     final tokenStartIndex = cookie.lastIndexOf(tokenSearchText);
     final tokenEndIndex = tokenStartIndex + tokenSearchText.length;
-    return cookie.substring(tokenEndIndex);
+    return cookie.substring(tokenEndIndex).replaceAll("\"", "");
   }
 
   void _getPermissions() async {
