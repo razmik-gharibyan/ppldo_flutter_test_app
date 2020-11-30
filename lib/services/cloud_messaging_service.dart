@@ -14,10 +14,11 @@ class CloudMessagingService {
       "query": mutationRequest
     });
     final result = await http.post(
-        globals.mainUrl,
+        globals.mainUrlDevChannel,
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "Bearer $userToken"
+          "Authorization": "Bearer $userToken",
+          "Origin": globals.initialUrlDevChannel
         },
         body: request
     );

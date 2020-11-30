@@ -28,7 +28,7 @@ class WebScreen extends StatefulWidget {
 class _WebScreenState extends State<WebScreen> {
 
   // Constants
-  final String _initialUrl = globals.initialUrl;
+  final String _initialUrl = globals.initialUrlDevChannel;
   // Tools and Services
   PermissionHelper _permissionHelper;
   WebViewController _controller;
@@ -63,8 +63,6 @@ class _WebScreenState extends State<WebScreen> {
     // -- Listen for changes --
     _connectivityBloc.checkConnectionStatus();
     _jsCommunicationBloc.startSession();
-    _listenForJSEvents();
-    _listenForContacts();
   }
 
   @override
@@ -118,6 +116,7 @@ class _WebScreenState extends State<WebScreen> {
                         javascriptMode: JavascriptMode.unrestricted,
                         onWebViewCreated: (WebViewController webViewController) {
                           _controller = webViewController;
+                          _listenForEvents();
                           _getCookies();
                         },
                         gestureNavigationEnabled: true,
@@ -173,10 +172,24 @@ class _WebScreenState extends State<WebScreen> {
     }
   }
 
+  void _listenForPushNotifications() {
+    _cloudMessagingBloc.cloudMessagingStream.listen((String routeUrl) {
+      if (_controller != null) {
+        _controller.loadUrl(routeUrl);
+      }
+    });
+  }
+
   void _listenForContacts() {
     _contactsBloc.contactsStream.listen((List<Contact> contacts) {
 
     });
+  }
+
+  void _listenForEvents() {
+    _listenForJSEvents();
+    _listenForPushNotifications();
+    _listenForContacts();
   }
 
   NavigationDecision _handleUrlRequests(NavigationRequest request) {

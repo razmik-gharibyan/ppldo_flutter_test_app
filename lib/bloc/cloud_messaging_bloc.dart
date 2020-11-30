@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:ppldo_flutter_test_app/bloc/bloc.dart';
@@ -21,10 +20,12 @@ class CloudMessagingBloc implements Bloc {
       print(msg);
       return;
     }, onLaunch: (msg) {
-      print(msg);
+      final routeUrl = msg["data"]["webviewUrl"];
+      _inCloudMessagingController.add(routeUrl);
       return;
     }, onResume: (msg) {
-      print(msg);
+      final routeUrl = msg["data"]["webviewUrl"];
+      _inCloudMessagingController.add(routeUrl);
       return;
     });
   }
