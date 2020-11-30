@@ -15,6 +15,8 @@ import 'package:ppldo_flutter_test_app/helper/permission_helper.dart';
 import 'package:ppldo_flutter_test_app/services/cloud_messaging_service.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
+import 'package:ppldo_flutter_test_app/globals.dart' as globals;
+
 class WebScreen extends StatefulWidget {
 
   static const String routeName = "/web-screen";
@@ -26,7 +28,7 @@ class WebScreen extends StatefulWidget {
 class _WebScreenState extends State<WebScreen> {
 
   // Constants
-  final String _initialUrl = "https://dev.ppl.do";
+  final String _initialUrl = globals.initialUrl;
   // Tools and Services
   PermissionHelper _permissionHelper;
   WebViewController _controller;

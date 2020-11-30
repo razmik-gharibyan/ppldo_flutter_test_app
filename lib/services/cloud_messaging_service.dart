@@ -7,7 +7,7 @@ class CloudMessagingService {
 
   Future postDeviceToken(String userToken, String deviceToken) async {
     final mutationRequest = """mutation { 
-                                addPushToken(token: \"$deviceToken\") 
+                                addPushToken(token: "$deviceToken") 
                                }
                             """;
     final request = jsonEncode({
@@ -22,6 +22,7 @@ class CloudMessagingService {
         body: request
     );
     if (result.statusCode == 200) {
+      // Push notifications are ready to be received
       Map<String,dynamic> jsonResponse = json.decode(result.body);
       print(jsonResponse);
     }

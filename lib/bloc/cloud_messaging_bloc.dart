@@ -16,9 +16,7 @@ class CloudMessagingBloc implements Bloc {
 
   void initCloudMessaging() {
     _fcm = FirebaseMessaging();
-    if (Platform.isIOS) {
-      _fcm.requestNotificationPermissions();
-    }
+    _fcm.requestNotificationPermissions();
     _fcm.configure(onMessage: (msg) {
       print(msg);
       return;
