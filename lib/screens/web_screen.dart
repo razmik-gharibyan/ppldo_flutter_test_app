@@ -13,6 +13,7 @@ import 'package:ppldo_flutter_test_app/bloc/deeplink_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/js_communication_bloc.dart';
 import 'package:ppldo_flutter_test_app/helper/permission_helper.dart';
 import 'package:ppldo_flutter_test_app/services/cloud_messaging_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import 'package:ppldo_flutter_test_app/globals.dart' as globals;
@@ -120,8 +121,8 @@ class _WebScreenState extends State<WebScreen> {
                           _getCookies();
                         },
                         gestureNavigationEnabled: true,
-                        navigationDelegate: (NavigationRequest request) {
-                          return _handleUrlRequests(request);
+                        navigationDelegate: (NavigationRequest request) async {
+                          return await _handleUrlRequests(request);
                         },
                       ),
                     );
@@ -192,12 +193,20 @@ class _WebScreenState extends State<WebScreen> {
     _listenForContacts();
   }
 
-  NavigationDecision _handleUrlRequests(NavigationRequest request) {
+  Future<NavigationDecision> _handleUrlRequests(NavigationRequest request) async {
+    /*
     if (request.url.endsWith(".pdf")) {
       _controller.loadUrl("https://docs.google.com/gview?embedded=true&url=${request.url}");
       return NavigationDecision.prevent;
     }
-    return NavigationDecision.navigate;
+     */
+    if (await canLaunch(request.url)) {
+      await launch(request.url);
+      return NavigationDecision.prevent;
+    } else {
+      _controller.loadUrl(request.url);
+      return NavigationDecision.navigate;
+    }
   }
 
   Future<bool> _onBackPressed() async {
