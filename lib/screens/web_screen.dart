@@ -58,7 +58,7 @@ class _WebScreenState extends State<WebScreen> {
     _permissionHelper = PermissionHelper();
     _cloudMessagingService = CloudMessagingService();
     // -- Init operations --
-    if (Platform.isAndroid) WebView.platform = SurfaceAndroidWebView();
+    //if (Platform.isAndroid) WebView.platform = SurfaceAndroidWebView();
     _deepLinkBloc.initUniLinks();
     _cloudMessagingBloc.initCloudMessaging();
     // -- Listen for changes --
@@ -201,6 +201,9 @@ class _WebScreenState extends State<WebScreen> {
     }
      */
     if (await canLaunch(request.url)) {
+      if (request.url.startsWith("https://dev.ppl.do") || request.url.startsWith("https://ppldo.net")) {
+        return NavigationDecision.navigate;
+      }
       await launch(request.url);
       return NavigationDecision.prevent;
     } else {
