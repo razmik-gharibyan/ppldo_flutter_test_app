@@ -201,6 +201,9 @@ class _WebScreenState extends State<WebScreen> {
     }
      */
     if (await canLaunch(request.url)) {
+      if (request.url.startsWith("https://dev.ppl.do") || request.url.startsWith("https://ppldo.net")) {
+        return NavigationDecision.navigate;
+      }
       await launch(request.url);
       return NavigationDecision.prevent;
     } else {
