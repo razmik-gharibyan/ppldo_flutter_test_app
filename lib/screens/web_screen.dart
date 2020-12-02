@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:connectivity/connectivity.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:ppldo_flutter_test_app/bloc/bloc_provider.dart';
 import 'package:ppldo_flutter_test_app/bloc/cloud_messaging_bloc.dart';
@@ -62,7 +63,7 @@ class _WebScreenState extends State<WebScreen> {
     _deepLinkBloc.initUniLinks();
     _cloudMessagingBloc.initCloudMessaging();
     // -- Listen for changes --
-    _connectivityBloc.checkConnectionStatus();
+    //_connectivityBloc.checkConnectionStatus();
     _jsCommunicationBloc.startSession();
   }
 
@@ -87,10 +88,6 @@ class _WebScreenState extends State<WebScreen> {
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.green,
-          title: Text("ppldonet test application"),
-        ),
         body: StreamBuilder<String>(
           stream: _deepLinkBloc.deepLinkStream,
           builder: (ct, deepLinkSnapshot) {
@@ -99,48 +96,24 @@ class _WebScreenState extends State<WebScreen> {
             } else {
               _controller.loadUrl(deepLinkSnapshot.data);
             }
-            return StreamBuilder<ConnectivityResult>(
-                stream: _connectivityBloc.deepLinkStream,
-                builder: (ctx, snapshot) {
-                  final connectivityResult = snapshot.data;
-                  if (connectivityResult == ConnectivityResult.none) {
-                    return Stack(
-                      children: [
-                        Container(
-                          width: double.infinity,
-                          color: Colors.red,
-                          child: Text(
-                            "No network connection",
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      ],
-                    );
-                  } else {
-                    return SafeArea(
-                      child: WebView(
-                        initialUrl: _initialUrl,
-                        javascriptMode: JavascriptMode.unrestricted,
-                        onWebViewCreated: (WebViewController webViewController) {
-                          _controller = webViewController;
-                          _listenForEvents();
-                          _getCookies();
-                        },
-                        gestureNavigationEnabled: true,
-                        navigationDelegate: (NavigationRequest request) async {
-                          return await _handleUrlRequests(request);
-                        },
-                      ),
-                    );
-                  }
-                }
+            return SafeArea(
+              child: WebView(
+                initialUrl: _initialUrl,
+                javascriptMode: JavascriptMode.unrestricted,
+                onWebViewCreated: (WebViewController webViewController) {
+                  _controller = webViewController;
+                  _listenForEvents();
+                  _getCookies();
+                },
+                gestureNavigationEnabled: true,
+                navigationDelegate: (NavigationRequest request) async {
+                  return await _handleUrlRequests(request);
+                },
+              )
             );
-          },
-        )
-      ),
+            }
+        ),
+      )
     );
   }
   
@@ -158,7 +131,7 @@ class _WebScreenState extends State<WebScreen> {
       final token = _getTokenFromCookies(cookie);
       if (token != null && token.isNotEmpty) {
         if (!_permissionCheckedOnce) {
-          _getPermissions();
+          //_getPermissions();
           _permissionCheckedOnce = true;
           if (_deviceToken != null && _deviceToken.isNotEmpty) {
             await _cloudMessagingService.postDeviceToken(token, _deviceToken);
