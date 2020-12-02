@@ -13,8 +13,11 @@ class CloudMessagingBloc implements Bloc {
   Sink<String> get _inCloudMessagingController => _cloudMessagingController.sink;
   Stream<String> get cloudMessagingStream => _cloudMessagingController.stream;
 
-  void initCloudMessaging() {
+  void initCloudMessaging() async {
     _fcm = FirebaseMessaging();
+    if (await _fcm.autoInitEnabled()) {
+      await _fcm.setAutoInitEnabled(false);
+    }
     _fcm.requestNotificationPermissions();
     _fcm.configure(onMessage: (msg) {
       print(msg);
@@ -32,6 +35,11 @@ class CloudMessagingBloc implements Bloc {
 
   Future<String> getDeviceToken() async {
     return await _fcm.getToken();
+  }
+
+  Future deleteDeviceToken() async {
+    await _fcm.deleteInstanceID();
+    //TODO call this method when user logs out
   }
 
   @override

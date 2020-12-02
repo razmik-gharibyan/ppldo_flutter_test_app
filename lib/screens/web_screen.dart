@@ -73,6 +73,15 @@ class _WebScreenState extends State<WebScreen> {
   }
 
   @override
+  void dispose() {
+    _cloudMessagingBloc.dispose();
+    _deepLinkBloc.dispose();
+    _contactsBloc.dispose();
+    _jsCommunicationBloc.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
 
     return WillPopScope(

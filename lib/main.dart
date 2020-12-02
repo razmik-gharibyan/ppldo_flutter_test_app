@@ -13,6 +13,7 @@ class MyApp extends StatelessWidget {
     return BlocProvider<ConnectivityBloc>(
       bloc: ConnectivityBloc(),
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Flutter Demo',
         theme: ThemeData(
           primarySwatch: Colors.blue,
