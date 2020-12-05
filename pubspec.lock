@@ -98,7 +98,7 @@ packages:
       name: cupertino_icons
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.0"
+    version: "1.0.1+1"
   fake_async:
     dependency: transitive
     description:
@@ -112,7 +112,7 @@ packages:
       name: firebase_core
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.5.2+1"
+    version: "0.5.3"
   firebase_core_platform_interface:
     dependency: transitive
     description:
@@ -318,10 +318,12 @@ packages:
   url_launcher:
     dependency: "direct main"
     description:
-      name: url_launcher
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "5.7.10"
+      path: "."
+      ref: main
+      resolved-ref: "02bd67bc73c823131f3958f5e0a74bb7d37f87f0"
+      url: "git://github.com/ppldo/url_launcher.git"
+    source: git
+    version: "5.7.11"
   url_launcher_linux:
     dependency: transitive
     description:

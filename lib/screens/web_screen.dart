@@ -179,14 +179,13 @@ class _WebScreenState extends State<WebScreen> {
       return NavigationDecision.prevent;
     }
      */
-    if (await canLaunch(request.url)) {
-      if (request.url.startsWith("https://dev.ppl.do") || request.url.startsWith("https://ppldo.net")) {
-        return ShouldOverrideUrlLoadingAction.ALLOW;
-      }
-      await launch(request.url);
+    if (request.url.startsWith("https://dev.ppl.do") || request.url.startsWith("https://ppldo.net")) {
+      return ShouldOverrideUrlLoadingAction.ALLOW;
+    }
+    if (await launch(request.url, universalLinksOnly: true)) {
       return ShouldOverrideUrlLoadingAction.CANCEL;
     } else {
-      _controller.loadUrl(url: request.url);
+      _controller.loadUrl(url: request.url); //TODO открыть custom tab
       return ShouldOverrideUrlLoadingAction.ALLOW;
     }
   }
