@@ -1,10 +1,7 @@
 import 'dart:async';
-import 'dart:io';
-
-import 'package:connectivity/connectivity.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:ppldo_flutter_test_app/bloc/bloc_provider.dart';
 import 'package:ppldo_flutter_test_app/bloc/cloud_messaging_bloc.dart';
@@ -15,7 +12,6 @@ import 'package:ppldo_flutter_test_app/bloc/js_communication_bloc.dart';
 import 'package:ppldo_flutter_test_app/helper/permission_helper.dart';
 import 'package:ppldo_flutter_test_app/services/cloud_messaging_service.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
 import 'package:ppldo_flutter_test_app/globals.dart' as globals;
 
@@ -33,7 +29,8 @@ class _WebScreenState extends State<WebScreen> {
   final String _initialUrl = globals.initialUrlDevChannel;
   // Tools and Services
   PermissionHelper _permissionHelper;
-  WebViewController _controller;
+  InAppWebViewController _controller;
+  InAppWebViewGroupOptions _options;
   CloudMessagingService _cloudMessagingService;
   // Bloc
   ConnectivityBloc _connectivityBloc;
@@ -58,8 +55,9 @@ class _WebScreenState extends State<WebScreen> {
     // -- Init tools --
     _permissionHelper = PermissionHelper();
     _cloudMessagingService = CloudMessagingService();
+    _options = InAppWebViewGroupOptions();
+    _options.crossPlatform.useShouldOverrideUrlLoading = true;
     // -- Init operations --
-    if (Platform.isAndroid) WebView.platform = SurfaceAndroidWebView();
     _deepLinkBloc.initUniLinks();
     _cloudMessagingBloc.initCloudMessaging();
     // -- Listen for changes --
@@ -94,19 +92,18 @@ class _WebScreenState extends State<WebScreen> {
             if (!deepLinkSnapshot.hasData) {
               print("No deeplink snapshot");
             } else {
-              _controller.loadUrl(deepLinkSnapshot.data);
+              _controller.loadUrl(url: deepLinkSnapshot.data);
             }
             return SafeArea(
-              child: WebView(
+              child: InAppWebView(
                 initialUrl: _initialUrl,
-                javascriptMode: JavascriptMode.unrestricted,
-                onWebViewCreated: (WebViewController webViewController) {
+                initialOptions: _options,
+                onWebViewCreated: (InAppWebViewController webViewController) {
                   _controller = webViewController;
                   _listenForEvents();
                   _getCookies();
                 },
-                gestureNavigationEnabled: true,
-                navigationDelegate: (NavigationRequest request) async {
+                shouldOverrideUrlLoading: (controller, request) async {
                   return await _handleUrlRequests(request);
                 },
               )
@@ -126,7 +123,7 @@ class _WebScreenState extends State<WebScreen> {
   }
 
   void _getCookies() async {
-    final String cookie = await _controller.evaluateJavascript("document.cookie");
+    final String cookie = await _controller.evaluateJavascript(source: "document.cookie");
     if (cookie != null && cookie.isNotEmpty && cookie != "null" && cookie != "\"\"") {
       final token = _getTokenFromCookies(cookie);
       if (token != null && token.isNotEmpty) {
@@ -158,7 +155,7 @@ class _WebScreenState extends State<WebScreen> {
   void _listenForPushNotifications() {
     _cloudMessagingBloc.cloudMessagingStream.listen((String routeUrl) {
       if (_controller != null) {
-        _controller.loadUrl(routeUrl);
+        _controller.loadUrl(url: routeUrl);
       }
     });
   }
@@ -175,7 +172,7 @@ class _WebScreenState extends State<WebScreen> {
     _listenForContacts();
   }
 
-  Future<NavigationDecision> _handleUrlRequests(NavigationRequest request) async {
+  Future<ShouldOverrideUrlLoadingAction> _handleUrlRequests(ShouldOverrideUrlLoadingRequest request) async {
     /*
     if (request.url.endsWith(".pdf")) {
       _controller.loadUrl("https://docs.google.com/gview?embedded=true&url=${request.url}");
@@ -184,13 +181,13 @@ class _WebScreenState extends State<WebScreen> {
      */
     if (await canLaunch(request.url)) {
       if (request.url.startsWith("https://dev.ppl.do") || request.url.startsWith("https://ppldo.net")) {
-        return NavigationDecision.navigate;
+        return ShouldOverrideUrlLoadingAction.ALLOW;
       }
       await launch(request.url);
-      return NavigationDecision.prevent;
+      return ShouldOverrideUrlLoadingAction.CANCEL;
     } else {
-      _controller.loadUrl(request.url);
-      return NavigationDecision.navigate;
+      _controller.loadUrl(url: request.url);
+      return ShouldOverrideUrlLoadingAction.ALLOW;
     }
   }
 

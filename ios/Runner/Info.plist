@@ -45,6 +45,8 @@
       </array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>io.flutter.embedded_views_preview</key>
+	<string>YES</string>
 	<key>NSContactsUsageDescription</key>
     <string>This app requires contacts access to function properly.</string>
 	<key>UILaunchStoryboardName</key>
