@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "663182676963",
+    "firebase_url": "https://ppldo-a03ab.firebaseio.com",
+    "project_id": "ppldo-a03ab",
+    "storage_bucket": "ppldo-a03ab.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:663182676963:android:7770e9c774d03b78",
+        "android_client_info": {
+          "package_name": "net.ppldo.android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "663182676963-sdee9na1g9egrpn5eg3pf5rf274mqciu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "net.ppldo.android",
+            "certificate_hash": "db0a2e7bb7820b2157a401f4ee6cdefab7ec046c"
+          }
+        },
+        {
+          "client_id": "663182676963-s0a43t9m4vc61l0vr8itig1q1cpm3u01.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "net.ppldo.android",
+            "certificate_hash": "4a2729f2dae2ecc4ccdaa3e6daa48d3d8fb71a31"
+          }
+        },
+        {
+          "client_id": "663182676963-5qk48n96749125sqr2e9e53m9185sio9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDH5SRk5MY0K7Vmc7lL-VBUWfZWhEShWHM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "663182676963-huntr597p5aqvnbktsdnfruj4fetq4l6.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "663182676963-hndiv3knruekug3n5jbb7egmfodukm7q.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.gudex.peopledo"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
