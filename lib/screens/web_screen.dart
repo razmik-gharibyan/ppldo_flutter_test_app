@@ -32,6 +32,7 @@ class _WebScreenState extends State<WebScreen> {
   InAppWebViewController _controller;
   InAppWebViewGroupOptions _options;
   CloudMessagingService _cloudMessagingService;
+  ChromeSafariBrowser _chromeSafariBrowser;
   // Bloc
   ConnectivityBloc _connectivityBloc;
   DeepLinkBloc _deepLinkBloc;
@@ -55,6 +56,7 @@ class _WebScreenState extends State<WebScreen> {
     // -- Init tools --
     _permissionHelper = PermissionHelper();
     _cloudMessagingService = CloudMessagingService();
+    _chromeSafariBrowser = ChromeSafariBrowser();
     _options = InAppWebViewGroupOptions();
     _options.crossPlatform.useShouldOverrideUrlLoading = true;
     // -- Init operations --
@@ -77,6 +79,7 @@ class _WebScreenState extends State<WebScreen> {
     _deepLinkBloc.dispose();
     _contactsBloc.dispose();
     _jsCommunicationBloc.dispose();
+    _chromeSafariBrowser.close();
     super.dispose();
   }
 
@@ -185,8 +188,11 @@ class _WebScreenState extends State<WebScreen> {
     if (await launch(request.url, universalLinksOnly: true)) {
       return ShouldOverrideUrlLoadingAction.CANCEL;
     } else {
-      _controller.loadUrl(url: request.url); //TODO открыть custom tab
-      return ShouldOverrideUrlLoadingAction.ALLOW;
+      _chromeSafariBrowser.open(url: request.url,options: ChromeSafariBrowserClassOptions(
+          android: AndroidChromeCustomTabsOptions(addDefaultShareMenuItem: false),
+          ios: IOSSafariOptions(barCollapsingEnabled: true))
+      );
+      return ShouldOverrideUrlLoadingAction.CANCEL;
     }
   }
 
