@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:io';
+import 'package:connectivity/connectivity.dart';
 import 'package:contacts_service/contacts_service.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -33,6 +36,7 @@ class _WebScreenState extends State<WebScreen> {
   InAppWebViewGroupOptions _options;
   CloudMessagingService _cloudMessagingService;
   ChromeSafariBrowser _chromeSafariBrowser;
+  InAppWebView _inAppWebView;
   // Bloc
   ConnectivityBloc _connectivityBloc;
   DeepLinkBloc _deepLinkBloc;
@@ -43,6 +47,7 @@ class _WebScreenState extends State<WebScreen> {
   PermissionStatus _contactsPermissionStatus;
   bool _permissionCheckedOnce = false;
   String _deviceToken;
+  bool _isNetworkError = false;
 
   @override
   void initState() {
@@ -59,12 +64,14 @@ class _WebScreenState extends State<WebScreen> {
     _chromeSafariBrowser = ChromeSafariBrowser();
     _options = InAppWebViewGroupOptions();
     _options.crossPlatform.useShouldOverrideUrlLoading = true;
+    _options.android.hardwareAcceleration = true;
     // -- Init operations --
     _deepLinkBloc.initUniLinks();
     _cloudMessagingBloc.initCloudMessaging();
     // -- Listen for changes --
-    //_connectivityBloc.checkConnectionStatus();
+    _connectivityBloc.checkConnectionStatus();
     _jsCommunicationBloc.startSession();
+    _listenForConnectivity();
   }
 
   @override
@@ -98,20 +105,29 @@ class _WebScreenState extends State<WebScreen> {
               _controller.loadUrl(url: deepLinkSnapshot.data);
             }
             return SafeArea(
-              child: InAppWebView(
-                initialUrl: _initialUrl,
-                initialOptions: _options,
-                onWebViewCreated: (InAppWebViewController webViewController) {
-                  _controller = webViewController;
-                  _listenForEvents();
-                  _getCookies();
-                },
-                shouldOverrideUrlLoading: (controller, request) async {
-                  return await _handleUrlRequests(request);
-                },
-              )
+              child: _isNetworkError
+                ? _errorWidget()
+                : InAppWebView(
+                    initialUrl: _initialUrl,
+                    initialOptions: _options,
+                    onWebViewCreated: (InAppWebViewController webViewController) {
+                      if (_controller != null) {
+                        _controller = webViewController;
+                      } else {
+                        _controller = webViewController;
+                        _listenForEvents();
+                        _getCookies();
+                      }
+                    },
+                    shouldOverrideUrlLoading: (controller, request) async {
+                      return await _handleUrlRequests(request);
+                    },
+                    onLoadError: (controller, url, code, message) {
+                      _loadErrorWidget(message);
+                    },
+                  ),
             );
-            }
+          }
         ),
       )
     );
@@ -126,18 +142,23 @@ class _WebScreenState extends State<WebScreen> {
   }
 
   void _getCookies() async {
-    final String cookie = await _controller.evaluateJavascript(source: "document.cookie");
-    if (cookie != null && cookie.isNotEmpty && cookie != "null" && cookie != "\"\"") {
-      final token = _getTokenFromCookies(cookie);
-      if (token != null && token.isNotEmpty) {
-        if (!_permissionCheckedOnce) {
-          //_getPermissions();
-          _permissionCheckedOnce = true;
-          if (_deviceToken != null && _deviceToken.isNotEmpty) {
-            await _cloudMessagingService.postDeviceToken(token, _deviceToken);
+    try {
+      final String cookie = await _controller.evaluateJavascript(source: "document.cookie");
+      if (cookie != null && cookie.isNotEmpty && cookie != "null" &&
+          cookie != "\"\"") {
+        final token = _getTokenFromCookies(cookie);
+        if (token != null && token.isNotEmpty) {
+          if (!_permissionCheckedOnce) {
+            //_getPermissions();
+            _permissionCheckedOnce = true;
+            if (_deviceToken != null && _deviceToken.isNotEmpty) {
+              await _cloudMessagingService.postDeviceToken(token, _deviceToken);
+            }
           }
         }
       }
+    } catch (e) {
+      print(e);
     }
   }
 
@@ -169,6 +190,12 @@ class _WebScreenState extends State<WebScreen> {
     });
   }
 
+  void _listenForConnectivity() {
+    _connectivityBloc.connectivityStream.listen((ConnectivityResult result) {
+
+    });
+  }
+
   void _listenForEvents() {
     _listenForJSEvents();
     _listenForPushNotifications();
@@ -194,6 +221,34 @@ class _WebScreenState extends State<WebScreen> {
       );
       return ShouldOverrideUrlLoadingAction.CANCEL;
     }
+  }
+
+  _loadErrorWidget(String message) {
+    if (message != null) {
+      if (message == "net::ERR_INTERNET_DISCONNECTED") {
+        setState(() {
+          _isNetworkError = true;
+        });
+      }
+    }
+  }
+
+  Widget _errorWidget() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Platform.isAndroid ? CircularProgressIndicator() : CupertinoActivityIndicator(),
+          SizedBox(
+            height: 10.0,
+          ),
+          Text(
+            "Включите интернет"
+          )
+        ],
+      ),
+    );
   }
 
   Future<bool> _onBackPressed() async {
