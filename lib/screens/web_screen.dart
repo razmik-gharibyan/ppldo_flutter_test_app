@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:connectivity/connectivity.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -36,7 +35,6 @@ class _WebScreenState extends State<WebScreen> {
   InAppWebViewGroupOptions _options;
   CloudMessagingService _cloudMessagingService;
   ChromeSafariBrowser _chromeSafariBrowser;
-  InAppWebView _inAppWebView;
   // Bloc
   ConnectivityBloc _connectivityBloc;
   DeepLinkBloc _deepLinkBloc;
@@ -47,7 +45,6 @@ class _WebScreenState extends State<WebScreen> {
   PermissionStatus _contactsPermissionStatus;
   bool _permissionCheckedOnce = false;
   String _deviceToken;
-  bool _isNetworkError = false;
 
   @override
   void initState() {
@@ -71,7 +68,6 @@ class _WebScreenState extends State<WebScreen> {
     // -- Listen for changes --
     _connectivityBloc.checkConnectionStatus();
     _jsCommunicationBloc.startSession();
-    _listenForConnectivity();
   }
 
   @override
@@ -105,27 +101,34 @@ class _WebScreenState extends State<WebScreen> {
               _controller.loadUrl(url: deepLinkSnapshot.data);
             }
             return SafeArea(
-              child: _isNetworkError
-                ? _errorWidget()
-                : InAppWebView(
-                    initialUrl: _initialUrl,
-                    initialOptions: _options,
-                    onWebViewCreated: (InAppWebViewController webViewController) {
-                      if (_controller != null) {
-                        _controller = webViewController;
-                      } else {
-                        _controller = webViewController;
-                        _listenForEvents();
-                        _getCookies();
-                      }
-                    },
-                    shouldOverrideUrlLoading: (controller, request) async {
-                      return await _handleUrlRequests(request);
-                    },
-                    onLoadError: (controller, url, code, message) {
-                      _loadErrorWidget(message);
-                    },
-                  ),
+              child: StreamBuilder<bool>(
+                stream: _connectivityBloc.networkErrorStream,
+                builder: (c, errorSnapshot) {
+                  if (!errorSnapshot.hasData || !errorSnapshot.data) {
+                    return InAppWebView(
+                      initialUrl: _initialUrl,
+                      initialOptions: _options,
+                      onWebViewCreated: (InAppWebViewController webViewController) {
+                        if (_controller != null) {
+                          _controller = webViewController;
+                        } else {
+                          _controller = webViewController;
+                          _listenForEvents();
+                          _getCookies();
+                        }
+                      },
+                      shouldOverrideUrlLoading: (controller, request) async {
+                        return await _handleUrlRequests(request);
+                      },
+                      onLoadError: (controller, url, code, message) {
+                        _loadErrorWidget(message);
+                      },
+                    );
+                  } else {
+                   return _errorWidget();
+                  }
+                },
+              )
             );
           }
         ),
@@ -190,12 +193,6 @@ class _WebScreenState extends State<WebScreen> {
     });
   }
 
-  void _listenForConnectivity() {
-    _connectivityBloc.connectivityStream.listen((ConnectivityResult result) {
-
-    });
-  }
-
   void _listenForEvents() {
     _listenForJSEvents();
     _listenForPushNotifications();
@@ -226,9 +223,7 @@ class _WebScreenState extends State<WebScreen> {
   _loadErrorWidget(String message) {
     if (message != null) {
       if (message == "net::ERR_INTERNET_DISCONNECTED") {
-        setState(() {
-          _isNetworkError = true;
-        });
+        _connectivityBloc.setIsNetworkError(true);
       }
     }
   }
