@@ -106,6 +106,23 @@ class _WebScreenState extends State<WebScreen> {
                 stream: _connectivityBloc.networkErrorStream,
                 builder: (c, errorSnapshot) {
                   if (!errorSnapshot.hasData || !errorSnapshot.data) {
+                    /*
+                    _inAppBrowser.openUrl(
+                      url: _initialUrl,
+                      options: InAppBrowserClassOptions(
+                        inAppWebViewGroupOptions: InAppWebViewGroupOptions(
+                          crossPlatform: InAppWebViewOptions(
+                            useShouldOverrideUrlLoading: true,
+                            disableContextMenu: false,
+                          ),
+                          android: AndroidInAppWebViewOptions(
+                            hardwareAcceleration: true
+                          )
+                        )
+                      )
+                    );
+
+                     */
                     return InAppWebView(
                       initialUrl: _initialUrl,
                       initialOptions: _options,
@@ -234,12 +251,14 @@ class _WebScreenState extends State<WebScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Platform.isAndroid ? CircularProgressIndicator() : CupertinoActivityIndicator(),
+          Platform.isAndroid ? CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+          ) : CupertinoActivityIndicator(),
           SizedBox(
             height: 10.0,
           ),
           Text(
-            "Включите интернет"
+            "No connection available..."
           )
         ],
       ),
