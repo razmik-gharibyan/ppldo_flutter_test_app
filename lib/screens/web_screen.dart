@@ -62,6 +62,7 @@ class _WebScreenState extends State<WebScreen> {
     _options = InAppWebViewGroupOptions();
     _options.crossPlatform.useShouldOverrideUrlLoading = true;
     _options.android.hardwareAcceleration = true;
+    _options.crossPlatform.disableContextMenu = false;
     // -- Init operations --
     _deepLinkBloc.initUniLinks();
     _cloudMessagingBloc.initCloudMessaging();
@@ -125,7 +126,7 @@ class _WebScreenState extends State<WebScreen> {
                       },
                     );
                   } else {
-                   return _errorWidget();
+                    return _errorWidget();
                   }
                 },
               )
@@ -147,8 +148,7 @@ class _WebScreenState extends State<WebScreen> {
   void _getCookies() async {
     try {
       final String cookie = await _controller.evaluateJavascript(source: "document.cookie");
-      if (cookie != null && cookie.isNotEmpty && cookie != "null" &&
-          cookie != "\"\"") {
+      if (cookie != null && cookie.isNotEmpty && cookie != "null" && cookie != "\"\"") {
         final token = _getTokenFromCookies(cookie);
         if (token != null && token.isNotEmpty) {
           if (!_permissionCheckedOnce) {

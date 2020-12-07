@@ -30,7 +30,7 @@ class ConnectivityBloc extends Bloc {
   void _reactToConnectionChange(ConnectivityResult result) {
     if (!(result == ConnectivityResult.none)) {
       // Internet connection is ON
-      if (_isNetworkError) {
+      if (_isNetworkError != null && _isNetworkError) {
         _isNetworkError = false;
         _inNetworkErrorController.add(false);
       }
