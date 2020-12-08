@@ -10,7 +10,7 @@
     <uses-permission android:name="android.permission.WRITE_CONTACTS" />
     <application
         android:name="io.flutter.app.FlutterApplication"
-        android:label="ppldo_flutter_test_app"
+        android:label="People Do"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true">
         <activity
