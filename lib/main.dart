@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
       bloc: ConnectivityBloc(),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'PPLDO',
+        title: 'People Do',
         theme: ThemeData(
           primarySwatch: Colors.blue,
           visualDensity: VisualDensity.adaptivePlatformDensity,

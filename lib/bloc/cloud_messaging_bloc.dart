@@ -15,9 +15,6 @@ class CloudMessagingBloc implements Bloc {
 
   void initCloudMessaging() async {
     _fcm = FirebaseMessaging();
-    if (await _fcm.autoInitEnabled()) {
-      await _fcm.setAutoInitEnabled(false);
-    }
     _fcm.requestNotificationPermissions();
     _fcm.configure(onMessage: (msg) {
       print(msg);
@@ -31,6 +28,7 @@ class CloudMessagingBloc implements Bloc {
       _inCloudMessagingController.add(routeUrl);
       return;
     });
+    await _fcm.setAutoInitEnabled(false);
   }
 
   Future<String> getDeviceToken() async {
@@ -38,8 +36,12 @@ class CloudMessagingBloc implements Bloc {
   }
 
   Future deleteDeviceToken() async {
-    await _fcm.deleteInstanceID();
-    //TODO call this method when user logs out
+    try {
+      bool didDelete = await _fcm.deleteInstanceID();
+      print(didDelete);
+    } catch (e) {
+      print("DELETE TOKEN EXCEPTION IS $e");
+    }
   }
 
   @override
