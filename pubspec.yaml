@@ -34,7 +34,8 @@ dependencies:
       ref: main
   contacts_service: ^0.4.6
   permission_handler: ^5.0.1+1
-  firebase_messaging: ^7.0.3
+  firebase_messaging: ^8.0.0-dev.11
+  firebase_core: ^0.5.3
   clipboard: ^0.1.2+8
 
 

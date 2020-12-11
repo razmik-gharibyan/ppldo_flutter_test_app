@@ -39,18 +39,19 @@ class CustomInAppBrowser extends InAppBrowser {
     // -- Listen for changes --
     connectivityBloc.checkConnectionStatus();
     jsCommunicationBloc.startSession();
-    _listenForEvents();
-    _getCookies();
   }
 
   @override
+  void onBrowserCreated() {
+    _listenForEvents();
+    _getCookies();
+    super.onBrowserCreated();
+  }
+
+
+
+  @override
   Future<ShouldOverrideUrlLoadingAction> shouldOverrideUrlLoading(ShouldOverrideUrlLoadingRequest request) async {
-    /*
-    if (request.url.endsWith(".pdf")) {
-      _controller.loadUrl("https://docs.google.com/gview?embedded=true&url=${request.url}");
-      return NavigationDecision.prevent;
-    }
-     */
     return await _handleUrlRequests(request);
   }
 
@@ -96,6 +97,7 @@ class CustomInAppBrowser extends InAppBrowser {
       if (cookie.isEmpty && _deviceToken != null && _deviceToken.isNotEmpty) {
         await cloudMessagingBloc.deleteDeviceToken();
         _deviceToken = null;
+        _permissionCheckedOnce = false;
       }
     } catch (e) {
       print(e);
@@ -117,7 +119,8 @@ class CustomInAppBrowser extends InAppBrowser {
   }
 
   void _listenForPushNotifications() {
-    cloudMessagingBloc.cloudMessagingStream.listen((String routeUrl) {
+    cloudMessagingBloc.cloudMessagingStream.listen((String routeUrl) async {
+      print("GOT ROUTE URL $routeUrl ,controller is ${this.webViewController}");
       if (this.webViewController != null) {
         this.webViewController.loadUrl(url: routeUrl);
       }

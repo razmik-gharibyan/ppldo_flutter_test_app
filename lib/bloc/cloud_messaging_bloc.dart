@@ -14,21 +14,16 @@ class CloudMessagingBloc implements Bloc {
   Stream<String> get cloudMessagingStream => _cloudMessagingController.stream;
 
   void initCloudMessaging() async {
-    _fcm = FirebaseMessaging();
-    _fcm.requestNotificationPermissions();
-    _fcm.configure(onMessage: (msg) {
-      print(msg);
-      return;
-    }, onLaunch: (msg) {
-      final routeUrl = msg["data"]["webviewUrl"];
+    _fcm = FirebaseMessaging.instance;
+    _fcm.requestPermission();
+    if (_fcm.isAutoInitEnabled) {
+      await _fcm.setAutoInitEnabled(false);
+    }
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message ) {
+      print("got message from push $message");
+      final routeUrl = message.data["webviewUrl"];
       _inCloudMessagingController.add(routeUrl);
-      return;
-    }, onResume: (msg) {
-      final routeUrl = msg["data"]["webviewUrl"];
-      _inCloudMessagingController.add(routeUrl);
-      return;
     });
-    await _fcm.setAutoInitEnabled(false);
   }
 
   Future<String> getDeviceToken() async {
@@ -36,12 +31,7 @@ class CloudMessagingBloc implements Bloc {
   }
 
   Future deleteDeviceToken() async {
-    try {
-      bool didDelete = await _fcm.deleteInstanceID();
-      print(didDelete);
-    } catch (e) {
-      print("DELETE TOKEN EXCEPTION IS $e");
-    }
+    await _fcm.deleteToken();
   }
 
   @override
