@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -63,18 +65,13 @@ class _WebScreenState extends State<WebScreen> {
     _options.crossPlatform.useShouldOverrideUrlLoading = true;
     _options.android.hardwareAcceleration = true;
     _options.crossPlatform.disableContextMenu = false;
+    _options.android.overScrollMode = AndroidOverScrollMode.OVER_SCROLL_ALWAYS;
     // -- Init operations --
     _deepLinkBloc.initUniLinks();
     _cloudMessagingBloc.initCloudMessaging();
     // -- Listen for changes --
     _connectivityBloc.checkConnectionStatus();
     _jsCommunicationBloc.startSession();
-  }
-
-  @override
-  void didChangeDependencies() async {
-    super.didChangeDependencies();
-    _deviceToken = await _cloudMessagingBloc.getDeviceToken();
   }
 
   @override
@@ -106,23 +103,6 @@ class _WebScreenState extends State<WebScreen> {
                 stream: _connectivityBloc.networkErrorStream,
                 builder: (c, errorSnapshot) {
                   if (!errorSnapshot.hasData || !errorSnapshot.data) {
-                    /*
-                    _inAppBrowser.openUrl(
-                      url: _initialUrl,
-                      options: InAppBrowserClassOptions(
-                        inAppWebViewGroupOptions: InAppWebViewGroupOptions(
-                          crossPlatform: InAppWebViewOptions(
-                            useShouldOverrideUrlLoading: true,
-                            disableContextMenu: false,
-                          ),
-                          android: AndroidInAppWebViewOptions(
-                            hardwareAcceleration: true
-                          )
-                        )
-                      )
-                    );
-
-                     */
                     return InAppWebView(
                       initialUrl: _initialUrl,
                       initialOptions: _options,
@@ -135,6 +115,7 @@ class _WebScreenState extends State<WebScreen> {
                           _getCookies();
                         }
                       },
+                      gestureRecognizers: [Factory<VerticalDragGestureRecognizer>(() => VerticalDragGestureRecognizer())].toSet(),
                       shouldOverrideUrlLoading: (controller, request) async {
                         return await _handleUrlRequests(request);
                       },
@@ -171,11 +152,17 @@ class _WebScreenState extends State<WebScreen> {
           if (!_permissionCheckedOnce) {
             //_getPermissions();
             _permissionCheckedOnce = true;
+            _deviceToken = await _cloudMessagingBloc.getDeviceToken();
             if (_deviceToken != null && _deviceToken.isNotEmpty) {
               await _cloudMessagingService.postDeviceToken(token, _deviceToken);
             }
           }
         }
+      }
+      if (cookie.isEmpty && _deviceToken != null && _deviceToken.isNotEmpty) {
+        await _cloudMessagingBloc.deleteDeviceToken();
+        _deviceToken = null;
+        _permissionCheckedOnce = false;
       }
     } catch (e) {
       print(e);
