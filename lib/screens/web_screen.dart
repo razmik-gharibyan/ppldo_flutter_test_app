@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:clipboard/clipboard.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -159,7 +160,7 @@ class _WebScreenState extends State<WebScreen> {
           }
         }
       }
-      if (cookie.isEmpty && _deviceToken != null && _deviceToken.isNotEmpty) {
+      if (cookie != null && cookie.isEmpty && _deviceToken != null && _deviceToken.isNotEmpty) {
         await _cloudMessagingBloc.deleteDeviceToken();
         _deviceToken = null;
         _permissionCheckedOnce = false;
@@ -167,6 +168,14 @@ class _WebScreenState extends State<WebScreen> {
     } catch (e) {
       print(e);
     }
+  }
+
+  void _listenForClipboardCopy() {
+    _controller.addJavaScriptHandler(handlerName: "copyText", callback: (text) {
+      final String clipboardText = text[0];
+      print(clipboardText);
+      FlutterClipboard.copy(clipboardText);
+    });
   }
 
   String _getTokenFromCookies(String cookie) {
@@ -201,6 +210,7 @@ class _WebScreenState extends State<WebScreen> {
     _listenForJSEvents();
     _listenForPushNotifications();
     _listenForContacts();
+    _listenForClipboardCopy();
   }
 
   Future<ShouldOverrideUrlLoadingAction> _handleUrlRequests(ShouldOverrideUrlLoadingRequest request) async {
