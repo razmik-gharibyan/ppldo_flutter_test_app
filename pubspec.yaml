@@ -23,7 +23,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_inappwebview: ^4.0.0+4
+  flutter_inappwebview:
+    git:
+      url: git://github.com/pichillilorenzo/flutter_inappwebview.git
+      ref: master
   http: ^0.12.2
   connectivity: ^2.0.2
   provider: ^4.3.2+2
