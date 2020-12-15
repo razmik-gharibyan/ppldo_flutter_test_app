@@ -19,6 +19,10 @@ class CloudMessagingBloc implements Bloc {
       await _fcm.setAutoInitEnabled(false);
     }
     _fcm.requestPermission();
+    _fcm.getInitialMessage().asStream().listen((RemoteMessage message) {
+      final routeUrl = message.data["webviewUrl"];
+      _inCloudMessagingController.add(routeUrl);
+    });
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       final routeUrl = message.data["webviewUrl"];
       _inCloudMessagingController.add(routeUrl);
