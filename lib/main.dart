@@ -9,8 +9,11 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SentryFlutter.init(
         (options) => options.dsn = 'https://912e6010faf6495d8dd13d623d85da5b@o48617.ingest.sentry.io/5559292',
-    appRunner: () => runApp(MyApp()),
+    appRunner: () => runFlutterApp(),
   );
+}
+
+void runFlutterApp() async {
   await Firebase.initializeApp();
   runApp(MyApp());
 }
