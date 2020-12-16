@@ -16,6 +16,7 @@ import 'package:ppldo_flutter_test_app/bloc/deeplink_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/js_communication_bloc.dart';
 import 'package:ppldo_flutter_test_app/helper/permission_helper.dart';
 import 'package:ppldo_flutter_test_app/services/cloud_messaging_service.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:ppldo_flutter_test_app/globals.dart' as globals;
@@ -52,27 +53,35 @@ class _WebScreenState extends State<WebScreen> {
   @override
   void initState() {
     super.initState();
-    // -- Init Bloc --
-    _connectivityBloc = BlocProvider.of<ConnectivityBloc>(context);
-    _deepLinkBloc = DeepLinkBloc();
-    _jsCommunicationBloc = JSCommunicationBloc();
-    _cloudMessagingBloc = CloudMessagingBloc();
-    _contactsBloc = ContactsBloc();
-    // -- Init tools --
-    _permissionHelper = PermissionHelper();
-    _cloudMessagingService = CloudMessagingService();
-    _chromeSafariBrowser = ChromeSafariBrowser();
-    _options = InAppWebViewGroupOptions();
-    _options.crossPlatform.useShouldOverrideUrlLoading = true;
-    _options.android.hardwareAcceleration = true;
-    _options.crossPlatform.disableContextMenu = false;
-    _options.android.overScrollMode = AndroidOverScrollMode.OVER_SCROLL_ALWAYS;
-    // -- Init operations --
-    _deepLinkBloc.initUniLinks();
-    _cloudMessagingBloc.initCloudMessaging();
-    // -- Listen for changes --
-    _connectivityBloc.checkConnectionStatus();
-    _jsCommunicationBloc.startSession();
+    try {
+      // -- Init Bloc --
+      _connectivityBloc = BlocProvider.of<ConnectivityBloc>(context);
+      _deepLinkBloc = DeepLinkBloc();
+      _jsCommunicationBloc = JSCommunicationBloc();
+      _cloudMessagingBloc = CloudMessagingBloc();
+      _contactsBloc = ContactsBloc();
+      // -- Init tools --
+      _permissionHelper = PermissionHelper();
+      _cloudMessagingService = CloudMessagingService();
+      _chromeSafariBrowser = ChromeSafariBrowser();
+      _options = InAppWebViewGroupOptions();
+      _options.crossPlatform.useShouldOverrideUrlLoading = true;
+      _options.android.hardwareAcceleration = true;
+      _options.crossPlatform.disableContextMenu = false;
+      _options.android.overScrollMode =
+          AndroidOverScrollMode.OVER_SCROLL_ALWAYS;
+      // -- Init operations --
+      _deepLinkBloc.initUniLinks();
+      _cloudMessagingBloc.initCloudMessaging();
+      // -- Listen for changes --
+      _connectivityBloc.checkConnectionStatus();
+      _jsCommunicationBloc.startSession();
+    } catch (error, stackTrace) {
+      Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
+    }
   }
 
   @override

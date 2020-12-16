@@ -3,9 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:ppldo_flutter_test_app/bloc/bloc_provider.dart';
 import 'package:ppldo_flutter_test_app/bloc/connectivity_bloc.dart';
 import 'package:ppldo_flutter_test_app/screens/web_screen.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await SentryFlutter.init(
+        (options) => options.dsn = 'https://912e6010faf6495d8dd13d623d85da5b@o48617.ingest.sentry.io/5559292',
+    appRunner: () => runApp(MyApp()),
+  );
   await Firebase.initializeApp();
   runApp(MyApp());
 }

@@ -40,6 +40,7 @@ dependencies:
   firebase_messaging: ^8.0.0-dev.11
   firebase_core: ^0.5.3
   clipboard: ^0.1.2+8
+  sentry_flutter: ^4.0.0
 
 
   # The following adds the Cupertino Icons font to your application.
