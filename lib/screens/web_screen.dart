@@ -50,34 +50,26 @@ class _WebScreenState extends State<WebScreen> {
   @override
   void initState() {
     super.initState();
-    try {
-      // -- Init Bloc --
-      _connectivityBloc = BlocProvider.of<ConnectivityBloc>(context);
-      _deepLinkBloc = DeepLinkBloc();
-      _jsCommunicationBloc = JSCommunicationBloc();
-      _cloudMessagingBloc = CloudMessagingBloc();
-      // -- Init tools --
-      _permissionHelper = PermissionHelper();
-      _cloudMessagingService = CloudMessagingService();
-      _chromeSafariBrowser = ChromeSafariBrowser();
-      _options = InAppWebViewGroupOptions();
-      _options.crossPlatform.useShouldOverrideUrlLoading = true;
-      _options.android.hardwareAcceleration = true;
-      _options.crossPlatform.disableContextMenu = false;
-      _options.android.overScrollMode =
-          AndroidOverScrollMode.OVER_SCROLL_ALWAYS;
-      // -- Init operations --
-      _deepLinkBloc.initUniLinks();
-      _cloudMessagingBloc.initCloudMessaging();
-      // -- Listen for changes --
-      _connectivityBloc.checkConnectionStatus();
-      _jsCommunicationBloc.startSession();
-    } catch (error, stackTrace) {
-      Sentry.captureException(
-        error,
-        stackTrace: stackTrace,
-      );
-    }
+    // -- Init Bloc --
+    _connectivityBloc = BlocProvider.of<ConnectivityBloc>(context);
+    _deepLinkBloc = DeepLinkBloc();
+    _jsCommunicationBloc = JSCommunicationBloc();
+    _cloudMessagingBloc = CloudMessagingBloc();
+    // -- Init tools --
+    _permissionHelper = PermissionHelper();
+    _cloudMessagingService = CloudMessagingService();
+    _chromeSafariBrowser = ChromeSafariBrowser();
+    _options = InAppWebViewGroupOptions();
+    _options.crossPlatform.useShouldOverrideUrlLoading = true;
+    _options.android.hardwareAcceleration = true;
+    _options.crossPlatform.disableContextMenu = false;
+    _options.android.overScrollMode = AndroidOverScrollMode.OVER_SCROLL_ALWAYS;
+    // -- Init operations --
+    _deepLinkBloc.initUniLinks();
+    _cloudMessagingBloc.initCloudMessaging();
+    // -- Listen for changes --
+    _connectivityBloc.checkConnectionStatus();
+    _jsCommunicationBloc.startSession();
   }
 
   @override
