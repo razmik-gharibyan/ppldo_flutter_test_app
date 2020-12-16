@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:clipboard/clipboard.dart';
-import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -11,7 +10,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:ppldo_flutter_test_app/bloc/bloc_provider.dart';
 import 'package:ppldo_flutter_test_app/bloc/cloud_messaging_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/connectivity_bloc.dart';
-import 'package:ppldo_flutter_test_app/bloc/contacts_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/deeplink_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/js_communication_bloc.dart';
 import 'package:ppldo_flutter_test_app/helper/permission_helper.dart';
@@ -44,7 +42,6 @@ class _WebScreenState extends State<WebScreen> {
   DeepLinkBloc _deepLinkBloc;
   JSCommunicationBloc _jsCommunicationBloc;
   CloudMessagingBloc _cloudMessagingBloc;
-  ContactsBloc _contactsBloc;
   // Vars
   PermissionStatus _contactsPermissionStatus;
   bool _permissionCheckedOnce = false;
@@ -59,7 +56,6 @@ class _WebScreenState extends State<WebScreen> {
       _deepLinkBloc = DeepLinkBloc();
       _jsCommunicationBloc = JSCommunicationBloc();
       _cloudMessagingBloc = CloudMessagingBloc();
-      _contactsBloc = ContactsBloc();
       // -- Init tools --
       _permissionHelper = PermissionHelper();
       _cloudMessagingService = CloudMessagingService();
@@ -88,7 +84,6 @@ class _WebScreenState extends State<WebScreen> {
   void dispose() {
     _cloudMessagingBloc.dispose();
     _deepLinkBloc.dispose();
-    _contactsBloc.dispose();
     _jsCommunicationBloc.dispose();
     _chromeSafariBrowser.close();
     super.dispose();
@@ -194,13 +189,6 @@ class _WebScreenState extends State<WebScreen> {
     return cookie.substring(tokenEndIndex).replaceAll("\"", "");
   }
 
-  void _getPermissions() async {
-    _contactsPermissionStatus = await _permissionHelper.getPermissionStatus();
-    if (_contactsPermissionStatus == PermissionStatus.granted) {
-      _contactsBloc.startContactsSession();
-    }
-  }
-
   void _listenForPushNotifications() {
     _cloudMessagingBloc.cloudMessagingStream.listen((String routeUrl) {
       if (_controller != null) {
@@ -209,16 +197,9 @@ class _WebScreenState extends State<WebScreen> {
     });
   }
 
-  void _listenForContacts() {
-    _contactsBloc.contactsStream.listen((List<Contact> contacts) {
-
-    });
-  }
-
   void _listenForEvents() {
     _listenForJSEvents();
     _listenForPushNotifications();
-    _listenForContacts();
     _listenForClipboardCopy();
   }
 
