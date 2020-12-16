@@ -64,6 +64,7 @@ class _WebScreenState extends State<WebScreen> {
     _options.android.hardwareAcceleration = true;
     _options.crossPlatform.disableContextMenu = false;
     _options.android.overScrollMode = AndroidOverScrollMode.OVER_SCROLL_ALWAYS;
+    _options.android.useHybridComposition = true;
     // -- Init operations --
     _deepLinkBloc.initUniLinks();
     _cloudMessagingBloc.initCloudMessaging();
