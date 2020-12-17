@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:clipboard/clipboard.dart';
+import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -10,9 +11,11 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:ppldo_flutter_test_app/bloc/bloc_provider.dart';
 import 'package:ppldo_flutter_test_app/bloc/cloud_messaging_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/connectivity_bloc.dart';
+import 'package:ppldo_flutter_test_app/bloc/contacts_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/deeplink_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/js_communication_bloc.dart';
 import 'package:ppldo_flutter_test_app/helper/permission_helper.dart';
+import 'package:ppldo_flutter_test_app/screens/contacts_screen.dart';
 import 'package:ppldo_flutter_test_app/services/cloud_messaging_service.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -30,7 +33,7 @@ class WebScreen extends StatefulWidget {
 class _WebScreenState extends State<WebScreen> {
 
   // Constants
-  final String _initialUrl = globals.initialUrlDevChannel;
+  final String _initialUrl = globals.initialUrl;
   // Tools and Services
   PermissionHelper _permissionHelper;
   InAppWebViewController _controller;
@@ -64,6 +67,7 @@ class _WebScreenState extends State<WebScreen> {
     _options.android.hardwareAcceleration = true;
     _options.crossPlatform.disableContextMenu = false;
     _options.android.overScrollMode = AndroidOverScrollMode.OVER_SCROLL_ALWAYS;
+    _options.android.useHybridComposition = true;
     // -- Init operations --
     _deepLinkBloc.initUniLinks();
     _cloudMessagingBloc.initCloudMessaging();
@@ -83,7 +87,6 @@ class _WebScreenState extends State<WebScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: Scaffold(
@@ -96,34 +99,46 @@ class _WebScreenState extends State<WebScreen> {
               _controller.loadUrl(url: deepLinkSnapshot.data);
             }
             return SafeArea(
-              child: StreamBuilder<bool>(
-                stream: _connectivityBloc.networkErrorStream,
-                builder: (c, errorSnapshot) {
-                  if (!errorSnapshot.hasData || !errorSnapshot.data) {
-                    return InAppWebView(
-                      initialUrl: _initialUrl,
-                      initialOptions: _options,
-                      onWebViewCreated: (InAppWebViewController webViewController) {
-                        if (_controller != null) {
-                          _controller = webViewController;
-                        } else {
-                          _controller = webViewController;
-                          _listenForEvents();
-                          _getCookies();
-                        }
-                      },
-                      gestureRecognizers: [Factory<VerticalDragGestureRecognizer>(() => VerticalDragGestureRecognizer())].toSet(),
-                      shouldOverrideUrlLoading: (controller, request) async {
-                        return await _handleUrlRequests(request);
-                      },
-                      onLoadError: (controller, url, code, message) {
-                        _loadErrorWidget(message);
-                      },
-                    );
-                  } else {
-                    return _errorWidget();
-                  }
-                },
+              child: Stack(
+                children: [
+                  StreamBuilder<bool>(
+                    stream: _connectivityBloc.networkErrorStream,
+                    builder: (c, errorSnapshot) {
+                      if (!errorSnapshot.hasData || !errorSnapshot.data) {
+                        return InAppWebView(
+                          initialUrl: _initialUrl,
+                          initialOptions: _options,
+                          onWebViewCreated: (InAppWebViewController webViewController) {
+                            if (_controller != null) {
+                              _controller = webViewController;
+                            } else {
+                              _controller = webViewController;
+                              _listenForEvents();
+                              _getCookies();
+                            }
+                          },
+                          gestureRecognizers: [Factory<VerticalDragGestureRecognizer>(() => VerticalDragGestureRecognizer())].toSet(),
+                          shouldOverrideUrlLoading: (controller, request) async {
+                            return await _handleUrlRequests(request);
+                          },
+                          onLoadError: (controller, url, code, message) {
+                            _loadErrorWidget(message);
+                          },
+                        );
+                      } else {
+                        return _errorWidget();
+                      }
+                    },
+                  ),
+                  /*
+                  FloatingActionButton(
+                    onPressed: () {
+                      _askOrGetContactPermissions();
+                    },
+                  )
+
+                   */
+                ],
               )
             );
           }
@@ -166,19 +181,19 @@ class _WebScreenState extends State<WebScreen> {
     }
   }
 
-  void _listenForClipboardCopy() {
-    _controller.addJavaScriptHandler(handlerName: "copyText", callback: (text) {
-      final String clipboardText = text[0];
-      print(clipboardText);
-      FlutterClipboard.copy(clipboardText);
-    });
-  }
-
   String _getTokenFromCookies(String cookie) {
     const tokenSearchText = "token=";
     final tokenStartIndex = cookie.lastIndexOf(tokenSearchText);
     final tokenEndIndex = tokenStartIndex + tokenSearchText.length;
     return cookie.substring(tokenEndIndex).replaceAll("\"", "");
+  }
+
+  void _listenForClipboardCopy() {
+    _controller.addJavaScriptHandler(handlerName: "copyText", callback: (text) async {
+      final String clipboardText = text[0];
+      print(clipboardText);
+      FlutterClipboard.copy(clipboardText);
+    });
   }
 
   void _listenForPushNotifications() {
@@ -187,6 +202,13 @@ class _WebScreenState extends State<WebScreen> {
         _controller.loadUrl(url: routeUrl);
       }
     });
+  }
+
+  void _askOrGetContactPermissions() async {
+    _contactsPermissionStatus = await _permissionHelper.getPermissionStatus();
+    if (_contactsPermissionStatus == PermissionStatus.granted) {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => ContactsScreen()),);
+    }
   }
 
   void _listenForEvents() {
