@@ -33,7 +33,7 @@ class WebScreen extends StatefulWidget {
 class _WebScreenState extends State<WebScreen> {
 
   // Constants
-  final String _initialUrl = globals.initialUrlDevChannel;
+  final String _initialUrl = globals.initialUrl;
   // Tools and Services
   PermissionHelper _permissionHelper;
   InAppWebViewController _controller;
