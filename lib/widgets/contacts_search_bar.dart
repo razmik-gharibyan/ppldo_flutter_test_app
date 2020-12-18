@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:ppldo_flutter_test_app/bloc/bloc_provider.dart';
 import 'package:ppldo_flutter_test_app/bloc/contacts_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/search_contacts_bloc.dart';
@@ -18,6 +19,8 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
 
   // Bloc
   SearchContactsBloc _searchContactsBloc;
+  // Tools
+  KeyboardVisibilityController _keyboardVisibilityController;
   // Vars
   TextEditingController _controller;
   FocusNode _focusNode;
@@ -32,11 +35,21 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
 
   @override
   void didChangeDependencies() {
-    // -- Init Bloc
-   _searchContactsBloc = BlocProvider.of<SearchContactsBloc>(context);
+     // -- Init Bloc
+    _searchContactsBloc = BlocProvider.of<SearchContactsBloc>(context);
+    // -- Init Tools
+    _keyboardVisibilityController = KeyboardVisibilityController();
     // -- Start Operations
     _listenForContactsSearch();
+    _listenForFocusChange();
+    _listenForKeyboardVisibility();
     super.didChangeDependencies();
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
   }
 
   @override
@@ -45,10 +58,6 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
       child: TextFormField(
         controller: _controller,
         decoration: InputDecoration(
-          suffixIcon: Icon(
-            _focusNode.hasFocus ? Icons.close : Icons.search,
-            color: Colors.grey,
-          ),
           prefixIcon: IconButton(
             icon: Icon(
               _focusNode.hasFocus ? Icons.search : Icons.arrow_back,
@@ -56,19 +65,41 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
             ),
             onPressed: () => Navigator.of(context).pop(),
           ),
+          suffixIcon: Icon(
+            _focusNode.hasFocus ? Icons.close : Icons.search,
+            color: Colors.grey,
+          ),
           hintText: "Contacts",
         ),
-        //focusNode: _focusNode,
+        focusNode: _focusNode,
         onChanged: (String data) => _searchContactsBloc.inSearchContactsController.add(data),
       )
     );
   }
 
+  void _listenForFocusChange() {
+    _focusNode.addListener(() {
+      setState(() {});
+    });
+  }
+
+  void _listenForKeyboardVisibility() {
+    _keyboardVisibilityController.onChange.listen((bool isVisible) {
+      if (!isVisible) {
+        if (_focusNode.hasFocus) {
+          _focusNode.unfocus();
+        }
+      }
+    });
+  }
+
   void _listenForContactsSearch() {
-    _searchContactsBloc.searchContactsStream.debounce(Duration(microseconds: 400)).listen((String searchText) {
+    _searchContactsBloc.searchContactsStream.debounce(Duration(milliseconds: 400)).listen((String searchText) {
+      print("Searched for contacts");
       final contacts = widget._contactBloc.contacts;
       if (contacts != null && contacts.isNotEmpty) {
-        final result = contacts.where((element) => element.displayName.contains(searchText)).toList();
+        final result = contacts.where((element) =>
+            element.displayName.toLowerCase().contains(searchText.toLowerCase())).toList();
         widget._contactBloc.addToContactsController(result);
       }
     });

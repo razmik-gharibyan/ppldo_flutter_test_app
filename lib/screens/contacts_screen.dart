@@ -12,15 +12,16 @@ class ContactsScreen extends StatefulWidget {
 
 class _ContactsScreenState extends State<ContactsScreen> {
 
+  // -- Bloc
   ContactsBloc _contactsBloc;
 
   @override
   void initState() {
+    super.initState();
     // -- Init Bloc
     _contactsBloc = ContactsBloc();
     // -- Start Operations
     _contactsBloc.getContactList();
-    super.initState();
   }
 
   @override
@@ -36,44 +37,52 @@ class _ContactsScreenState extends State<ContactsScreen> {
       child: LayoutBuilder(
         builder: (c, constraints) => SafeArea(
           child: Scaffold(
-            body: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Container(
-                    height: constraints.maxHeight * 0.1,
-                    child: ContactsSearchBar(_contactsBloc),
-                  ),
-                  Container(
-                    height: constraints.maxHeight * 0.1,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Icon(Icons.person_add),
-                        Text("Invite to PPLDO"),
-                      ],
+            body: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                FocusScope.of(context).requestFocus(new FocusNode());
+              },
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Container(
+                      height: constraints.maxHeight * 0.1,
+                      child: ContactsSearchBar(_contactsBloc),
                     ),
-                  ),
-                  Container(
-                    height: constraints.maxHeight * 0.8,
-                    child: StreamBuilder<List<Contact>>(
-                      stream: _contactsBloc.contactsStream,
-                      builder: (ctx, snapshot) {
-                        if (snapshot == null || !snapshot.hasData) {
-                          return Center(
-                            child: CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
-                            ),
-                          );
-                        }
-                        if (snapshot.data.isEmpty) {
-                          return Text("No contacts found on your phone");
-                        }
-                        return _contactListView(snapshot.data);
-                      },
+                    Container(
+                      height: constraints.maxHeight * 0.1,
+                      child: Row(
+                        children: [
+                          Spacer(flex: 1,),
+                          Icon(Icons.person_add),
+                          SizedBox(width: 10.0,),
+                          Text("Invite to PPLDO"),
+                          Spacer(flex: 10,)
+                        ],
+                      ),
                     ),
-                  )
-                ],
+                    Container(
+                      height: constraints.maxHeight * 0.76,
+                      child: StreamBuilder<List<Contact>>(
+                        stream: _contactsBloc.contactsStream,
+                        builder: (ctx, snapshot) {
+                          if (snapshot == null || !snapshot.hasData) {
+                            return Center(
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                              ),
+                            );
+                          }
+                          if (snapshot.data.isEmpty) {
+                            return Text("No contacts found on your phone");
+                          }
+                          return _contactListView(snapshot.data);
+                        },
+                      ),
+                    )
+                  ],
+                ),
               ),
             ),
           ),
@@ -84,19 +93,25 @@ class _ContactsScreenState extends State<ContactsScreen> {
 
   Widget _contactListView(List<Contact> contacts) {
     return ListView.builder(
-      itemBuilder: (ctx, index) => ListTile(
-        leading: Icon(Icons.contacts),
-        title: Text(contacts[index].displayName),
-        subtitle: Text(contacts[index].phones.toList()[0].value),
-        trailing: RaisedButton(
-          child: Text(
-            "Add"
-          ),
-          onPressed: () {
-            //TODO call js method
-          },
-        ),
-      ),
+      itemBuilder: (ctx, index) {
+        return Column(
+          children: [
+            Divider(thickness: 3,),
+            ListTile(
+              title: Text(contacts[index].displayName),
+              subtitle: Text(contacts[index].phones.toList()[0].value),
+              trailing: RaisedButton(
+                child: Text(
+                    "Add"
+                ),
+                onPressed: () {
+                  //TODO call js method
+                },
+              ),
+            ),
+          ],
+        );
+      },
       itemCount: contacts.length,
       shrinkWrap: true,
     );

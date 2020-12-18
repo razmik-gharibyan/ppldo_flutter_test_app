@@ -130,14 +130,11 @@ class _WebScreenState extends State<WebScreen> {
                       }
                     },
                   ),
-                  /*
                   FloatingActionButton(
                     onPressed: () {
                       _askOrGetContactPermissions();
                     },
                   )
-
-                   */
                 ],
               )
             );
