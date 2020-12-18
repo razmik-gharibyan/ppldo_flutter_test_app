@@ -17,8 +17,16 @@ class ContactsBloc implements Bloc {
 
   void getContactList() async {
     final result = await ContactsService.getContacts();
-    _contacts = result.toList();
-    _inContactsController.add(result.toList());
+    final validContactList = result.toList().where((element) {
+      if (element.displayName != null && element.phones.toList() != null) {
+        if (element.phones.toList().isNotEmpty) {
+          return element.phones.toList()[0].value != null;
+        }
+      }
+      return false;
+    }).toList();
+    _contacts = validContactList;
+    _inContactsController.add(validContactList);
   }
 
   void addToContactsController(List<Contact> contacts) {
