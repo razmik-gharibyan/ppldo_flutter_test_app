@@ -30,7 +30,7 @@ class WebScreen extends StatefulWidget {
   _WebScreenState createState() => _WebScreenState();
 }
 
-class _WebScreenState extends State<WebScreen> {
+class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
 
   // Constants
   final String _initialUrl = globals.initialUrl;
@@ -76,6 +76,19 @@ class _WebScreenState extends State<WebScreen> {
     // -- Listen for changes --
     _connectivityBloc.checkConnectionStatus();
     _jsCommunicationBloc.startSession();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    super.didChangeAppLifecycleState(state);
+    switch (state) {
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.paused:
+      case AppLifecycleState.detached:
+        await _checkTokenFromCookies();
+        break;
+      case AppLifecycleState.resumed:
+    }
   }
 
   @override
