@@ -4,12 +4,17 @@ import 'package:ppldo_flutter_test_app/bloc/bloc.dart';
 
 class JSCommunicationBloc implements Bloc {
 
-  // Tools
-  Timer _timer;
   // -- CookieTimer
+  Timer _timer;
+  // -- Controllers
   final _cookieTimerController = StreamController<bool>();
+  final _addContactController = StreamController<String>();
+  // -- Sinks
   Sink<bool> get _inCookieTimerController => _cookieTimerController.sink;
+  Sink<String> get _inAddContactController => _addContactController.sink;
+  // -- Streams
   Stream<bool> get cookieTimerStream => _cookieTimerController.stream;
+  Stream<String> get addContactStream => _addContactController.stream;
 
   void startSession() {
     _startCookieTimer();
@@ -21,10 +26,15 @@ class JSCommunicationBloc implements Bloc {
     });
   }
 
+  void addContactNumber(String number) {
+    _inAddContactController.add(number);
+  }
+
   @override
   void dispose() {
     _timer.cancel();
     _cookieTimerController.close();
+    _addContactController.close();
   }
 
 }

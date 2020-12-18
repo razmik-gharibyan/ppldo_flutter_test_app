@@ -40,6 +40,7 @@ class _WebScreenState extends State<WebScreen> {
   InAppWebViewGroupOptions _options;
   CloudMessagingService _cloudMessagingService;
   ChromeSafariBrowser _chromeSafariBrowser;
+  CookieManager _cookieManager;
   // Bloc
   ConnectivityBloc _connectivityBloc;
   DeepLinkBloc _deepLinkBloc;
@@ -62,6 +63,7 @@ class _WebScreenState extends State<WebScreen> {
     _permissionHelper = PermissionHelper();
     _cloudMessagingService = CloudMessagingService();
     _chromeSafariBrowser = ChromeSafariBrowser();
+    _cookieManager = CookieManager();
     _options = InAppWebViewGroupOptions();
     _options.crossPlatform.useShouldOverrideUrlLoading = true;
     _options.android.hardwareAcceleration = true;
@@ -77,7 +79,8 @@ class _WebScreenState extends State<WebScreen> {
   }
 
   @override
-  void dispose() {
+  void dispose() async {
+    await _checkTokenFromCookies();
     _cloudMessagingBloc.dispose();
     _deepLinkBloc.dispose();
     _jsCommunicationBloc.dispose();
@@ -114,7 +117,7 @@ class _WebScreenState extends State<WebScreen> {
                             } else {
                               _controller = webViewController;
                               _listenForEvents();
-                              _getCookies();
+                              _checkTokenFromCookies();
                             }
                           },
                           gestureRecognizers: [Factory<VerticalDragGestureRecognizer>(() => VerticalDragGestureRecognizer())].toSet(),
@@ -130,11 +133,12 @@ class _WebScreenState extends State<WebScreen> {
                       }
                     },
                   ),
+                  /*
                   FloatingActionButton(
-                    onPressed: () {
-                      _askOrGetContactPermissions();
-                    },
+                    onPressed: _askOrGetContactPermissions,
                   )
+
+                   */
                 ],
               )
             );
@@ -147,28 +151,24 @@ class _WebScreenState extends State<WebScreen> {
   void _listenForJSEvents() {
     _jsCommunicationBloc.cookieTimerStream.listen((bool event) {
       if (event) {
-        _getCookies();
+        _checkTokenFromCookies();
       }
     });
   }
 
-  void _getCookies() async {
+  Future<void> _checkTokenFromCookies() async {
     try {
-      final String cookie = await _controller.evaluateJavascript(source: "document.cookie");
-      if (cookie != null && cookie.isNotEmpty && cookie != "null" && cookie != "\"\"") {
-        final token = _getTokenFromCookies(cookie);
-        if (token != null && token.isNotEmpty) {
-          if (!_permissionCheckedOnce) {
-            //_getPermissions();
-            _permissionCheckedOnce = true;
-            _deviceToken = await _cloudMessagingBloc.getDeviceToken();
-            if (_deviceToken != null && _deviceToken.isNotEmpty) {
-              await _cloudMessagingService.postDeviceToken(token, _deviceToken);
-            }
+      final token = await _cookieManager.getCookie(url: globals.initialUrl, name: "token");
+      if (token != null && token.value != null) {
+        if (!_permissionCheckedOnce) {
+          _permissionCheckedOnce = true;
+          _deviceToken = await _cloudMessagingBloc.getDeviceToken();
+          if (_deviceToken != null && _deviceToken.isNotEmpty) {
+            await _cloudMessagingService.postDeviceToken(token.value, _deviceToken);
           }
         }
       }
-      if (cookie != null && cookie.isEmpty && _deviceToken != null && _deviceToken.isNotEmpty) {
+      if (token == null &&_deviceToken != null && _deviceToken.isNotEmpty) {
         await _cloudMessagingBloc.deleteDeviceToken();
         _deviceToken = null;
         _permissionCheckedOnce = false;
@@ -178,18 +178,17 @@ class _WebScreenState extends State<WebScreen> {
     }
   }
 
-  String _getTokenFromCookies(String cookie) {
-    const tokenSearchText = "token=";
-    final tokenStartIndex = cookie.lastIndexOf(tokenSearchText);
-    final tokenEndIndex = tokenStartIndex + tokenSearchText.length;
-    return cookie.substring(tokenEndIndex).replaceAll("\"", "");
-  }
-
   void _listenForClipboardCopy() {
-    _controller.addJavaScriptHandler(handlerName: "copyText", callback: (text) async {
+    _controller.addJavaScriptHandler(handlerName: "copyText", callback: (text) {
       final String clipboardText = text[0];
       print(clipboardText);
       FlutterClipboard.copy(clipboardText);
+    });
+  }
+  
+  void _listenForAddContacts() {
+    _controller.addJavaScriptHandler(handlerName: "syncContacts", callback: (_) {
+      _askOrGetContactPermissions();
     });
   }
 
@@ -212,6 +211,7 @@ class _WebScreenState extends State<WebScreen> {
     _listenForJSEvents();
     _listenForPushNotifications();
     _listenForClipboardCopy();
+    _listenForAddContacts();
   }
 
   Future<ShouldOverrideUrlLoadingAction> _handleUrlRequests(ShouldOverrideUrlLoadingRequest request) async {

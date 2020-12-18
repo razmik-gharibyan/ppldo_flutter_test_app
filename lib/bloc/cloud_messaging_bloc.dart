@@ -43,6 +43,7 @@ class CloudMessagingBloc implements Bloc {
 
   Future deleteDeviceToken() async {
     await _fcm.deleteToken();
+    print("removed device token");
   }
 
   @override

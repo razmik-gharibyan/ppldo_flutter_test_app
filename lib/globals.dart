@@ -1,13 +1,13 @@
 enum Mode {
-  DEVELOPER, PRODUCTION
+  DEVELOPMENT, PRODUCTION
 }
 
-Mode applicationMode = Mode.DEVELOPER;
+Mode applicationMode = Mode.DEVELOPMENT;
 
 final String mainUrl =
-  applicationMode == Mode.DEVELOPER ? "https://api-dev.ppl.do/graphql" : "https://api.ppl.do/graphql";
+  applicationMode == Mode.DEVELOPMENT ? "https://api-dev.ppl.do/graphql" : "https://api.ppl.do/graphql";
 final String initialUrl =
-  applicationMode == Mode.DEVELOPER ? "https://dev.ppl.do" : "https://ppldo.net";
+  applicationMode == Mode.DEVELOPMENT ? "https://dev.ppl.do" : "https://ppldo.net";
 
 
 

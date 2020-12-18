@@ -18,9 +18,11 @@ class ContactsBloc implements Bloc {
   void getContactList() async {
     final result = await ContactsService.getContacts();
     final validContactList = result.toList().where((element) {
-      if (element.displayName != null && element.phones.toList() != null) {
-        if (element.phones.toList().isNotEmpty) {
-          return element.phones.toList()[0].value != null;
+      final name = element.displayName;
+      final phoneList = element.phones.toList();
+      if (name != null && phoneList != null) {
+        if (phoneList.isNotEmpty) {
+          return phoneList[0].value != null;
         }
       }
       return false;
