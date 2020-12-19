@@ -225,7 +225,7 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
     _listenForJSEvents();
     _listenForPushNotifications();
     _listenForClipboardCopy();
-    _listenForAddContacts();
+    //_listenForAddContacts();
   }
 
   Future<ShouldOverrideUrlLoadingAction> _handleUrlRequests(ShouldOverrideUrlLoadingRequest request) async {
