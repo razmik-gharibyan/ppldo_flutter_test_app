@@ -60,6 +60,7 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
     _jsCommunicationBloc = JSCommunicationBloc();
     _cloudMessagingBloc = CloudMessagingBloc();
     // -- Init tools --
+    WidgetsBinding.instance.addObserver(this);
     _permissionHelper = PermissionHelper();
     _cloudMessagingService = CloudMessagingService();
     _chromeSafariBrowser = ChromeSafariBrowser();
@@ -93,11 +94,11 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
 
   @override
   void dispose() async {
-    await _checkTokenFromCookies();
     _cloudMessagingBloc.dispose();
     _deepLinkBloc.dispose();
     _jsCommunicationBloc.dispose();
     _chromeSafariBrowser.close();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
