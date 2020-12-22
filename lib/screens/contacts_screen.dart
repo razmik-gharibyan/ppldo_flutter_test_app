@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:ppldo_flutter_test_app/bloc/bloc_provider.dart';
 import 'package:ppldo_flutter_test_app/bloc/contacts_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/search_contacts_bloc.dart';
+import 'package:ppldo_flutter_test_app/model/ppldo_contact.dart';
 import 'package:ppldo_flutter_test_app/widgets/contacts_search_bar.dart';
 
 class ContactsScreen extends StatefulWidget {
@@ -64,7 +65,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                     ),
                     Container(
                       height: constraints.maxHeight * 0.76,
-                      child: StreamBuilder<List<Contact>>(
+                      child: StreamBuilder<List<PpldoContact>>(
                         stream: _contactsBloc.contactsStream,
                         builder: (ctx, snapshot) {
                           if (snapshot == null || !snapshot.hasData) {
@@ -91,15 +92,15 @@ class _ContactsScreenState extends State<ContactsScreen> {
     );
   }
 
-  Widget _contactListView(List<Contact> contacts) {
+  Widget _contactListView(List<PpldoContact> contacts) {
     return ListView.builder(
       itemBuilder: (ctx, index) {
         return Column(
           children: [
             Divider(thickness: 3,),
             ListTile(
-              title: Text(contacts[index].displayName),
-              subtitle: Text(contacts[index].phones.toList()[0].value),
+              title: Text(contacts[index].name),
+              subtitle: Text(contacts[index].phone),
               trailing: RaisedButton(
                 child: Text(
                     "Add"

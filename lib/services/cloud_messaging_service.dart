@@ -30,25 +30,4 @@ class CloudMessagingService {
     }
   }
 
-  /*
-  mutation ($phones: [PhoneNumber!]!) {
-  makePosibleContacts(phones: $phones){
-    edges {
-      is_contact
-      node {
-        __typename
-        ...on ActiveUser {
-          phone
-          profile {
-            first_name
-            last_name
-          }
-        }
-      }
-    }
-  }
-}
-variables "phones": ["79123273936", "18085550101"]
-   */
-
 }

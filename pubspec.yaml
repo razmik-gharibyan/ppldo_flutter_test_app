@@ -43,6 +43,7 @@ dependencies:
   sentry_flutter: ^4.0.0
   stream_transform: ^1.2.0
   flutter_keyboard_visibility: ^4.0.2
+  flutter_libphonenumber: ^0.3.11
 
 
   # The following adds the Cupertino Icons font to your application.
