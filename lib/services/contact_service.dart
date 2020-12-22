@@ -4,7 +4,7 @@ import 'package:ppldo_flutter_test_app/globals.dart' as globals;
 
 class ContactService {
 
-  Future sendLocalContacts(String userToken, List<String> contacts) async {
+  Future sendLocalContacts(String userToken, List<String> phones) async {
     final mutationRequest = """mutation (\$phones: [PhoneNumber!]!) {
                                 makePosibleContacts(phones: \$phones){
                                   edges {
@@ -25,7 +25,7 @@ class ContactService {
                             """;
     final request = jsonEncode({
       "query": mutationRequest,
-      "variables": {"phones": contacts}
+      "variables": {"phones": phones}
     });
     final result = await http.post(
         globals.mainUrl,

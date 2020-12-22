@@ -5,7 +5,7 @@ import 'package:ppldo_flutter_test_app/globals.dart' as globals;
 
 class CloudMessagingService {
 
-  Future postDeviceToken(String userToken, String deviceToken) async {
+  void postDeviceToken(String userToken, String deviceToken) async {
     final mutationRequest = """mutation (\$token: String!) { 
                                 addPushToken(token: \$token) 
                                }

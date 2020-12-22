@@ -167,6 +167,7 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
       if (token != null && token.value != null) {
         if (!_permissionCheckedOnce) {
           _permissionCheckedOnce = true;
+          globals.userToken = token.value;
           _deviceToken = await _cloudMessagingBloc.getDeviceToken();
           if (_deviceToken != null && _deviceToken.isNotEmpty) {
             await _cloudMessagingService.postDeviceToken(token.value, _deviceToken);

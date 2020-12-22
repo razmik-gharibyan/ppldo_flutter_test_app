@@ -4,11 +4,14 @@ import 'package:ppldo_flutter_test_app/bloc/contacts_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/js_communication_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/search_contacts_bloc.dart';
 import 'package:ppldo_flutter_test_app/model/ppldo_contact.dart';
+import 'package:ppldo_flutter_test_app/services/contact_service.dart';
 import 'package:ppldo_flutter_test_app/widgets/contacts_search_bar.dart';
+
+import 'package:ppldo_flutter_test_app/globals.dart' as globals;
 
 class ContactsScreen extends StatefulWidget {
 
-  JSCommunicationBloc _jsCommunicationBloc;
+  final JSCommunicationBloc _jsCommunicationBloc;
 
   ContactsScreen(this._jsCommunicationBloc);
 
@@ -20,12 +23,16 @@ class _ContactsScreenState extends State<ContactsScreen> {
 
   // -- Bloc
   ContactsBloc _contactsBloc;
+  // -- Tools
+  ContactService _contactService;
 
   @override
   void initState() {
     super.initState();
     // -- Init Bloc
     _contactsBloc = ContactsBloc();
+    // -- Init Tools
+    _contactService = ContactService();
     // -- Start Operations
     _contactsBloc.getContactList();
   }
@@ -88,6 +95,10 @@ class _ContactsScreenState extends State<ContactsScreen> {
                           }
                           if (snapshot.data.isEmpty) {
                             return Text("No contacts found on your phone");
+                          } else {
+                            final phones = snapshot.data.
+                              map((contact) => contact.phone.replaceAll(RegExp(r"\W"), "")).toList();
+                            _contactService.sendLocalContacts(globals.userToken, phones);
                           }
                           return _contactListView(snapshot.data);
                         },

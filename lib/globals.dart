@@ -1,3 +1,4 @@
+// Main
 enum Mode {
   DEVELOPMENT, PRODUCTION
 }
@@ -9,5 +10,6 @@ final String mainUrl =
 final String initialUrl =
   applicationMode == Mode.DEVELOPMENT ? "https://dev.ppl.do" : "https://ppldo.net";
 
-
+// Tools
+String userToken;
 
