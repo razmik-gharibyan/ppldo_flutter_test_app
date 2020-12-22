@@ -1,12 +1,17 @@
-import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:ppldo_flutter_test_app/bloc/bloc_provider.dart';
 import 'package:ppldo_flutter_test_app/bloc/contacts_bloc.dart';
+import 'package:ppldo_flutter_test_app/bloc/js_communication_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/search_contacts_bloc.dart';
 import 'package:ppldo_flutter_test_app/model/ppldo_contact.dart';
 import 'package:ppldo_flutter_test_app/widgets/contacts_search_bar.dart';
 
 class ContactsScreen extends StatefulWidget {
+
+  JSCommunicationBloc _jsCommunicationBloc;
+
+  ContactsScreen(this._jsCommunicationBloc);
+
   @override
   _ContactsScreenState createState() => _ContactsScreenState();
 }
@@ -53,14 +58,20 @@ class _ContactsScreenState extends State<ContactsScreen> {
                     ),
                     Container(
                       height: constraints.maxHeight * 0.1,
-                      child: Row(
-                        children: [
-                          Spacer(flex: 1,),
-                          Icon(Icons.person_add),
-                          SizedBox(width: 10.0,),
-                          Text("Invite to PPLDO"),
-                          Spacer(flex: 10,)
-                        ],
+                      child: InkWell(
+                        child: Row(
+                          children: [
+                            Spacer(flex: 1,),
+                            Icon(Icons.person_add),
+                            SizedBox(width: 10.0,),
+                            Text("Invite to PPLDO"),
+                            Spacer(flex: 10,)
+                          ],
+                        ),
+                        onTap: () {
+                          widget._jsCommunicationBloc.addContactNumber("");
+                          Navigator.pop(context);
+                        },
                       ),
                     ),
                     Container(
@@ -103,10 +114,11 @@ class _ContactsScreenState extends State<ContactsScreen> {
               subtitle: Text(contacts[index].phone),
               trailing: RaisedButton(
                 child: Text(
-                    "Add"
+                    "Invite"
                 ),
                 onPressed: () {
-                  //TODO call js method
+                  widget._jsCommunicationBloc.addContactNumber(contacts[index].phone);
+                  Navigator.pop(context);
                 },
               ),
             ),

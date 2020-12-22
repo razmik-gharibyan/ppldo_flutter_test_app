@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:clipboard/clipboard.dart';
-import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -11,13 +10,11 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:ppldo_flutter_test_app/bloc/bloc_provider.dart';
 import 'package:ppldo_flutter_test_app/bloc/cloud_messaging_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/connectivity_bloc.dart';
-import 'package:ppldo_flutter_test_app/bloc/contacts_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/deeplink_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/js_communication_bloc.dart';
 import 'package:ppldo_flutter_test_app/helper/permission_helper.dart';
 import 'package:ppldo_flutter_test_app/screens/contacts_screen.dart';
 import 'package:ppldo_flutter_test_app/services/cloud_messaging_service.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:ppldo_flutter_test_app/globals.dart' as globals;
@@ -107,52 +104,52 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: Scaffold(
-        body: StreamBuilder<String>(
-          stream: _deepLinkBloc.deepLinkStream,
-          builder: (ct, deepLinkSnapshot) {
-            if (!deepLinkSnapshot.hasData) {
-              print("No deeplink snapshot");
-            } else {
-              _controller.loadUrl(url: deepLinkSnapshot.data);
+          body: StreamBuilder<String>(
+            stream: _deepLinkBloc.deepLinkStream,
+            builder: (ct, deepLinkSnapshot) {
+              if (!deepLinkSnapshot.hasData) {
+                print("No deeplink snapshot");
+              } else {
+                _controller.loadUrl(url: deepLinkSnapshot.data);
+              }
+              return SafeArea(
+                child: Stack(
+                  children: [
+                    StreamBuilder<bool>(
+                      stream: _connectivityBloc.networkErrorStream,
+                      builder: (c, errorSnapshot) {
+                        if (!errorSnapshot.hasData || !errorSnapshot.data) {
+                          return InAppWebView(
+                            initialUrl: _initialUrl,
+                            initialOptions: _options,
+                            onWebViewCreated: (InAppWebViewController webViewController) {
+                              if (_controller != null) {
+                                _controller = webViewController;
+                              } else {
+                                _controller = webViewController;
+                                _listenForEvents();
+                                _checkTokenFromCookies();
+                              }
+                            },
+                            gestureRecognizers: [Factory<VerticalDragGestureRecognizer>(() => VerticalDragGestureRecognizer())].toSet(),
+                            shouldOverrideUrlLoading: (controller, request) async {
+                              return await _handleUrlRequests(request);
+                            },
+                            onLoadError: (controller, url, code, message) {
+                              _loadErrorWidget(message);
+                            },
+                          );
+                        } else {
+                          return _errorWidget();
+                        }
+                      },
+                    ),
+                  ],
+                )
+              );
             }
-            return SafeArea(
-              child: Stack(
-                children: [
-                  StreamBuilder<bool>(
-                    stream: _connectivityBloc.networkErrorStream,
-                    builder: (c, errorSnapshot) {
-                      if (!errorSnapshot.hasData || !errorSnapshot.data) {
-                        return InAppWebView(
-                          initialUrl: _initialUrl,
-                          initialOptions: _options,
-                          onWebViewCreated: (InAppWebViewController webViewController) {
-                            if (_controller != null) {
-                              _controller = webViewController;
-                            } else {
-                              _controller = webViewController;
-                              _listenForEvents();
-                              _checkTokenFromCookies();
-                            }
-                          },
-                          gestureRecognizers: [Factory<VerticalDragGestureRecognizer>(() => VerticalDragGestureRecognizer())].toSet(),
-                          shouldOverrideUrlLoading: (controller, request) async {
-                            return await _handleUrlRequests(request);
-                          },
-                          onLoadError: (controller, url, code, message) {
-                            _loadErrorWidget(message);
-                          },
-                        );
-                      } else {
-                        return _errorWidget();
-                      }
-                    },
-                  ),
-                ],
-              )
-            );
-          }
+          ),
         ),
-      )
     );
   }
   
@@ -199,6 +196,16 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
       _askOrGetContactPermissions();
     });
   }
+  
+  void _listenForAddPhoneNumber() {
+    _jsCommunicationBloc.addContactStream.listen((String phoneNumber) async {
+      if (phoneNumber.isEmpty) {
+        await _controller.evaluateJavascript(source: "app.vms.modals.openInvite()");
+      } else {
+        await _controller.evaluateJavascript(source: "app.vms.modals.openInvite({phone: '$phoneNumber'})");
+      }
+    });
+  }
 
   void _listenForPushNotifications() {
     _cloudMessagingBloc.cloudMessagingStream.listen((String routeUrl) {
@@ -211,7 +218,7 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
   void _askOrGetContactPermissions() async {
     _contactsPermissionStatus = await _permissionHelper.getPermissionStatus();
     if (_contactsPermissionStatus == PermissionStatus.granted) {
-      Navigator.push(context, MaterialPageRoute(builder: (context) => ContactsScreen()),);
+      Navigator.push(context, MaterialPageRoute(builder: (context) => ContactsScreen(_jsCommunicationBloc)),);
     }
   }
 
@@ -219,7 +226,8 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
     _listenForJSEvents();
     _listenForPushNotifications();
     _listenForClipboardCopy();
-    //_listenForAddContacts();
+    _listenForAddContacts();
+    _listenForAddPhoneNumber();
   }
 
   Future<ShouldOverrideUrlLoadingAction> _handleUrlRequests(ShouldOverrideUrlLoadingRequest request) async {
