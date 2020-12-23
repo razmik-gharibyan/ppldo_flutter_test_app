@@ -11,7 +11,7 @@ class ContactsHelper {
     final countries = CountryManager().countries;
     final phoneCode = countries.firstWhere((country) => country.countryCode == code).phoneCode;
     List<PpldoContact> formattedContacts = List<PpldoContact>();
-
+    /*
     for (var contact in contacts) {
       final phoneNumber = libPhoneNumber.formatNumberSync(contact.phones.toList()[0].value)
           .replaceAll(RegExp(r"\W"), "");
@@ -23,8 +23,22 @@ class ContactsHelper {
           final result = await libPhoneNumber.parse("+$phoneCode$phoneNumber");
           formattedContacts.add(PpldoContact(name: contact.displayName, phone: result["e164"]));
         } catch (exception) {
-          print("invalid contact in contact list should be ignored");
+          print("invalid contact in contact list should be igored");
         }
+      }
+    };
+
+     */
+    for (var contact in contacts) {
+      final phoneNumber = libPhoneNumber.formatNumberSync(contact.phones.toList()[0].value)
+          .replaceAll(RegExp(r"\W"), "");
+      try {
+        final result= await libPhoneNumber.parse(phoneNumber);
+        final String internationalNumber = result["e164"];
+        final String formattedInternationalNumber = internationalNumber.replaceAll(RegExp(r"\W"), "");
+        formattedContacts.add(PpldoContact(name: contact.displayName, phone: formattedInternationalNumber));
+      } catch (exception) {
+        print("invalid contact in contact list should be ignored");
       }
     };
     return formattedContacts;

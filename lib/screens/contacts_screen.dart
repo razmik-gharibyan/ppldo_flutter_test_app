@@ -4,13 +4,9 @@ import 'package:ppldo_flutter_test_app/bloc/contacts_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/js_communication_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/search_contacts_bloc.dart';
 import 'package:ppldo_flutter_test_app/model/ppldo_contact.dart';
-import 'package:ppldo_flutter_test_app/services/contact_service.dart';
 import 'package:ppldo_flutter_test_app/widgets/contacts_search_bar.dart';
 
-import 'package:ppldo_flutter_test_app/globals.dart' as globals;
-
 class ContactsScreen extends StatefulWidget {
-
   final JSCommunicationBloc _jsCommunicationBloc;
 
   ContactsScreen(this._jsCommunicationBloc);
@@ -20,19 +16,14 @@ class ContactsScreen extends StatefulWidget {
 }
 
 class _ContactsScreenState extends State<ContactsScreen> {
-
   // -- Bloc
   ContactsBloc _contactsBloc;
-  // -- Tools
-  ContactService _contactService;
 
   @override
   void initState() {
     super.initState();
     // -- Init Bloc
     _contactsBloc = ContactsBloc();
-    // -- Init Tools
-    _contactService = ContactService();
     // -- Start Operations
     _contactsBloc.getContactList();
   }
@@ -68,11 +59,17 @@ class _ContactsScreenState extends State<ContactsScreen> {
                       child: InkWell(
                         child: Row(
                           children: [
-                            Spacer(flex: 1,),
+                            Spacer(
+                              flex: 1,
+                            ),
                             Icon(Icons.person_add),
-                            SizedBox(width: 10.0,),
+                            SizedBox(
+                              width: 10.0,
+                            ),
                             Text("Invite to PPLDO"),
-                            Spacer(flex: 10,)
+                            Spacer(
+                              flex: 10,
+                            )
                           ],
                         ),
                         onTap: () {
@@ -86,21 +83,19 @@ class _ContactsScreenState extends State<ContactsScreen> {
                       child: StreamBuilder<List<PpldoContact>>(
                         stream: _contactsBloc.contactsStream,
                         builder: (ctx, snapshot) {
+                          final contacts = snapshot.data;
                           if (snapshot == null || !snapshot.hasData) {
                             return Center(
                               child: CircularProgressIndicator(
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.green),
                               ),
                             );
                           }
-                          if (snapshot.data.isEmpty) {
+                          if (contacts.isEmpty) {
                             return Text("No contacts found on your phone");
-                          } else {
-                            final phones = snapshot.data.
-                              map((contact) => contact.phone.replaceAll(RegExp(r"\W"), "")).toList();
-                            //_contactService.sendLocalContacts(globals.userToken, phones);
                           }
-                          return _contactListView(snapshot.data);
+                          return _contactListView(contacts);
                         },
                       ),
                     )
@@ -117,21 +112,20 @@ class _ContactsScreenState extends State<ContactsScreen> {
   Widget _contactListView(List<PpldoContact> contacts) {
     return ListView.builder(
       itemBuilder: (ctx, index) {
+        final contact = contacts[index];
         return Column(
           children: [
-            Divider(thickness: 3,),
+            Divider(
+              thickness: 3,
+            ),
             ListTile(
-              title: Text(contacts[index].name),
-              subtitle: Text(contacts[index].phone),
-              trailing: RaisedButton(
-                child: Text(
-                    "Invite"
-                ),
-                onPressed: () {
-                  widget._jsCommunicationBloc.addContactNumber(contacts[index].phone);
-                  Navigator.pop(context);
-                },
-              ),
+              title: Text(contact.name),
+              subtitle: Text(contact.phone),
+              trailing: contact.isContact == null
+                  ? _addOrInviteButton("Invite", contact.phone)
+                  : contact.isContact
+                      ? null
+                      : _addOrInviteButton("Add", contact.phone),
             ),
           ],
         );
@@ -139,5 +133,14 @@ class _ContactsScreenState extends State<ContactsScreen> {
       itemCount: contacts.length,
       shrinkWrap: true,
     );
+  }
+
+  Widget _addOrInviteButton(String text, String phone) {
+    return RaisedButton(
+        child: Text(text),
+        onPressed: () {
+          widget._jsCommunicationBloc.addContactNumber(phone);
+          Navigator.pop(context);
+        });
   }
 }
