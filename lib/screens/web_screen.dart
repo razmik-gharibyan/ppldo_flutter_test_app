@@ -144,6 +144,11 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
                         }
                       },
                     ),
+                    FloatingActionButton(
+                      onPressed: () {
+                        _askOrGetContactPermissions();
+                      },
+                    )
                   ],
                 )
               );

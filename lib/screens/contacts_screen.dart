@@ -98,7 +98,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                           } else {
                             final phones = snapshot.data.
                               map((contact) => contact.phone.replaceAll(RegExp(r"\W"), "")).toList();
-                            _contactService.sendLocalContacts(globals.userToken, phones);
+                            //_contactService.sendLocalContacts(globals.userToken, phones);
                           }
                           return _contactListView(snapshot.data);
                         },

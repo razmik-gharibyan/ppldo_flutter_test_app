@@ -24,7 +24,7 @@ class ContactsBloc implements Bloc {
       final phoneList = element.phones.toList();
       if (name != null && phoneList != null) {
         if (phoneList.isNotEmpty) {
-          return phoneList[0].value != null;
+          return (phoneList[0].value != null && phoneList[0].value.length >= 9);
         }
       }
       return false;
