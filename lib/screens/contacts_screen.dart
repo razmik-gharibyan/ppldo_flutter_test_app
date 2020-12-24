@@ -121,7 +121,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
             ListTile(
               leading: Icon(Icons.person_rounded,size: 40.0,),
               title: Text(contact.name),
-              subtitle: Text(contact.phone),
+              subtitle: Text(contact.isContact == null ? contact.phone : "in PPL DO"),
               trailing: contact.isContact == null
                   ? _inviteButton(contact.phone)
                   : contact.isContact
