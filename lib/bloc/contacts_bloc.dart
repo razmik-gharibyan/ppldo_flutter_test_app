@@ -14,9 +14,13 @@ class ContactsBloc implements Bloc {
   ContactService _contactService = ContactService();
   // Controllers
   final _contactsController = StreamController<List<PpldoContact>>();
-  // Streams
+  final _addContactController = StreamController<bool>();
+  // Sinks
   Sink<List<PpldoContact>> get _inContactsController => _contactsController.sink;
+  Sink<bool> get _inAddContactController => _addContactController.sink;
+  // Streams
   Stream<List<PpldoContact>> get contactsStream => _contactsController.stream;
+  Stream<bool> get addContactStream => _addContactController.stream;
   // Vars
   List<PpldoContact> _contacts;
   // Getters
@@ -44,29 +48,47 @@ class ContactsBloc implements Bloc {
 
   List<PpldoContact> _compareLocalAndRemoteContacts(List<PpldoContact> localContacts, List<PpldoContact> remoteContacts) {
     List<PpldoContact> resultContacts = List<PpldoContact>();
-    for (var localContact in localContacts) {
-      for (var remoteContact in remoteContacts) {
-        if (localContact.phone == remoteContact.phone) {
-          resultContacts.add(remoteContact);
-          break;
-        }
-        final index = remoteContacts.indexOf(remoteContact);
-        if (index == (remoteContacts.length - 1)) {
-          // Check if index is last index of for loop
-          resultContacts.add(localContact);
+    if (remoteContacts.isEmpty) {
+      resultContacts.addAll(localContacts);
+    } else {
+      for (var localContact in localContacts) {
+        for (var remoteContact in remoteContacts) {
+          if (localContact.phone == remoteContact.phone) {
+            // if isContact is true, then don't add this contact to contact list on UI
+            if (!remoteContact.isContact) {
+              resultContacts.add(remoteContact);
+            }
+            break;
+          }
+          final index = remoteContacts.indexOf(remoteContact);
+          if (index == (remoteContacts.length - 1)) {
+            // Check if index is last index of for loop
+            resultContacts.add(localContact);
+          }
         }
       }
     }
     return resultContacts;
   }
 
-  void addToContactsController(List<PpldoContact> contacts) {
+  void addContactsToContactsController(List<PpldoContact> contacts) {
     _inContactsController.add(contacts);
+  }
+
+  void addContact(String id) async {
+    try {
+      final isContactAdded = await _contactService.addContact(globals.userToken, id);
+      _inAddContactController.add(isContactAdded);
+    } catch (exception) {
+      //TODO handle exception when could not add user to contact list
+    }
+
   }
 
   @override
   void dispose() {
     _contactsController.close();
+    _addContactController.close();
   }
 
 }

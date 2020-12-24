@@ -100,7 +100,7 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
       if (contacts != null && contacts.isNotEmpty) {
         final result = contacts.where((element) =>
             element.name.toLowerCase().contains(searchText.toLowerCase())).toList();
-        widget._contactBloc.addToContactsController(result);
+        widget._contactBloc.addContactsToContactsController(result);
       }
     });
   }

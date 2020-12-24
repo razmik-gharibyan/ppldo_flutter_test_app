@@ -116,16 +116,17 @@ class _ContactsScreenState extends State<ContactsScreen> {
         return Column(
           children: [
             Divider(
-              thickness: 3,
+              thickness: 1,
             ),
             ListTile(
+              leading: Icon(Icons.person_rounded,size: 40.0,),
               title: Text(contact.name),
               subtitle: Text(contact.phone),
               trailing: contact.isContact == null
-                  ? _addOrInviteButton("Invite", contact.phone)
+                  ? _inviteButton(contact.phone)
                   : contact.isContact
                       ? null
-                      : _addOrInviteButton("Add", contact.phone),
+                      : _addButton(contact.id),
             ),
           ],
         );
@@ -135,12 +136,40 @@ class _ContactsScreenState extends State<ContactsScreen> {
     );
   }
 
-  Widget _addOrInviteButton(String text, String phone) {
+  Widget _inviteButton(String phone) {
     return RaisedButton(
-        child: Text(text),
+        child: Text("Invite"),
         onPressed: () {
           widget._jsCommunicationBloc.addContactNumber(phone);
           Navigator.pop(context);
         });
   }
+
+  Widget _addButton(String id) {
+    return StreamBuilder<bool>(
+      stream: _contactsBloc.addContactStream,
+      builder: (ct, snapshot) {
+        if (!snapshot.hasData) {
+          return RaisedButton(
+            child: Text("Add"),
+            onPressed: () {
+              _contactsBloc.addContact(id);
+            },
+          );
+        } else {
+          if (snapshot.data) {
+            return Text("Contact Added");
+          } else {
+            return RaisedButton(
+              child: Text("Add"),
+              onPressed: () {
+                _contactsBloc.addContact(id);
+              },
+            );
+          }
+        }
+      }
+    );
+  }
+
 }
