@@ -6,7 +6,7 @@ import 'package:ppldo_flutter_test_app/model/ppldo_contact.dart';
 class ContactService {
 
   Future<List<PpldoContact>> sendLocalContacts(String userToken, List<String> phones) async {
-    final mutationRequest = """mutation (\$phones: [PhoneNumber!]!) {
+    final mutationRequest = """mutation (\$phones: [String!]!) {
                                 makePosibleContacts(phones: \$phones){
                                   edges {
                                     is_contact

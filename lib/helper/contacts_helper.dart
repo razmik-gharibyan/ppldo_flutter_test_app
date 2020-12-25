@@ -5,7 +5,7 @@ import 'package:ppldo_flutter_test_app/model/ppldo_contact.dart';
 
 class ContactsHelper {
 
-  Future<List<PpldoContact>> formatContactList(List<Contact> contacts) async {
+  Future<List<PpldoContact>> formatContactList(List<PpldoContact> contacts) async {
     final libPhoneNumber = FlutterLibphonenumber();
     final code = await FlutterSimCountryCode.simCountryCode;
     final countries = CountryManager().countries;
@@ -30,13 +30,13 @@ class ContactsHelper {
 
      */
     for (var contact in contacts) {
-      final phoneNumber = libPhoneNumber.formatNumberSync(contact.phones.toList()[0].value)
+      final phoneNumber = libPhoneNumber.formatNumberSync(contact.phone)
           .replaceAll(RegExp(r"\W"), "");
       try {
         final result= await libPhoneNumber.parse(phoneNumber);
         final String internationalNumber = result["e164"];
         final String formattedInternationalNumber = internationalNumber.replaceAll(RegExp(r"\W"), "");
-        formattedContacts.add(PpldoContact(name: contact.displayName, phone: formattedInternationalNumber));
+        formattedContacts.add(PpldoContact(name: contact.name, phone: formattedInternationalNumber));
       } catch (exception) {
         print("invalid contact in contact list should be ignored");
       }

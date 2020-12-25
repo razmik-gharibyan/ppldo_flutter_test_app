@@ -23,12 +23,14 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
 
   // Vars
   FocusNode _focusNode;
+  TextEditingController _controller;
   bool _isSearchBarActive = false;
 
   @override
   void initState() {
     super.initState();
     _focusNode = FocusNode();
+    _controller = TextEditingController();
   }
 
   @override
@@ -47,17 +49,29 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
   @override
   void dispose() {
     _focusNode.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final aspectRatio = MediaQuery.of(context).size.aspectRatio;
-    return _isSearchBarActive ? _activeSearchBar(aspectRatio) : _inactiveSearchBar(aspectRatio);
+    final _aspectRatio = MediaQuery.of(context).size.aspectRatio;
+    return Container(
+      padding: const EdgeInsets.all(3.0),
+      margin: const EdgeInsets.all(5.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(6.0 / _aspectRatio)),
+        border: Border.all(
+          color: Colors.black54,
+          width: 0.2 / _aspectRatio,
+        )
+      ),
+      child: _isSearchBarActive ? _activeSearchBar(_aspectRatio) : _inactiveSearchBar(_aspectRatio),
+    );
   }
 
   Widget _activeSearchBar(double aspectRatio) {
-    return Container(child: Row(
+    return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         Flexible(
@@ -71,6 +85,7 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
         Flexible(
           flex: 8,
           child: TextField(
+            controller: _controller,
             style: TextStyle(
               color: Colors.black87,
               fontSize: 12.0 / aspectRatio,
@@ -79,10 +94,11 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
               hintText: "Search contact",
               hintStyle: TextStyle(
                 color: Colors.black87,
-                fontWeight: FontWeight.bold,
+                fontStyle: FontStyle.italic,
                 fontSize: 13.0 / aspectRatio,
               ),
             ),
+            cursorColor: Colors.lightGreen,
             focusNode: _focusNode,
             onChanged: (String data) => _searchContactsBloc.inSearchContactsController.add(data),
           ),
@@ -96,12 +112,14 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
               size: 18.0 / aspectRatio,
             ),
             onPressed: () {
+              _controller.clear();
+              _searchContactsBloc.inSearchContactsController.add(_controller.text);
               _focusNode.unfocus();
             },
           ),
         ),
       ],
-    ));
+    );
   }
 
   Widget _inactiveSearchBar(double aspectRatio) {
@@ -127,7 +145,7 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
             "Contacts",
             style: TextStyle(
               color: Colors.black87,
-              fontSize: 12.0 / aspectRatio,
+              fontSize: 13.0 / aspectRatio,
             ),
           ),
         ),

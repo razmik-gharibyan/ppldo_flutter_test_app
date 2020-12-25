@@ -38,12 +38,23 @@ class ContactsBloc implements Bloc {
       }
       return false;
     }).toList();
-    final formattedContacts = await ContactsHelper().formatContactList(validContactList);
+    final multipleNumberContactList = _checkMultiplePhoneNumbers(validContactList);
+    final formattedContacts = await ContactsHelper().formatContactList(multipleNumberContactList);
     final phones = formattedContacts.map((contact) => contact.phone).toList();
     final remoteContacts = await _contactService.sendLocalContacts(globals.userToken, phones);
     final resultContacts = _compareLocalAndRemoteContacts(formattedContacts, remoteContacts);
     _contacts = resultContacts;
     _inContactsController.add(resultContacts);
+  }
+
+  List<PpldoContact> _checkMultiplePhoneNumbers(List<Contact> contacts) {
+    List<PpldoContact> resultList = List<PpldoContact>();
+    for (var contact in contacts) {
+      for (var phone in contact.phones.toList()) {
+        resultList.add(PpldoContact(name: contact.displayName, phone: phone.value));
+      }
+    }
+    return resultList;
   }
 
   List<PpldoContact> _compareLocalAndRemoteContacts(List<PpldoContact> localContacts, List<PpldoContact> remoteContacts) {

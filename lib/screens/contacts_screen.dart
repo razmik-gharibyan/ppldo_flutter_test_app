@@ -36,6 +36,8 @@ class _ContactsScreenState extends State<ContactsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final _aspectRatio = MediaQuery.of(context).size.aspectRatio;
+
     return BlocProvider<SearchContactsBloc>(
       bloc: SearchContactsBloc(),
       child: LayoutBuilder(
@@ -62,11 +64,20 @@ class _ContactsScreenState extends State<ContactsScreen> {
                             Spacer(
                               flex: 1,
                             ),
-                            Icon(Icons.person_add),
-                            SizedBox(
-                              width: 10.0,
+                            Icon(
+                              Icons.person_add_alt_1_outlined,
+                              size: 27.0 / _aspectRatio,
+                              color: Colors.black54,
                             ),
-                            Text("Invite to PPLDO"),
+                            SizedBox(
+                              width: 15.0,
+                            ),
+                            Text(
+                              "Invite to PPLDO",
+                              style: TextStyle(
+                                fontSize: 12.0 / _aspectRatio
+                              ),
+                            ),
                             Spacer(
                               flex: 10,
                             )
@@ -95,7 +106,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                           if (contacts.isEmpty) {
                             return Text("No contacts found on your phone");
                           }
-                          return _contactListView(contacts);
+                          return _contactListView(contacts, _aspectRatio);
                         },
                       ),
                     )
@@ -109,13 +120,16 @@ class _ContactsScreenState extends State<ContactsScreen> {
     );
   }
 
-  Widget _contactListView(List<PpldoContact> contacts) {
+  Widget _contactListView(List<PpldoContact> contacts, double aspectRatio) {
     return ListView.builder(
       itemBuilder: (ctx, index) {
         final contact = contacts[index];
         return Column(
           children: [
             Divider(
+              height: 1 / aspectRatio,
+              indent: 40.0 / aspectRatio,
+              endIndent: 10.0 / aspectRatio,
               thickness: 1,
             ),
             ListTile(
