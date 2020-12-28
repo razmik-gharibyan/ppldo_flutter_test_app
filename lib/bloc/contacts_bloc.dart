@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:contacts_service/contacts_service.dart';
+import 'package:flutter_sim_country_code/flutter_sim_country_code.dart';
 import 'package:ppldo_flutter_test_app/bloc/bloc.dart';
 import 'package:ppldo_flutter_test_app/helper/contacts_helper.dart';
 import 'package:ppldo_flutter_test_app/model/ppldo_contact.dart';
@@ -14,7 +15,7 @@ class ContactsBloc implements Bloc {
   ContactService _contactService = ContactService();
   // Controllers
   final _contactsController = StreamController<List<PpldoContact>>();
-  final _addContactController = StreamController<bool>();
+  final _addContactController = StreamController<bool>.broadcast();
   // Sinks
   Sink<List<PpldoContact>> get _inContactsController => _contactsController.sink;
   Sink<bool> get _inAddContactController => _addContactController.sink;
@@ -39,9 +40,11 @@ class ContactsBloc implements Bloc {
       return false;
     }).toList();
     final multipleNumberContactList = _checkMultiplePhoneNumbers(validContactList);
-    final formattedContacts = await ContactsHelper().formatContactList(multipleNumberContactList);
+    final nonDuplicatedContacts = _removeContactsWithDuplicatePhoneNumbers(multipleNumberContactList);
+    final formattedContacts = await ContactsHelper().formatContactList(nonDuplicatedContacts);
     final phones = formattedContacts.map((contact) => contact.phone).toList();
-    final remoteContacts = await _contactService.sendLocalContacts(globals.userToken, phones);
+    final countryCode = await FlutterSimCountryCode.simCountryCode;
+    final remoteContacts = await _contactService.sendLocalContacts(globals.userToken, phones, countryCode);
     final resultContacts = _compareLocalAndRemoteContacts(formattedContacts, remoteContacts);
     _contacts = resultContacts;
     _inContactsController.add(resultContacts);
@@ -57,25 +60,46 @@ class ContactsBloc implements Bloc {
     return resultList;
   }
 
+  List<PpldoContact> _removeContactsWithDuplicatePhoneNumbers(List<PpldoContact> contacts) {
+    List<PpldoContact> resultList = List<PpldoContact>();
+    for (var contact in contacts) {
+      if (resultList.isNotEmpty) {
+        final maybeDuplicateContact = resultList.indexWhere((element) => element.phone == contact.phone);
+        if (maybeDuplicateContact == -1) {
+          // Contact number is not duplicate
+          resultList.add(contact);
+        }
+      } else {
+        resultList.add(contact);
+      }
+    }
+    return resultList;
+  }
+
   List<PpldoContact> _compareLocalAndRemoteContacts(List<PpldoContact> localContacts, List<PpldoContact> remoteContacts) {
     List<PpldoContact> resultContacts = List<PpldoContact>();
-    if (remoteContacts.isEmpty) {
-      resultContacts.addAll(localContacts);
-    } else {
-      for (var localContact in localContacts) {
-        for (var remoteContact in remoteContacts) {
-          if (localContact.phone == remoteContact.phone) {
-            // if isContact is true, then don't add this contact to contact list on UI
-            if (!remoteContact.isContact) {
-              resultContacts.add(remoteContact);
+    for (var localContact in localContacts) {
+      for (var remoteContact in remoteContacts) {
+        if (localContact.phone == remoteContact.rawPhone) {
+          if (remoteContact.phone != null) {
+            // User have valid international number
+            if (remoteContact.name != null) {
+              // User is registered in PPLDO
+              if (!remoteContact.isContact) {
+                resultContacts.add(remoteContact);
+              }
+            } else {
+              final mixedContact = PpldoContact(
+                name: localContact.name,
+                phone: remoteContact.phone,
+                isContact: remoteContact.isContact,
+                rawPhone: remoteContact.rawPhone,
+                inPPLDO: false
+              );
+              resultContacts.add(mixedContact);
             }
-            break;
           }
-          final index = remoteContacts.indexOf(remoteContact);
-          if (index == (remoteContacts.length - 1)) {
-            // Check if index is last index of for loop
-            resultContacts.add(localContact);
-          }
+          break;
         }
       }
     }

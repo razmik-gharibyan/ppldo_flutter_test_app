@@ -133,14 +133,24 @@ class _ContactsScreenState extends State<ContactsScreen> {
               thickness: 1,
             ),
             ListTile(
-              leading: Icon(Icons.person_rounded,size: 40.0,),
+              leading: CircleAvatar(
+                child: contact.avatarUrl == null
+                 ? Icon(
+                    Icons.person_rounded,
+                    size: 15.0 / aspectRatio,
+                   )
+                 : null,
+                backgroundImage: contact.avatarUrl != null
+                ? NetworkImage(
+                  contact.avatarUrl,
+                )
+                : null,
+              ),
               title: Text(contact.name),
-              subtitle: Text(contact.isContact == null ? contact.phone : "in PPL DO"),
-              trailing: contact.isContact == null
-                  ? _inviteButton(contact.phone)
-                  : contact.isContact
-                      ? null
-                      : _addButton(contact.id),
+              subtitle: Text(contact.inPPLDO ? "in PPL DO" : "+${contact.phone}"),
+              trailing: contact.inPPLDO
+                  ? _addButton(contact.id)
+                  : _inviteButton(contact.phone)
             ),
           ],
         );

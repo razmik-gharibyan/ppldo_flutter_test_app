@@ -35,10 +35,11 @@ class ContactsHelper {
       try {
         final result= await libPhoneNumber.parse(phoneNumber);
         final String internationalNumber = result["e164"];
-        final String formattedInternationalNumber = internationalNumber.replaceAll(RegExp(r"\W"), "");
-        formattedContacts.add(PpldoContact(name: contact.name, phone: formattedInternationalNumber));
+        //final String formattedInternationalNumber = internationalNumber.replaceAll(RegExp(r"\W"), "");
+        formattedContacts.add(PpldoContact(name: contact.name, phone: internationalNumber));
       } catch (exception) {
-        print("invalid contact in contact list should be ignored");
+        // Phone number is not international
+        formattedContacts.add(PpldoContact(name: contact.name, phone: phoneNumber));
       }
     };
     return formattedContacts;

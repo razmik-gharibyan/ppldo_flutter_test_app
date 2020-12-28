@@ -4,8 +4,10 @@ class PpldoContact {
 
   final String id;
   final bool isContact;
+  bool inPPLDO;
+  final String rawPhone;
   final String name;
-  final String phone;
+  String phone;
   final String avatarUrl;
   final String avatarKey;
 
@@ -14,6 +16,8 @@ class PpldoContact {
     @required this.phone,
     this.id,
     this.isContact,
+    this.inPPLDO,
+    this.rawPhone,
     this.avatarUrl,
     this.avatarKey
   });
