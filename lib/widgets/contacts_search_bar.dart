@@ -3,6 +3,7 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:ppldo_flutter_test_app/bloc/bloc_provider.dart';
 import 'package:ppldo_flutter_test_app/bloc/contacts_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/search_contacts_bloc.dart';
+import 'package:ppldo_flutter_test_app/extensions/hext_to_color.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 class ContactsSearchBar extends StatefulWidget {
@@ -144,8 +145,9 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
           child: Text(
             "Contacts",
             style: TextStyle(
-              color: Colors.black87,
+              color: HexColor.fromHex("272C3C"),
               fontSize: 13.0 / aspectRatio,
+              fontWeight: FontWeight.w500
             ),
           ),
         ),
