@@ -15,13 +15,10 @@ class ContactsBloc implements Bloc {
   ContactService _contactService = ContactService();
   // Controllers
   final _contactsController = StreamController<List<PpldoContact>>();
-  final _addContactController = StreamController<bool>.broadcast();
   // Sinks
   Sink<List<PpldoContact>> get _inContactsController => _contactsController.sink;
-  Sink<bool> get _inAddContactController => _addContactController.sink;
   // Streams
   Stream<List<PpldoContact>> get contactsStream => _contactsController.stream;
-  Stream<bool> get addContactStream => _addContactController.stream;
   // Vars
   List<PpldoContact> _contacts;
   // Getters
@@ -46,6 +43,10 @@ class ContactsBloc implements Bloc {
     final countryCode = await FlutterSimCountryCode.simCountryCode;
     final remoteContacts = await _contactService.sendLocalContacts(globals.userToken, phones, countryCode);
     final resultContacts = _compareLocalAndRemoteContacts(formattedContacts, remoteContacts);
+    resultContacts.sort((a, b) {
+      if (a.inPPLDO) return -1;
+      return 1;
+    });
     _contacts = resultContacts;
     _inContactsController.add(resultContacts);
   }
@@ -113,7 +114,16 @@ class ContactsBloc implements Bloc {
   void addContact(String id) async {
     try {
       final isContactAdded = await _contactService.addContact(globals.userToken, id);
-      _inAddContactController.add(isContactAdded);
+      if (isContactAdded) {
+        _contacts = _contacts.map((contact) {
+          if(contact.id == id) {
+            // Find correct contact by id
+            contact.isContact = true;
+          }
+          return contact;
+        }).toList();
+        _inContactsController.add(_contacts);
+      }
     } catch (exception) {
       //TODO handle exception when could not add user to contact list
     }
@@ -123,7 +133,6 @@ class ContactsBloc implements Bloc {
   @override
   void dispose() {
     _contactsController.close();
-    _addContactController.close();
   }
 
 }

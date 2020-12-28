@@ -5,8 +5,9 @@ import 'package:ppldo_flutter_test_app/model/ppldo_contact.dart';
 
 class ContactsHelper {
 
+  final _libPhoneNumber = FlutterLibphonenumber();
+
   Future<List<PpldoContact>> formatContactList(List<PpldoContact> contacts) async {
-    final libPhoneNumber = FlutterLibphonenumber();
     final code = await FlutterSimCountryCode.simCountryCode;
     final countries = CountryManager().countries;
     final phoneCode = countries.firstWhere((country) => country.countryCode == code).phoneCode;
@@ -30,10 +31,10 @@ class ContactsHelper {
 
      */
     for (var contact in contacts) {
-      final phoneNumber = libPhoneNumber.formatNumberSync(contact.phone)
+      final phoneNumber = _libPhoneNumber.formatNumberSync(contact.phone)
           .replaceAll(RegExp(r"\W"), "");
       try {
-        final result= await libPhoneNumber.parse(phoneNumber);
+        final result= await _libPhoneNumber.parse(phoneNumber);
         final String internationalNumber = result["e164"];
         //final String formattedInternationalNumber = internationalNumber.replaceAll(RegExp(r"\W"), "");
         formattedContacts.add(PpldoContact(name: contact.name, phone: internationalNumber));
@@ -43,6 +44,10 @@ class ContactsHelper {
       }
     };
     return formattedContacts;
+  }
+
+  String e164ToBeautifulInternational(String phoneNumber) {
+    return _libPhoneNumber.formatNumberSync(phoneNumber);
   }
 
 }

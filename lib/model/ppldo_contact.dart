@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 class PpldoContact {
 
   final String id;
-  final bool isContact;
+  bool isContact;
   bool inPPLDO;
   final String rawPhone;
   final String name;

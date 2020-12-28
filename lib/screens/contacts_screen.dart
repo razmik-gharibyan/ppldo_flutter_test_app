@@ -3,7 +3,9 @@ import 'package:ppldo_flutter_test_app/bloc/bloc_provider.dart';
 import 'package:ppldo_flutter_test_app/bloc/contacts_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/js_communication_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/search_contacts_bloc.dart';
+import 'package:ppldo_flutter_test_app/helper/contacts_helper.dart';
 import 'package:ppldo_flutter_test_app/model/ppldo_contact.dart';
+import 'package:ppldo_flutter_test_app/widgets/add_contact_button.dart';
 import 'package:ppldo_flutter_test_app/widgets/contacts_search_bar.dart';
 
 class ContactsScreen extends StatefulWidget {
@@ -121,6 +123,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
   }
 
   Widget _contactListView(List<PpldoContact> contacts, double aspectRatio) {
+    final contactsHelper = ContactsHelper();
     return ListView.builder(
       itemBuilder: (ctx, index) {
         final contact = contacts[index];
@@ -147,9 +150,9 @@ class _ContactsScreenState extends State<ContactsScreen> {
                 : null,
               ),
               title: Text(contact.name),
-              subtitle: Text(contact.inPPLDO ? "in PPL DO" : "+${contact.phone}"),
+              subtitle: Text(contact.inPPLDO ? "in PPLDO" : contactsHelper.e164ToBeautifulInternational(contact.phone)),
               trailing: contact.inPPLDO
-                  ? _addButton(contact.id)
+                  ? _addButton(contact.id, contact.isContact)
                   : _inviteButton(contact.phone)
             ),
           ],
@@ -169,31 +172,8 @@ class _ContactsScreenState extends State<ContactsScreen> {
         });
   }
 
-  Widget _addButton(String id) {
-    return StreamBuilder<bool>(
-      stream: _contactsBloc.addContactStream,
-      builder: (ct, snapshot) {
-        if (!snapshot.hasData) {
-          return RaisedButton(
-            child: Text("Add"),
-            onPressed: () {
-              _contactsBloc.addContact(id);
-            },
-          );
-        } else {
-          if (snapshot.data) {
-            return Text("Contact Added");
-          } else {
-            return RaisedButton(
-              child: Text("Add"),
-              onPressed: () {
-                _contactsBloc.addContact(id);
-              },
-            );
-          }
-        }
-      }
-    );
+  Widget _addButton(String id, bool isContact) {
+    return AddContactButton(_contactsBloc, id, isContact);
   }
 
 }
