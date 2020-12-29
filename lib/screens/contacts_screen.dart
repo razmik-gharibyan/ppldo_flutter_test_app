@@ -125,7 +125,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                       ),
                     ),
                     Container(
-                      height: constraints.maxHeight * 0.72,
+                      height: constraints.maxHeight * 0.715,
                       child: StreamBuilder<List<PpldoContact>>(
                         stream: _contactsBloc.contactsStream,
                         builder: (ctx, snapshot) {
@@ -208,6 +208,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
       },
       itemCount: contacts.length,
       shrinkWrap: true,
+      //physics: NeverScrollableScrollPhysics(),
     );
   }
 

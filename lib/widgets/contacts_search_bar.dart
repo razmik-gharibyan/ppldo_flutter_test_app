@@ -101,12 +101,11 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
             decoration: InputDecoration.collapsed(
               hintText: "Search contact",
               hintStyle: TextStyle(
-                color: Colors.black87,
-                fontStyle: FontStyle.italic,
-                fontSize: 13.0 / aspectRatio,
+                color: Colors.grey,
+                fontSize: 11.0 / aspectRatio,
               ),
             ),
-            cursorColor: Colors.lightGreen,
+            cursorColor: Colors.black,
             focusNode: _focusNode,
             onChanged: (String data) => _searchContactsBloc.inSearchContactsController.add(data),
           ),
