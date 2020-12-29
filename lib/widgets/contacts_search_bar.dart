@@ -42,9 +42,9 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
     // -- Init Tools
     _keyboardVisibilityController = KeyboardVisibilityController();
     // -- Start Operations
+    //_listenForKeyboardVisibility();
     _listenForContactsSearch();
     _listenForFocusChange();
-    _listenForKeyboardVisibility();
   }
 
   @override
@@ -57,17 +57,21 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
   @override
   Widget build(BuildContext context) {
     final _aspectRatio = MediaQuery.of(context).size.aspectRatio;
-    return Container(
-      padding: const EdgeInsets.all(3.0),
-      margin: const EdgeInsets.all(5.0),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(6.0 / _aspectRatio)),
-        border: Border.all(
-          color: Colors.black54,
-          width: 0.2 / _aspectRatio,
-        )
+
+    return WillPopScope(
+      child: Container(
+        padding: const EdgeInsets.all(3.0),
+        margin: const EdgeInsets.all(5.0),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(6.0 / _aspectRatio)),
+          border: Border.all(
+            color: Colors.black54,
+            width: 0.2 / _aspectRatio,
+          )
+        ),
+        child: _isSearchBarActive ? _activeSearchBar(_aspectRatio) : _inactiveSearchBar(_aspectRatio),
       ),
-      child: _isSearchBarActive ? _activeSearchBar(_aspectRatio) : _inactiveSearchBar(_aspectRatio),
+      onWillPop: _onBackPressed,
     );
   }
 
@@ -113,9 +117,7 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
               size: 18.0 / aspectRatio,
             ),
             onPressed: () {
-              _controller.clear();
-              _searchContactsBloc.inSearchContactsController.add(_controller.text);
-              _focusNode.unfocus();
+              _unFocusAndShowFullContacts();
             },
           ),
         ),
@@ -173,6 +175,14 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
     );
   }
 
+  Future<bool> _onBackPressed() {
+    if (_focusNode.hasFocus) {
+     _unFocusAndShowFullContacts();
+      return Future.value(false);
+    }
+    return Future.value(true);
+  }
+
   void _listenForFocusChange() {
     _focusNode.addListener(() {
       setState(() {
@@ -183,13 +193,15 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
     });
   }
 
+  void _unFocusAndShowFullContacts() {
+    _controller.clear();
+    _searchContactsBloc.inSearchContactsController.add(_controller.text);
+    _focusNode.unfocus();
+  }
+
   void _listenForKeyboardVisibility() {
     _keyboardVisibilityController.onChange.listen((bool isVisible) {
-      if (!isVisible) {
-        if (_focusNode.hasFocus) {
-          _focusNode.unfocus();
-        }
-      }
+
     });
   }
 

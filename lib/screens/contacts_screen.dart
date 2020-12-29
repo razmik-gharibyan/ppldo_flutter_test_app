@@ -48,7 +48,9 @@ class _ContactsScreenState extends State<ContactsScreen> {
             body: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () {
-                FocusScope.of(context).requestFocus(new FocusNode());
+                // Uncomment this part if you want to unFocus (ie close soft keyboard)
+                // when user taps outside of searchBar
+                //FocusScope.of(context).requestFocus(new FocusNode());
               },
               child: SingleChildScrollView(
                 child: Column(
