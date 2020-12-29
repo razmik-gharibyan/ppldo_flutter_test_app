@@ -3,6 +3,7 @@ import 'package:ppldo_flutter_test_app/bloc/bloc_provider.dart';
 import 'package:ppldo_flutter_test_app/bloc/contacts_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/js_communication_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/search_contacts_bloc.dart';
+import 'package:ppldo_flutter_test_app/extensions/hext_to_color.dart';
 import 'package:ppldo_flutter_test_app/helper/contacts_helper.dart';
 import 'package:ppldo_flutter_test_app/model/ppldo_contact.dart';
 import 'package:ppldo_flutter_test_app/widgets/add_contact_button.dart';
@@ -45,6 +46,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
       child: LayoutBuilder(
         builder: (c, constraints) => SafeArea(
           child: Scaffold(
+            backgroundColor: Colors.white,
             body: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () {
@@ -57,11 +59,38 @@ class _ContactsScreenState extends State<ContactsScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Container(
-                      height: constraints.maxHeight * 0.1,
+                      height: constraints.maxHeight * 0.11,
                       child: ContactsSearchBar(_contactsBloc),
                     ),
                     Container(
-                      height: constraints.maxHeight * 0.1,
+                      width: double.infinity,
+                      height: constraints.maxHeight * 0.05,
+                      padding: EdgeInsets.only(left: 12.0 / _aspectRatio),
+                      color: HexColor.fromHex("F1F1F1"),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "CONTACTS FROM TELEPHONE BOOK",
+                          style: TextStyle(
+                            fontSize: 9.0 / _aspectRatio,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      height: constraints.maxHeight * 0.09,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: HexColor.fromHex("EFEFEF"),//.withOpacity(0.5),
+                            spreadRadius: 0,
+                            blurRadius: 0,
+                            offset: Offset(0, 1), // changes position of shadow
+                          ),
+                        ],
+                      ),
                       child: InkWell(
                         child: Row(
                           children: [
@@ -69,17 +98,19 @@ class _ContactsScreenState extends State<ContactsScreen> {
                               flex: 1,
                             ),
                             Icon(
-                              Icons.person_add_alt_1_outlined,
-                              size: 27.0 / _aspectRatio,
-                              color: Colors.black54,
+                              Icons.person_add,
+                              size: 17.0 / _aspectRatio,
+                              color: HexColor.fromHex("7D808A"),
                             ),
                             SizedBox(
-                              width: 15.0,
+                              width: 13.0 / _aspectRatio,
                             ),
                             Text(
                               "Invite to PPLDO",
                               style: TextStyle(
-                                fontSize: 12.0 / _aspectRatio
+                                fontSize: 11.0 / _aspectRatio,
+                                fontWeight: FontWeight.w500,
+                                color: HexColor.fromHex("2D3245")
                               ),
                             ),
                             Spacer(
@@ -94,7 +125,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                       ),
                     ),
                     Container(
-                      height: constraints.maxHeight * 0.76,
+                      height: constraints.maxHeight * 0.72,
                       child: StreamBuilder<List<PpldoContact>>(
                         stream: _contactsBloc.contactsStream,
                         builder: (ctx, snapshot) {
@@ -131,18 +162,13 @@ class _ContactsScreenState extends State<ContactsScreen> {
         final contact = contacts[index];
         return Column(
           children: [
-            Divider(
-              height: 1 / aspectRatio,
-              indent: 40.0 / aspectRatio,
-              endIndent: 10.0 / aspectRatio,
-              thickness: 1,
-            ),
             ListTile(
               leading: CircleAvatar(
                 child: contact.avatarUrl == null
                  ? Icon(
                     Icons.person_rounded,
                     size: 15.0 / aspectRatio,
+                    color: Colors.white.withOpacity(0.4),
                    )
                  : null,
                 backgroundImage: contact.avatarUrl != null
@@ -151,11 +177,31 @@ class _ContactsScreenState extends State<ContactsScreen> {
                 )
                 : null,
               ),
-              title: Text(contact.name),
-              subtitle: Text(contact.inPPLDO ? "in PPLDO" : contactsHelper.e164ToBeautifulInternational(contact.phone)),
+              title: Text(
+                contact.name,
+                style: TextStyle(
+                  color: HexColor.fromHex("272C3C"),
+                  fontSize: 11 / aspectRatio,
+                  fontWeight: FontWeight.w500
+                ),
+              ),
+              subtitle: Text(
+                contact.inPPLDO ? "in PPLDO" : contactsHelper.e164ToBeautifulInternational(contact.phone),
+                style: TextStyle(
+                    color: HexColor.fromHex(contact.inPPLDO ? "007AFF" : "7D808A"),
+                    fontSize: 9 / aspectRatio,
+                    fontWeight: FontWeight.w400
+                ),
+              ),
               trailing: contact.inPPLDO
                   ? _addButton(contact.id, contact.isContact)
                   : _inviteButton(contact.phone)
+            ),
+            Divider(
+              color: HexColor.fromHex("EFEFEF"),
+              height: 1 / aspectRatio,
+              indent: 40.0 / aspectRatio,
+              thickness: 1,
             ),
           ],
         );
@@ -166,8 +212,10 @@ class _ContactsScreenState extends State<ContactsScreen> {
   }
 
   Widget _inviteButton(String phone) {
-    return RaisedButton(
-        child: Text("Invite"),
+    return IconButton(
+        icon: Icon(Icons.person_add),
+        color: HexColor.fromHex("7D808A"),
+        iconSize: 24,
         onPressed: () {
           widget._jsCommunicationBloc.addContactNumber(phone);
           Navigator.pop(context);

@@ -60,14 +60,17 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
 
     return WillPopScope(
       child: Container(
-        padding: const EdgeInsets.all(3.0),
-        margin: const EdgeInsets.all(5.0),
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(6.0 / _aspectRatio)),
-          border: Border.all(
-            color: Colors.black54,
-            width: 0.2 / _aspectRatio,
-          )
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: HexColor.fromHex("EFEFEF"),//.withOpacity(0.5),
+              spreadRadius: 0,
+              blurRadius: 0,
+              offset: Offset(0, 1), // changes position of shadow
+            ),
+          ],
         ),
         child: _isSearchBarActive ? _activeSearchBar(_aspectRatio) : _inactiveSearchBar(_aspectRatio),
       ),
@@ -83,7 +86,7 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
           flex: 1,
           child: Icon(
             Icons.search,
-            color: Colors.black54,
+            color: HexColor.fromHex("7D808A"),
             size: 18.0 / aspectRatio,
           ),
         ),
@@ -109,11 +112,11 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
           ),
         ),
         Flexible(
-          flex: 1,
+          flex: 2,
           child: IconButton(
             icon: Icon(
               Icons.close,
-              color: Colors.black54,
+              color: HexColor.fromHex("7D808A"),
               size: 18.0 / aspectRatio,
             ),
             onPressed: () {
@@ -134,8 +137,8 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
           child: IconButton(
             icon: Icon(
               Icons.arrow_back,
-              color: Colors.black54,
-              size: 18.0 / aspectRatio,
+              color: HexColor.fromHex("7D808A"),
+              size: 15.6 / aspectRatio,
             ),
             onPressed: () {
               Navigator.of(context).popUntil((route) => route.settings.name == "/");
@@ -148,17 +151,17 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
             "Contacts",
             style: TextStyle(
               color: HexColor.fromHex("272C3C"),
-              fontSize: 13.0 / aspectRatio,
+              fontSize: 14.0 / aspectRatio,
               fontWeight: FontWeight.w500
             ),
           ),
         ),
         Flexible(
-          flex: 1,
+          flex: 2,
           child: IconButton(
             icon: Icon(
               Icons.search,
-              color: Colors.black54,
+              color: HexColor.fromHex("7D808A"),
               size: 18.0 / aspectRatio,
             ),
             onPressed: () {
