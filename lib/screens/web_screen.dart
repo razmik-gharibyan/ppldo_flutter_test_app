@@ -220,6 +220,8 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
     _contactsPermissionStatus = await _permissionHelper.getPermissionStatus();
     if (_contactsPermissionStatus == PermissionStatus.granted) {
       Navigator.push(context, MaterialPageRoute(builder: (context) => ContactsScreen(_jsCommunicationBloc)),);
+    } else {
+      _jsCommunicationBloc.addContactNumber("");
     }
   }
 
