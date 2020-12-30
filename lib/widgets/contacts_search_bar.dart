@@ -7,9 +7,12 @@ import 'package:ppldo_flutter_test_app/extensions/hext_to_color.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 class ContactsSearchBar extends StatefulWidget {
-  final ContactsBloc _contactBloc;
 
-  ContactsSearchBar(this._contactBloc);
+  final ContactsBloc _contactBloc;
+  final Function _searchBarActivatedCallback;
+  final bool _isSearchBarActive;
+
+  ContactsSearchBar(this._contactBloc, this._searchBarActivatedCallback, this._isSearchBarActive);
 
   @override
   _ContactsSearchBarState createState() => _ContactsSearchBarState();
@@ -25,13 +28,15 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
   // Vars
   FocusNode _focusNode;
   TextEditingController _controller;
-  bool _isSearchBarActive = false;
+  bool _isSearchBarActive;
 
   @override
   void initState() {
     super.initState();
     _focusNode = FocusNode();
     _controller = TextEditingController();
+    _isSearchBarActive = widget._isSearchBarActive;
+    if (_isSearchBarActive) _focusNode.requestFocus();
   }
 
   @override
@@ -65,7 +70,7 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: HexColor.fromHex("EFEFEF"),//.withOpacity(0.5),
+              color: HexColor.fromHex("EFEFEF"),
               spreadRadius: 0,
               blurRadius: 0,
               offset: Offset(0, 1), // changes position of shadow
@@ -169,6 +174,7 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
               }
               setState(() {
                 _isSearchBarActive = !_isSearchBarActive;
+                widget._searchBarActivatedCallback(_isSearchBarActive);
               });
             },
           ),
@@ -190,6 +196,7 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
       setState(() {
         if (!_focusNode.hasFocus) {
           _isSearchBarActive = !_isSearchBarActive;
+          widget._searchBarActivatedCallback(_isSearchBarActive);
         }
       });
     });
