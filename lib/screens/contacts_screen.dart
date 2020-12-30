@@ -24,16 +24,12 @@ class _ContactsScreenState extends State<ContactsScreen> {
   ContactsBloc _contactsBloc;
   // -- Vars
   bool _isSearchBarActive = false;
-  // -- Widgets
-  ContactsSearchBar _contactsSearchBar;
 
   @override
   void initState() {
     super.initState();
     // -- Init Bloc
     _contactsBloc = ContactsBloc();
-    // -- Init Widgets
-    //_contactsSearchBar = ContactsSearchBar(_contactsBloc, _searchBarActivatedCallback);
     // -- Start Operations
     _contactsBloc.getContactList();
   }
@@ -47,6 +43,8 @@ class _ContactsScreenState extends State<ContactsScreen> {
   @override
   Widget build(BuildContext context) {
     final _aspectRatio = MediaQuery.of(context).size.aspectRatio;
+    final mediaQuery = MediaQuery.of(context);
+    print(mediaQuery);
 
     return BlocProvider<SearchContactsBloc>(
       bloc: SearchContactsBloc(),
@@ -85,7 +83,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                               child: Text(
                                 "CONTACTS FROM TELEPHONE BOOK",
                                 style: TextStyle(
-                                  fontSize: 9.0 / _aspectRatio,
+                                  fontSize: 12,
                                   fontWeight: FontWeight.w400,
                                 ),
                               ),
@@ -97,7 +95,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                               color: Colors.white,
                               boxShadow: [
                                 BoxShadow(
-                                  color: HexColor.fromHex("EFEFEF"),//.withOpacity(0.5),
+                                  color: HexColor.fromHex("EFEFEF"),//
                                   spreadRadius: 0,
                                   blurRadius: 0,
                                   offset: Offset(0, 1), // changes position of shadow
@@ -112,7 +110,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                                   ),
                                   Icon(
                                     Icons.person_add,
-                                    size: 17.0 / _aspectRatio,
+                                    size: 24,
                                     color: HexColor.fromHex("7D808A"),
                                   ),
                                   SizedBox(
@@ -121,7 +119,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                                   Text(
                                     "Invite to PPLDO",
                                     style: TextStyle(
-                                      fontSize: 11.0 / _aspectRatio,
+                                      fontSize: 16,
                                       fontWeight: FontWeight.w500,
                                       color: HexColor.fromHex("2D3245")
                                     ),
@@ -183,7 +181,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                 child: contact.avatarUrl == null
                  ? Icon(
                     Icons.person_rounded,
-                    size: 15.0 / aspectRatio,
+                    size: 24,
                     color: Colors.white.withOpacity(0.4),
                    )
                  : null,
@@ -197,7 +195,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                 contact.name,
                 style: TextStyle(
                   color: HexColor.fromHex("272C3C"),
-                  fontSize: 11 / aspectRatio,
+                  fontSize: 16,
                   fontWeight: FontWeight.w500
                 ),
               ),
@@ -205,7 +203,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                 contact.inPPLDO ? "in PPLDO" : contactsHelper.e164ToBeautifulInternational(contact.phone),
                 style: TextStyle(
                     color: HexColor.fromHex(contact.inPPLDO ? "007AFF" : "7D808A"),
-                    fontSize: 9 / aspectRatio,
+                    fontSize: 14,
                     fontWeight: FontWeight.w400
                 ),
               ),

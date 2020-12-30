@@ -71,8 +71,6 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
           boxShadow: [
             BoxShadow(
               color: HexColor.fromHex("EFEFEF"),
-              spreadRadius: 0,
-              blurRadius: 0,
               offset: Offset(0, 1), // changes position of shadow
             ),
           ],
@@ -92,7 +90,7 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
           child: Icon(
             Icons.search,
             color: HexColor.fromHex("7D808A"),
-            size: 18.0 / aspectRatio,
+            size: 24,
           ),
         ),
         Flexible(
@@ -101,13 +99,13 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
             controller: _controller,
             style: TextStyle(
               color: Colors.black87,
-              fontSize: 12.0 / aspectRatio,
+              fontSize: 23,
             ),
             decoration: InputDecoration.collapsed(
               hintText: "Search contact",
               hintStyle: TextStyle(
                 color: Colors.grey,
-                fontSize: 11.0 / aspectRatio,
+                fontSize: 22,
               ),
             ),
             cursorColor: Colors.black,
@@ -121,7 +119,7 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
             icon: Icon(
               Icons.close,
               color: HexColor.fromHex("7D808A"),
-              size: 18.0 / aspectRatio,
+              size: 24,
             ),
             onPressed: () {
               _unFocusAndShowFullContacts();
@@ -142,7 +140,7 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
             icon: Icon(
               Icons.arrow_back,
               color: HexColor.fromHex("7D808A"),
-              size: 15.6 / aspectRatio,
+              size: 24,
             ),
             onPressed: () {
               Navigator.of(context).popUntil((route) => route.settings.name == "/");
@@ -155,7 +153,7 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
             "Contacts",
             style: TextStyle(
               color: HexColor.fromHex("272C3C"),
-              fontSize: 14.0 / aspectRatio,
+              fontSize: 22,
               fontWeight: FontWeight.w500
             ),
           ),
@@ -166,7 +164,7 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
             icon: Icon(
               Icons.search,
               color: HexColor.fromHex("7D808A"),
-              size: 18.0 / aspectRatio,
+              size: 24,
             ),
             onPressed: () {
               if (!_focusNode.hasFocus) {
