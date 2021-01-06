@@ -19,9 +19,21 @@ class CloudMessagingBloc implements Bloc {
       await _fcm.setAutoInitEnabled(false);
     }
     _fcm.requestPermission();
+    _fcm.getInitialMessage().asStream().listen((RemoteMessage message) {
+      if (message != null) {
+        if (message.data != null) {
+          final routeUrl = message.data["webviewUrl"];
+          _inCloudMessagingController.add(routeUrl);
+        }
+      }
+    });
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      final routeUrl = message.data["webviewUrl"];
-      _inCloudMessagingController.add(routeUrl);
+      if (message != null) {
+        if (message.data != null) {
+          final routeUrl = message.data["webviewUrl"];
+          _inCloudMessagingController.add(routeUrl);
+        }
+      }
     });
   }
 
@@ -31,6 +43,7 @@ class CloudMessagingBloc implements Bloc {
 
   Future deleteDeviceToken() async {
     await _fcm.deleteToken();
+    print("removed device token");
   }
 
   @override

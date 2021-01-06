@@ -28,7 +28,9 @@ class DeepLinkBloc implements Bloc {
   void _initUniLinksFromColdStart() async {
     try {
       String initialLink = await getInitialLink();
-      _inDeepLinkController.add(initialLink);
+      if (initialLink != null) {
+        _inDeepLinkController.add(initialLink);
+      }
     } on PlatformException {
       print("DeepLink cold start error occurred");
     }

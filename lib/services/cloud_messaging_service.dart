@@ -5,20 +5,21 @@ import 'package:ppldo_flutter_test_app/globals.dart' as globals;
 
 class CloudMessagingService {
 
-  Future postDeviceToken(String userToken, String deviceToken) async {
-    final mutationRequest = """mutation { 
-                                addPushToken(token: "$deviceToken") 
+  void postDeviceToken(String userToken, String deviceToken) async {
+    final mutationRequest = """mutation (\$token: String!) { 
+                                addPushToken(token: \$token) 
                                }
                             """;
     final request = jsonEncode({
-      "query": mutationRequest
+      "query": mutationRequest,
+      "variables": {"token": deviceToken}
     });
     final result = await http.post(
-        globals.mainUrlDevChannel,
+        globals.mainUrl,
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $userToken",
-          "Origin": globals.initialUrlDevChannel
+          "Origin": globals.initialUrl
         },
         body: request
     );
