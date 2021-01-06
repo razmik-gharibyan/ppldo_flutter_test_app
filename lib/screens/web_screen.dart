@@ -193,8 +193,9 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
   }
   
   void _listenForAddContacts() {
-    _controller.addJavaScriptHandler(handlerName: "syncContacts", callback: (_) {
-      _askOrGetContactPermissions();
+    _controller.addJavaScriptHandler(handlerName: "syncContacts", callback: (_) async {
+      //_askOrGetContactPermissions();
+      await _controller.evaluateJavascript(source: "app.vms.modals.openInvite()");
     });
   }
   
