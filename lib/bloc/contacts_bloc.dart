@@ -5,9 +5,9 @@ import 'package:flutter_sim_country_code/flutter_sim_country_code.dart';
 import 'package:ppldo_flutter_test_app/bloc/bloc.dart';
 import 'package:ppldo_flutter_test_app/helper/contacts_helper.dart';
 import 'package:ppldo_flutter_test_app/model/ppldo_contact.dart';
+import 'package:ppldo_flutter_test_app/services/contact_service.dart';
 
 import 'package:ppldo_flutter_test_app/globals.dart' as globals;
-import 'package:ppldo_flutter_test_app/services/contact_service.dart';
 
 class ContactsBloc implements Bloc {
 
@@ -43,12 +43,15 @@ class ContactsBloc implements Bloc {
     final countryCode = await FlutterSimCountryCode.simCountryCode;
     final remoteContacts = await _contactService.sendLocalContacts(globals.userToken, phones, countryCode);
     final resultContacts = _compareLocalAndRemoteContacts(formattedContacts, remoteContacts);
-    resultContacts.sort((a, b) {
-      if (a.inPPLDO) return -1;
-      return 1;
-    });
-    _contacts = resultContacts;
-    _inContactsController.add(resultContacts);
+    final inPPLDOContacts = resultContacts.where((element) => element.inPPLDO).toList();
+    inPPLDOContacts.sort((a, b) => a.name.compareTo(b.name));
+    final notInPPLDOContacts = resultContacts.where((element) => !element.inPPLDO).toList();
+    notInPPLDOContacts.sort((a, b) => a.name.compareTo(b.name));
+    List<PpldoContact> finalContactList = List<PpldoContact>();
+    finalContactList.addAll(inPPLDOContacts);
+    finalContactList.addAll(notInPPLDOContacts);
+    _contacts = finalContactList;
+    _inContactsController.add(finalContactList);
   }
 
   List<PpldoContact> _checkMultiplePhoneNumbers(List<Contact> contacts) {
@@ -62,10 +65,12 @@ class ContactsBloc implements Bloc {
   }
 
   List<PpldoContact> _removeContactsWithDuplicatePhoneNumbers(List<PpldoContact> contacts) {
+
     List<PpldoContact> resultList = List<PpldoContact>();
     for (var contact in contacts) {
       if (resultList.isNotEmpty) {
-        final maybeDuplicateContact = resultList.indexWhere((element) => element.phone == contact.phone);
+        final maybeDuplicateContact = resultList.indexWhere((element) =>
+          element.phone.replaceAll(RegExp(r"\W"), "").replaceAll(" ", "") == contact.phone.replaceAll(RegExp(r"\W"), "").replaceAll(" ", ""));
         if (maybeDuplicateContact == -1) {
           // Contact number is not duplicate
           resultList.add(contact);

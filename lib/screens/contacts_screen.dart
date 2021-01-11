@@ -218,7 +218,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
             Divider(
               color: HexColor.fromHex("EFEFEF"),
               height: 1 / aspectRatio,
-              indent: 40.0 / aspectRatio,
+              indent: 74.0,
               thickness: 1,
             ),
           ],
