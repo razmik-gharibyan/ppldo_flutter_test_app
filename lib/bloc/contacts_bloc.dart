@@ -43,15 +43,21 @@ class ContactsBloc implements Bloc {
     final countryCode = await FlutterSimCountryCode.simCountryCode;
     final remoteContacts = await _contactService.sendLocalContacts(globals.userToken, phones, countryCode);
     final resultContacts = _compareLocalAndRemoteContacts(formattedContacts, remoteContacts);
-    final inPPLDOContacts = resultContacts.where((element) => element.inPPLDO).toList();
-    inPPLDOContacts.sort((a, b) => a.name.compareTo(b.name));
-    final notInPPLDOContacts = resultContacts.where((element) => !element.inPPLDO).toList();
-    notInPPLDOContacts.sort((a, b) => a.name.compareTo(b.name));
-    List<PpldoContact> finalContactList = List<PpldoContact>();
-    finalContactList.addAll(inPPLDOContacts);
-    finalContactList.addAll(notInPPLDOContacts);
-    _contacts = finalContactList;
-    _inContactsController.add(finalContactList);
+    resultContacts.sort((a, b) {
+      // This sorting mechanism checks if inPPLDO from element a and element b both are true or both are false
+      // if so then sort elements in list in alphabetical order, otherwise check which element is greater then
+      // other and move it up [-1] or down [+1] in list. Up of list is considered as element 0,1,2 etc.
+      if (a.inPPLDO == b.inPPLDO) {
+        return a.name.compareTo(b.name);
+      } else if (a.inPPLDO && !b.inPPLDO) {
+        return -1;
+      } else if (!a.inPPLDO && b.inPPLDO) {
+        return 1;
+      }
+      return 0;
+    });
+    _contacts = resultContacts;
+    _inContactsController.add(resultContacts);
   }
 
   List<PpldoContact> _checkMultiplePhoneNumbers(List<Contact> contacts) {
