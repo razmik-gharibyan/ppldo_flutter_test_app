@@ -10,7 +10,7 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  globals.applicationMode = globals.Mode.PRODUCTION;
+  globals.applicationMode = globals.Mode.DEVELOPMENT;
   if (kReleaseMode) {
     await SentryFlutter.init(
           (options) => options.dsn = 'https://912e6010faf6495d8dd13d623d85da5b@o48617.ingest.sentry.io/5559292',

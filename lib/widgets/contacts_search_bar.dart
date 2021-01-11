@@ -7,12 +7,12 @@ import 'package:ppldo_flutter_test_app/extensions/hext_to_color.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 class ContactsSearchBar extends StatefulWidget {
-
   final ContactsBloc _contactBloc;
   final Function _searchBarActivatedCallback;
   final bool _isSearchBarActive;
 
-  ContactsSearchBar(this._contactBloc, this._searchBarActivatedCallback, this._isSearchBarActive);
+  ContactsSearchBar(this._contactBloc, this._searchBarActivatedCallback,
+      this._isSearchBarActive);
 
   @override
   _ContactsSearchBarState createState() => _ContactsSearchBarState();
@@ -65,7 +65,7 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
 
     return WillPopScope(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+        //padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
@@ -75,7 +75,9 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
             ),
           ],
         ),
-        child: _isSearchBarActive ? _activeSearchBar(_aspectRatio) : _inactiveSearchBar(_aspectRatio),
+        child: _isSearchBarActive
+            ? _activeSearchBar(_aspectRatio)
+            : _inactiveSearchBar(_aspectRatio),
       ),
       onWillPop: _onBackPressed,
     );
@@ -83,38 +85,49 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
 
   Widget _activeSearchBar(double aspectRatio) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Flexible(
-          flex: 1,
-          child: Icon(
-            Icons.search,
-            color: HexColor.fromHex("7D808A"),
-            size: 24,
-          ),
-        ),
-        Flexible(
-          flex: 8,
-          child: TextField(
-            controller: _controller,
-            style: TextStyle(
-              color: Colors.black87,
-              fontSize: 23,
-            ),
-            decoration: InputDecoration.collapsed(
-              hintText: "Search contact",
-              hintStyle: TextStyle(
-                color: Colors.grey,
-                fontSize: 22,
+        Expanded(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 16.0),
+                child: Icon(
+                  Icons.search,
+                  color: HexColor.fromHex("7D808A"),
+                  size: 24,
+                ),
               ),
-            ),
-            cursorColor: Colors.black,
-            focusNode: _focusNode,
-            onChanged: (String data) => _searchContactsBloc.inSearchContactsController.add(data),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 16.0),
+                  child: TextField(
+                    controller: _controller,
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontSize: 23,
+                    ),
+                    decoration: InputDecoration.collapsed(
+                      hintText: "Search contact",
+                      hintStyle: TextStyle(
+                        color: Colors.grey,
+                        fontSize: 22,
+                      ),
+                    ),
+                    cursorColor: Colors.black,
+                    focusNode: _focusNode,
+                    onChanged: (String data) => _searchContactsBloc
+                        .inSearchContactsController
+                        .add(data),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-        Flexible(
-          flex: 2,
+        Padding(
+          padding: const EdgeInsets.only(right: 16.0),
           child: IconButton(
             icon: Icon(
               Icons.close,
@@ -132,34 +145,32 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
 
   Widget _inactiveSearchBar(double aspectRatio) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Flexible(
-          flex: 1,
-          child: IconButton(
-            icon: Icon(
-              Icons.arrow_back,
-              color: HexColor.fromHex("7D808A"),
-              size: 24,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            IconButton(
+                icon: Icon(
+                  Icons.arrow_back,
+                  color: HexColor.fromHex("7D808A"),
+                  size: 24,
+                ),
+                onPressed: () {
+                  Navigator.of(context)
+                      .popUntil((route) => route.settings.name == "/");
+                }),
+            Text(
+              "Contacts",
+              style: TextStyle(
+                  color: HexColor.fromHex("272C3C"),
+                  fontSize: 22,
+                  fontWeight: FontWeight.w500),
             ),
-            onPressed: () {
-              Navigator.of(context).popUntil((route) => route.settings.name == "/");
-            }
-          ),
+          ],
         ),
-        Expanded(
-          flex: 8,
-          child: Text(
-            "Contacts",
-            style: TextStyle(
-              color: HexColor.fromHex("272C3C"),
-              fontSize: 22,
-              fontWeight: FontWeight.w500
-            ),
-          ),
-        ),
-        Flexible(
-          flex: 2,
+        Padding(
+          padding: const EdgeInsets.only(right: 16.0),
           child: IconButton(
             icon: Icon(
               Icons.search,
@@ -183,7 +194,7 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
 
   Future<bool> _onBackPressed() {
     if (_focusNode.hasFocus) {
-     _unFocusAndShowFullContacts();
+      _unFocusAndShowFullContacts();
       return Future.value(false);
     }
     return Future.value(true);
@@ -207,9 +218,7 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
   }
 
   void _listenForKeyboardVisibility() {
-    _keyboardVisibilityController.onChange.listen((bool isVisible) {
-
-    });
+    _keyboardVisibilityController.onChange.listen((bool isVisible) {});
   }
 
   void _listenForContactsSearch() {

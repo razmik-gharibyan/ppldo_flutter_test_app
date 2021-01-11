@@ -61,7 +61,11 @@ class _ContactsScreenState extends State<ContactsScreen> {
               },
               child: Column(
                 children: [
-                  _isSearchBarActive ? ContactsSearchBar(_contactsBloc, _searchBarActivatedCallback, _isSearchBarActive) : Container(),
+                  _isSearchBarActive ? Container(
+                    width: double.infinity,
+                    height: constraints.maxHeight * 0.11,
+                    child: ContactsSearchBar(_contactsBloc, _searchBarActivatedCallback, _isSearchBarActive)
+                  ) : Container(),
                   Expanded(
                     child: SingleChildScrollView(
                       child: Column(
@@ -70,21 +74,24 @@ class _ContactsScreenState extends State<ContactsScreen> {
                           _isSearchBarActive
                           ? Container()
                           : Container(
+                            width: double.infinity,
                             height: constraints.maxHeight * 0.11,
                             child: ContactsSearchBar(_contactsBloc, _searchBarActivatedCallback, _isSearchBarActive),
                           ),
                           Container(
                             width: double.infinity,
                             height: constraints.maxHeight * 0.05,
-                            padding: EdgeInsets.only(left: 12.0 / _aspectRatio),
                             color: HexColor.fromHex("F1F1F1"),
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                "CONTACTS FROM TELEPHONE BOOK",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w400,
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 16.0),
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  "CONTACTS FROM TELEPHONE BOOK",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w400,
+                                  ),
                                 ),
                               ),
                             ),
@@ -95,7 +102,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                               color: Colors.white,
                               boxShadow: [
                                 BoxShadow(
-                                  color: HexColor.fromHex("EFEFEF"),//
+                                  color: HexColor.fromHex("EFEFEF"),
                                   spreadRadius: 0,
                                   blurRadius: 0,
                                   offset: Offset(0, 1), // changes position of shadow
@@ -105,28 +112,25 @@ class _ContactsScreenState extends State<ContactsScreen> {
                             child: InkWell(
                               child: Row(
                                 children: [
-                                  Spacer(
-                                    flex: 1,
-                                  ),
-                                  Icon(
-                                    Icons.person_add,
-                                    size: 24,
-                                    color: HexColor.fromHex("7D808A"),
-                                  ),
-                                  SizedBox(
-                                    width: 13.0 / _aspectRatio,
-                                  ),
-                                  Text(
-                                    "Invite to PPLDO",
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                      color: HexColor.fromHex("2D3245")
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 25.0),
+                                    child: Icon(
+                                      Icons.person_add,
+                                      size: 24,
+                                      color: HexColor.fromHex("7D808A"),
                                     ),
                                   ),
-                                  Spacer(
-                                    flex: 10,
-                                  )
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 25.0),
+                                    child: Text(
+                                      "Invite to PPLDO",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: HexColor.fromHex("2D3245")
+                                      ),
+                                    ),
+                                  ),
                                 ],
                               ),
                               onTap: () {
