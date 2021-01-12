@@ -26,6 +26,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
   // -- Tools
   ContactsHelper _contactsHelper;
   ScrollController _scrollController;
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   // -- Vars
   bool _isSearchBarActive = false;
 
@@ -56,6 +57,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
       child: LayoutBuilder(
         builder: (c, constraints) => SafeArea(
           child: Scaffold(
+            key: _scaffoldKey,
             backgroundColor: Colors.white,
             body: GestureDetector(
               behavior: HitTestBehavior.opaque,
@@ -246,7 +248,29 @@ class _ContactsScreenState extends State<ContactsScreen> {
   }
 
   Widget _addButton(String id, bool isContact) {
-    return AddContactButton(_contactsBloc, id, isContact);
+    return AddContactButton(_contactsBloc, id, isContact, _showAddContactSnackBar);
+  }
+
+  void _showAddContactSnackBar(double aspectRatio) {
+    setState(() {
+      _scaffoldKey.currentState.showSnackBar(SnackBar(
+        duration: Duration(milliseconds : 2000),
+        content: Container(
+          height: 20.0 / aspectRatio,
+          child: Align(
+            alignment: Alignment.center,
+            child: Text(
+              "User added to contacts",
+              style: TextStyle(
+                fontSize: 14.0,
+                fontWeight: FontWeight.w400
+              ),
+            ),
+          ),
+        ),
+        behavior: SnackBarBehavior.floating,
+      ));
+    });
   }
 
   /// This method will be called when search bar will become enabled / disabled

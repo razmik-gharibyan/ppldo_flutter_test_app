@@ -6,8 +6,9 @@ class AddContactButton extends StatefulWidget {
   final ContactsBloc _contactsBloc;
   final String _id;
   final bool _isContact;
+  final Function _showSnackBar;
 
-  AddContactButton(this._contactsBloc, this._id, this._isContact);
+  AddContactButton(this._contactsBloc, this._id, this._isContact, this._showSnackBar);
 
   @override
   _AddContactButtonState createState() => _AddContactButtonState();
@@ -34,21 +35,23 @@ class _AddContactButtonState extends State<AddContactButton> {
 
   @override
   Widget build(BuildContext context) {
+    final _aspectRatio = MediaQuery.of(context).size.aspectRatio;
     return _isContactAdded
         ? IconButton(
           icon: Icon(
-              Icons.check_circle_outline,
-              color: HexColor.fromHex("6D7278"),
+              Icons.check_circle,
+              color: HexColor.fromHex("7CB342"),
               size: 24,
             ),
           onPressed: () {},
         )
         : IconButton(
-            icon: Icon(Icons.add_circle_outline),
+            icon: Icon(Icons.person_add),
             color: HexColor.fromHex("6D7278"),
             iconSize: 24.0,
             onPressed: () async {
               widget._contactsBloc.addContact(widget._id);
+              widget._showSnackBar(_aspectRatio);
             },
           );
   }
