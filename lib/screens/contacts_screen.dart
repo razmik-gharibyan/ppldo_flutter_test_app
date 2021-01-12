@@ -10,6 +10,7 @@ import 'package:ppldo_flutter_test_app/widgets/add_contact_button.dart';
 import 'package:ppldo_flutter_test_app/widgets/contacts_search_bar.dart';
 
 class ContactsScreen extends StatefulWidget {
+
   final JSCommunicationBloc _jsCommunicationBloc;
 
   ContactsScreen(this._jsCommunicationBloc);
@@ -22,6 +23,9 @@ class _ContactsScreenState extends State<ContactsScreen> {
 
   // -- Bloc
   ContactsBloc _contactsBloc;
+  // -- Tools
+  ContactsHelper _contactsHelper;
+  ScrollController _scrollController;
   // -- Vars
   bool _isSearchBarActive = false;
 
@@ -30,6 +34,9 @@ class _ContactsScreenState extends State<ContactsScreen> {
     super.initState();
     // -- Init Bloc
     _contactsBloc = ContactsBloc();
+    // -- Init Tools
+    _contactsHelper = ContactsHelper();
+    _scrollController = ScrollController();
     // -- Start Operations
     _contactsBloc.getContactList();
   }
@@ -43,8 +50,6 @@ class _ContactsScreenState extends State<ContactsScreen> {
   @override
   Widget build(BuildContext context) {
     final _aspectRatio = MediaQuery.of(context).size.aspectRatio;
-    final mediaQuery = MediaQuery.of(context);
-    print(mediaQuery);
 
     return BlocProvider<SearchContactsBloc>(
       bloc: SearchContactsBloc(),
@@ -68,6 +73,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                   ) : Container(),
                   Expanded(
                     child: SingleChildScrollView(
+                      controller: _scrollController,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
@@ -148,8 +154,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                                 if (snapshot == null || !snapshot.hasData) {
                                   return Center(
                                     child: CircularProgressIndicator(
-                                      valueColor:
-                                          AlwaysStoppedAnimation<Color>(Colors.green),
+                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
                                     ),
                                   );
                                 }
@@ -174,7 +179,6 @@ class _ContactsScreenState extends State<ContactsScreen> {
   }
 
   Widget _contactListView(List<PpldoContact> contacts, double aspectRatio) {
-    final contactsHelper = ContactsHelper();
     return ListView.builder(
       itemBuilder: (ctx, index) {
         final contact = contacts[index];
@@ -204,7 +208,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                 ),
               ),
               subtitle: Text(
-                contact.inPPLDO ? "in PPLDO" : contactsHelper.e164ToBeautifulInternational(contact.phone),
+                contact.inPPLDO ? "in PPLDO" : _contactsHelper.e164ToBeautifulInternational(contact.phone),
                 style: TextStyle(
                     color: HexColor.fromHex(contact.inPPLDO ? "007AFF" : "7D808A"),
                     fontSize: 14,
@@ -250,6 +254,11 @@ class _ContactsScreenState extends State<ContactsScreen> {
   void _searchBarActivatedCallback(bool isSearchBarActive) {
     setState(() {
       _isSearchBarActive = isSearchBarActive;
+      if (!_isSearchBarActive) {
+        // Scroll to start of SingleChildScrollView that have this controller attached
+        // to show search bar and invite button, after coming back from active search bar
+        _scrollController.jumpTo(0.0,);
+      }
     });
   }
 
