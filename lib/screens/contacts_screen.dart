@@ -68,17 +68,27 @@ class _ContactsScreenState extends State<ContactsScreen> {
               },
               child: Column(
                 children: [
+                  // Uncomment this part if you want to scroll search bar when inactive and not when active
+                  /*
                   _isSearchBarActive ? Container(
                     width: double.infinity,
                     height: constraints.maxHeight * 0.11,
                     child: ContactsSearchBar(_contactsBloc, _searchBarActivatedCallback, _isSearchBarActive)
                   ) : Container(),
+                   */
+                  Container(
+                      width: double.infinity,
+                      height: constraints.maxHeight * 0.11,
+                      child: ContactsSearchBar(_contactsBloc, _searchBarActivatedCallback, _isSearchBarActive)
+                  ),
                   Expanded(
                     child: SingleChildScrollView(
                       controller: _scrollController,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
+                          // Uncomment this part if you want to scroll search bar when inactive and not when active
+                          /*
                           _isSearchBarActive
                           ? Container()
                           : Container(
@@ -86,6 +96,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                             height: constraints.maxHeight * 0.11,
                             child: ContactsSearchBar(_contactsBloc, _searchBarActivatedCallback, _isSearchBarActive),
                           ),
+                           */
                           Container(
                             width: double.infinity,
                             height: constraints.maxHeight * 0.05,
