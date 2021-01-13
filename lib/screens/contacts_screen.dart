@@ -79,7 +79,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                    */
                   Container(
                       width: double.infinity,
-                      height: constraints.maxHeight * 0.11,
+                      height: constraints.maxHeight * 0.09,
                       child: ContactsSearchBar(_contactsBloc, _searchBarActivatedCallback, _isSearchBarActive)
                   ),
                   Expanded(
@@ -108,7 +108,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                                 ),
                               ),
                               Container(
-                                height: constraints.maxHeight * 0.09,
+                                height: constraints.maxHeight * 0.08,
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   boxShadow: [
@@ -162,12 +162,33 @@ class _ContactsScreenState extends State<ContactsScreen> {
                             if (snapshot == null || !snapshot.hasData) {
                               return Center(
                                 child: CircularProgressIndicator(
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                                  valueColor: AlwaysStoppedAnimation<Color>(HexColor.fromHex("7CB342")),
                                 ),
                               );
                             }
+                            if (snapshot.hasError) {
+                              return Center(
+                                child: Text(
+                                  "No one found",
+                                  style: TextStyle(
+                                    color: HexColor.fromHex("272C3C"),
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500
+                                  ),
+                                )
+                              );
+                            }
                             if (contacts.isEmpty) {
-                              return Text("No contacts found on your phone");
+                              return Center(
+                                child: Text(
+                                  "Oops something went wrong, try again later",
+                                  style: TextStyle(
+                                    color: HexColor.fromHex("272C3C"),
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500
+                                  ),
+                                )
+                              );
                             }
                             return _contactListView(contacts, _aspectRatio);
                             },
@@ -184,58 +205,60 @@ class _ContactsScreenState extends State<ContactsScreen> {
   }
 
   Widget _contactListView(List<PpldoContact> contacts, double aspectRatio) {
-    return ListView.builder(
-      itemBuilder: (ctx, index) {
-        final contact = contacts[index];
-        return Column(
-          children: [
-            ListTile(
-              leading: CircleAvatar(
-                child: contact.avatarUrl == null
-                 ? Icon(
-                    Icons.person_rounded,
-                    size: 24,
-                    color: Colors.white.withOpacity(0.4),
-                   )
-                 : null,
-                backgroundImage: contact.avatarUrl != null
-                ? NetworkImage(
-                  contact.avatarUrl,
-                )
-                : null,
-              ),
-              title: Text(
-                contact.name,
-                style: TextStyle(
-                  color: HexColor.fromHex("272C3C"),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500
+    return Scrollbar(
+      child: ListView.builder(
+        itemBuilder: (ctx, index) {
+          final contact = contacts[index];
+          return Column(
+            children: [
+              ListTile(
+                leading: CircleAvatar(
+                  child: contact.avatarUrl == null
+                   ? Icon(
+                      Icons.person_rounded,
+                      size: 24,
+                      color: Colors.white.withOpacity(0.4),
+                     )
+                   : null,
+                  backgroundImage: contact.avatarUrl != null
+                  ? NetworkImage(
+                    contact.avatarUrl,
+                  )
+                  : null,
                 ),
-              ),
-              subtitle: Text(
-                contact.inPPLDO ? "Registered" : _contactsHelper.e164ToBeautifulInternational(contact.phone),
-                style: TextStyle(
-                    color: HexColor.fromHex(contact.inPPLDO ? "007AFF" : "7D808A"),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400
+                title: Text(
+                  contact.name,
+                  style: TextStyle(
+                    color: HexColor.fromHex("272C3C"),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500
+                  ),
                 ),
+                subtitle: Text(
+                  contact.inPPLDO ? "Registered" : _contactsHelper.e164ToBeautifulInternational(contact.phone),
+                  style: TextStyle(
+                      color: HexColor.fromHex(contact.inPPLDO ? "007AFF" : "7D808A"),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400
+                  ),
+                ),
+                trailing: contact.inPPLDO
+                    ? _addButton(contact.id, contact.isContact)
+                    : _inviteButton(contact.phone)
               ),
-              trailing: contact.inPPLDO
-                  ? _addButton(contact.id, contact.isContact)
-                  : _inviteButton(contact.phone)
-            ),
-            Divider(
-              color: HexColor.fromHex("EFEFEF"),
-              height: 1 / aspectRatio,
-              indent: 74.0,
-              thickness: 1,
-            ),
-          ],
-        );
-      },
-      itemCount: contacts.length,
-      //shrinkWrap: true,
-      //physics: NeverScrollableScrollPhysics(),
+              Divider(
+                color: HexColor.fromHex("EFEFEF"),
+                height: 1 / aspectRatio,
+                indent: 74.0,
+                thickness: 1,
+              ),
+            ],
+          );
+        },
+        itemCount: contacts.length,
+        //shrinkWrap: true,
+        //physics: NeverScrollableScrollPhysics(),
+      ),
     );
   }
 
@@ -255,25 +278,23 @@ class _ContactsScreenState extends State<ContactsScreen> {
   }
 
   void _showAddContactSnackBar(double aspectRatio) {
-    setState(() {
-      _scaffoldKey.currentState.showSnackBar(SnackBar(
-        duration: Duration(milliseconds : 2000),
-        content: Container(
-          height: 20.0 / aspectRatio,
-          child: Align(
-            alignment: Alignment.center,
-            child: Text(
-              "User added to contacts",
-              style: TextStyle(
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      duration: Duration(milliseconds : 2000),
+      content: Container(
+        height: 20.0 / aspectRatio,
+        child: Align(
+          alignment: Alignment.center,
+          child: Text(
+            "User added to contacts",
+            style: TextStyle(
                 fontSize: 14.0,
                 fontWeight: FontWeight.w400
-              ),
             ),
           ),
         ),
-        behavior: SnackBarBehavior.floating,
-      ));
-    });
+      ),
+      behavior: SnackBarBehavior.floating,
+    ));
   }
 
   /// This method will be called when search bar will become enabled / disabled

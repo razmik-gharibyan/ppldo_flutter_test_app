@@ -117,9 +117,7 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
                     ),
                     cursorColor: Colors.black,
                     focusNode: _focusNode,
-                    onChanged: (String data) => _searchContactsBloc
-                        .inSearchContactsController
-                        .add(data),
+                    onChanged: (String data) => _searchContactsBloc.inSearchContactsController.add(data),
                   ),
                 ),
               ),
