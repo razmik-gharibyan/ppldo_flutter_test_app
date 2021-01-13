@@ -45,6 +45,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
   @override
   void dispose() {
     _contactsBloc.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -82,108 +83,99 @@ class _ContactsScreenState extends State<ContactsScreen> {
                       child: ContactsSearchBar(_contactsBloc, _searchBarActivatedCallback, _isSearchBarActive)
                   ),
                   Expanded(
-                    child: SingleChildScrollView(
+                    child: NestedScrollView(
                       controller: _scrollController,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          // Uncomment this part if you want to scroll search bar when inactive and not when active
-                          /*
-                          _isSearchBarActive
-                          ? Container()
-                          : Container(
-                            width: double.infinity,
-                            height: constraints.maxHeight * 0.11,
-                            child: ContactsSearchBar(_contactsBloc, _searchBarActivatedCallback, _isSearchBarActive),
-                          ),
-                           */
-                          Container(
-                            width: double.infinity,
-                            height: constraints.maxHeight * 0.05,
-                            color: HexColor.fromHex("F1F1F1"),
-                            child: Padding(
-                              padding: const EdgeInsets.only(left: 16.0),
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  "CONTACTS FROM TELEPHONE BOOK",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Container(
-                            height: constraints.maxHeight * 0.09,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: HexColor.fromHex("EFEFEF"),
-                                  spreadRadius: 0,
-                                  blurRadius: 0,
-                                  offset: Offset(0, 1), // changes position of shadow
-                                ),
-                              ],
-                            ),
-                            child: InkWell(
-                              child: Row(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 25.0),
-                                    child: Icon(
-                                      Icons.person_add,
-                                      size: 24,
-                                      color: HexColor.fromHex("7D808A"),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 25.0),
+                      headerSliverBuilder: (cont, value) => [
+                        SliverToBoxAdapter(
+                          child: Column(
+                            children: [
+                              Container(
+                                width: double.infinity,
+                                height: constraints.maxHeight * 0.05,
+                                color: HexColor.fromHex("F1F1F1"),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 16.0),
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
                                     child: Text(
-                                      "Invite to PPLDO",
+                                      "CONTACTS FROM TELEPHONE BOOK",
                                       style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500,
-                                        color: HexColor.fromHex("2D3245")
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w400,
                                       ),
                                     ),
                                   ),
-                                ],
+                                ),
                               ),
-                              onTap: () {
-                                widget._jsCommunicationBloc.addContactNumber("");
-                                Navigator.pop(context);
-                              },
-                            ),
-                          ),
-                          Container(
-                            //height: constraints.maxHeight * 0.715,
-                            child: StreamBuilder<List<PpldoContact>>(
-                              stream: _contactsBloc.contactsStream,
-                              builder: (ctx, snapshot) {
-                                final contacts = snapshot.data;
-                                if (snapshot == null || !snapshot.hasData) {
-                                  return Center(
-                                    child: CircularProgressIndicator(
-                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                              Container(
+                                height: constraints.maxHeight * 0.09,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: HexColor.fromHex("EFEFEF"),
+                                      spreadRadius: 0,
+                                      blurRadius: 0,
+                                      offset: Offset(0, 1), // changes position of shadow
                                     ),
-                                  );
-                                }
-                                if (contacts.isEmpty) {
-                                  return Text("No contacts found on your phone");
-                                }
-                                return _contactListView(contacts, _aspectRatio);
-                              },
-                            ),
+                                  ],
+                                ),
+                                child: InkWell(
+                                  child: Row(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 25.0),
+                                        child: Icon(
+                                          Icons.person_add,
+                                          size: 24,
+                                          color: HexColor.fromHex("7D808A"),
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 25.0),
+                                        child: Text(
+                                          "Invite",
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w500,
+                                              color: HexColor.fromHex("2D3245")
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  onTap: () {
+                                    widget._jsCommunicationBloc.addContactNumber("");
+                                    Navigator.pop(context);
+                                  },
+                                ),
+                              ),
+                            ],
                           )
-                        ],
-                      ),
+                      )],
+                      body: Container(
+                        height: constraints.maxHeight * 0.715,
+                        child: StreamBuilder<List<PpldoContact>>(
+                          stream: _contactsBloc.contactsStream,
+                          builder: (ctx, snapshot) {
+                            final contacts = snapshot.data;
+                            if (snapshot == null || !snapshot.hasData) {
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                                ),
+                              );
+                            }
+                            if (contacts.isEmpty) {
+                              return Text("No contacts found on your phone");
+                            }
+                            return _contactListView(contacts, _aspectRatio);
+                            },
+                        ),
+                      )
                     ),
                   ),
-                ],
-              ),
+                ],),
             ),
           ),
         ),
@@ -221,7 +213,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                 ),
               ),
               subtitle: Text(
-                contact.inPPLDO ? "in PPLDO" : _contactsHelper.e164ToBeautifulInternational(contact.phone),
+                contact.inPPLDO ? "Registered" : _contactsHelper.e164ToBeautifulInternational(contact.phone),
                 style: TextStyle(
                     color: HexColor.fromHex(contact.inPPLDO ? "007AFF" : "7D808A"),
                     fontSize: 14,
@@ -242,8 +234,8 @@ class _ContactsScreenState extends State<ContactsScreen> {
         );
       },
       itemCount: contacts.length,
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
+      //shrinkWrap: true,
+      //physics: NeverScrollableScrollPhysics(),
     );
   }
 
