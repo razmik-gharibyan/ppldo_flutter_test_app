@@ -25,8 +25,6 @@ class CloudMessagingService {
     );
     if (result.statusCode == 200) {
       // Push notifications are ready to be received
-      Map<String,dynamic> jsonResponse = json.decode(result.body);
-      print(jsonResponse);
     }
   }
 

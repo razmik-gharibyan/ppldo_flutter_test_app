@@ -5,6 +5,7 @@ import 'package:ppldo_flutter_test_app/bloc/js_communication_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/search_contacts_bloc.dart';
 import 'package:ppldo_flutter_test_app/extensions/hext_to_color.dart';
 import 'package:ppldo_flutter_test_app/helper/contacts_helper.dart';
+import 'package:ppldo_flutter_test_app/helper/resize_helper.dart';
 import 'package:ppldo_flutter_test_app/model/ppldo_contact.dart';
 import 'package:ppldo_flutter_test_app/services/avatar_service.dart';
 import 'package:ppldo_flutter_test_app/widgets/add_contact_button.dart';
@@ -225,7 +226,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                    : null,
                   backgroundImage: contact.avatarUrl != null
                   ? NetworkImage(
-                    contact.avatarUrl,
+                      ResizeHelper().getResizedUrlForAvatar(globals.resizeBaseUrl, contact.avatarKey, contact.area),
                   )
                   : null,
                 ),

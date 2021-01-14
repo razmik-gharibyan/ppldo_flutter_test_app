@@ -5,7 +5,7 @@ import 'package:ppldo_flutter_test_app/globals.dart' as globals;
 class AvatarService {
 
   /// Get base url for resizing images
-  Future<String> getResizeBaseUrl(String userToken) async {
+  Future<String> getResizeBaseUrl() async {
     final queryRequest = """query {
                                  settings {
                                   resizeBaseUrl 
@@ -19,7 +19,6 @@ class AvatarService {
       globals.mainGraphqlUrl,
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer $userToken",
         "Origin": globals.initialUrl
       },
       body: request
