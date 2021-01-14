@@ -14,6 +14,7 @@ import 'package:ppldo_flutter_test_app/bloc/deeplink_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/js_communication_bloc.dart';
 import 'package:ppldo_flutter_test_app/helper/permission_helper.dart';
 import 'package:ppldo_flutter_test_app/screens/contacts_screen.dart';
+import 'package:ppldo_flutter_test_app/services/avatar_service.dart';
 import 'package:ppldo_flutter_test_app/services/cloud_messaging_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -38,6 +39,7 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
   CloudMessagingService _cloudMessagingService;
   ChromeSafariBrowser _chromeSafariBrowser;
   CookieManager _cookieManager;
+  AvatarService _avatarService;
   // Bloc
   ConnectivityBloc _connectivityBloc;
   DeepLinkBloc _deepLinkBloc;
@@ -62,6 +64,7 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
     _cloudMessagingService = CloudMessagingService();
     _chromeSafariBrowser = ChromeSafariBrowser();
     _cookieManager = CookieManager();
+    _avatarService = AvatarService();
     _options = InAppWebViewGroupOptions();
     _options.crossPlatform.useShouldOverrideUrlLoading = true;
     _options.android.hardwareAcceleration = true;
@@ -168,6 +171,7 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
         if (!_permissionCheckedOnce) {
           _permissionCheckedOnce = true;
           globals.userToken = token.value;
+          globals.resizeBaseUrl = await _avatarService.getResizeBaseUrl(token.value);
           _deviceToken = await _cloudMessagingBloc.getDeviceToken();
           if (_deviceToken != null && _deviceToken.isNotEmpty) {
             await _cloudMessagingService.postDeviceToken(token.value, _deviceToken);

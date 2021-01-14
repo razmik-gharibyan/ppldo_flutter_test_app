@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:ppldo_flutter_test_app/globals.dart' as globals;
+import 'package:ppldo_flutter_test_app/model/area.dart';
 import 'package:ppldo_flutter_test_app/model/ppldo_contact.dart';
 
 class ContactService {
@@ -25,6 +26,12 @@ class ContactService {
                                         avatar {
                                           url
                                           key
+                                          area {
+                                            x
+                                            y
+                                            width
+                                            height
+                                          }
                                         }
                                       }  
                                     } 
@@ -40,7 +47,7 @@ class ContactService {
       }
     });
     final result = await http.post(
-        globals.mainUrl,
+        globals.mainGraphqlUrl,
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $userToken",
@@ -66,9 +73,11 @@ class ContactService {
             final Map<String,dynamic> avatar = node["avatar"];
             String avatarUrl;
             String avatarKey;
+            Area area;
             if (avatar != null) {
               avatarUrl = avatar["url"];
               avatarKey = avatar["key"];
+              area = Area.fromJson(avatar["area"]);
             }
             return PpldoContact(
                 name: "$firstName $lastName",
@@ -78,7 +87,8 @@ class ContactService {
                 rawPhone: rawPhone,
                 id: id,
                 avatarUrl: avatarUrl,
-                avatarKey: avatarKey
+                avatarKey: avatarKey,
+                area: area
             );
           } else {
             final internationalizedPhone = e["internationalized_phone"];
@@ -110,7 +120,7 @@ class ContactService {
       "variables": {"userId": id}
     });
     final result = await http.post(
-        globals.mainUrl,
+        globals.mainGraphqlUrl,
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $userToken",

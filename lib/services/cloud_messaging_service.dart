@@ -15,7 +15,7 @@ class CloudMessagingService {
       "variables": {"token": deviceToken}
     });
     final result = await http.post(
-        globals.mainUrl,
+        globals.mainGraphqlUrl,
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $userToken",

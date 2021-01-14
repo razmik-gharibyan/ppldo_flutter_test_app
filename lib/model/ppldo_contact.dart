@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:ppldo_flutter_test_app/model/area.dart';
 
 class PpldoContact {
 
@@ -10,6 +11,7 @@ class PpldoContact {
   String phone;
   final String avatarUrl;
   final String avatarKey;
+  final Area area;
 
   PpldoContact({
     @required this.name,
@@ -19,7 +21,8 @@ class PpldoContact {
     this.inPPLDO,
     this.rawPhone,
     this.avatarUrl,
-    this.avatarKey
+    this.avatarKey,
+    this.area,
   });
 
 }

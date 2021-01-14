@@ -6,8 +6,11 @@ import 'package:ppldo_flutter_test_app/bloc/search_contacts_bloc.dart';
 import 'package:ppldo_flutter_test_app/extensions/hext_to_color.dart';
 import 'package:ppldo_flutter_test_app/helper/contacts_helper.dart';
 import 'package:ppldo_flutter_test_app/model/ppldo_contact.dart';
+import 'package:ppldo_flutter_test_app/services/avatar_service.dart';
 import 'package:ppldo_flutter_test_app/widgets/add_contact_button.dart';
 import 'package:ppldo_flutter_test_app/widgets/contacts_search_bar.dart';
+
+import 'package:ppldo_flutter_test_app/globals.dart' as globals;
 
 class ContactsScreen extends StatefulWidget {
 
