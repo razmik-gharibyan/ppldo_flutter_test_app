@@ -83,123 +83,125 @@ class _ContactsScreenState extends State<ContactsScreen> {
                    */
                   Container(
                       width: double.infinity,
-                      height: constraints.maxHeight * 0.09,
+                      height: 64.0,
                       child: ContactsSearchBar(_contactsBloc, _searchBarActivatedCallback, _isSearchBarActive)
                   ),
                   Expanded(
-                    child: NestedScrollView(
-                      controller: _scrollController,
-                      headerSliverBuilder: (cont, value) => [
-                        SliverToBoxAdapter(
-                          child: Column(
-                            children: [
-                              Container(
-                                width: double.infinity,
-                                height: constraints.maxHeight * 0.05,
-                                color: HexColor.fromHex("F1F1F1"),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(left: 16.0),
-                                  child: Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Text(
-                                      "CONTACTS FROM TELEPHONE BOOK",
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w400,
+                    child: LayoutBuilder(
+                      builder: (c, boxConstraints) => NestedScrollView(
+                        controller: _scrollController,
+                        headerSliverBuilder: (cont, value) => [
+                          SliverToBoxAdapter(
+                            child: Column(
+                              children: [
+                                Container(
+                                  width: double.infinity,
+                                  height: 32.0,
+                                  color: HexColor.fromHex("F1F1F1"),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(left: 16.0),
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        "CONTACTS FROM TELEPHONE BOOK",
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w400,
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              Container(
-                                height: constraints.maxHeight * 0.08,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: HexColor.fromHex("EFEFEF"),
-                                      spreadRadius: 0,
-                                      blurRadius: 0,
-                                      offset: Offset(0, 1), // changes position of shadow
-                                    ),
-                                  ],
-                                ),
-                                child: InkWell(
-                                  child: Row(
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.only(left: 25.0),
-                                        child: Icon(
-                                          Icons.person_add,
-                                          size: 24,
-                                          color: HexColor.fromHex("7D808A"),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.only(left: 25.0),
-                                        child: Text(
-                                          "Invite",
-                                          style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w500,
-                                              color: HexColor.fromHex("2D3245")
-                                          ),
-                                        ),
+                                Container(
+                                  height: 56.0,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: HexColor.fromHex("EFEFEF"),
+                                        spreadRadius: 0,
+                                        blurRadius: 0,
+                                        offset: Offset(0, 1), // changes position of shadow
                                       ),
                                     ],
                                   ),
-                                  onTap: () {
-                                    widget._jsCommunicationBloc.addContactNumber("");
-                                    Navigator.pop(context);
-                                  },
-                                ),
-                              ),
-                            ],
-                          )
-                      )],
-                      body: Container(
-                        height: constraints.maxHeight * 0.715,
-                        child: StreamBuilder<List<PpldoContact>>(
-                          stream: _contactsBloc.contactsStream,
-                          builder: (ctx, snapshot) {
-                            final contacts = snapshot.data;
-                            if (snapshot == null || !snapshot.hasData) {
-                              return Center(
-                                child: CircularProgressIndicator(
-                                  valueColor: AlwaysStoppedAnimation<Color>(HexColor.fromHex("7CB342")),
-                                ),
-                              );
-                            }
-                            if (snapshot.hasError) {
-                              return Center(
-                                child: Text(
-                                  "No one found",
-                                  style: TextStyle(
-                                    color: HexColor.fromHex("272C3C"),
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500
+                                  child: InkWell(
+                                    child: Row(
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.only(left: 25.0),
+                                          child: Icon(
+                                            Icons.person_add,
+                                            size: 24,
+                                            color: HexColor.fromHex("7D808A"),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.only(left: 25.0),
+                                          child: Text(
+                                            "Invite",
+                                            style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w500,
+                                                color: HexColor.fromHex("2D3245")
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    onTap: () {
+                                      widget._jsCommunicationBloc.addContactNumber("");
+                                      Navigator.pop(context);
+                                    },
                                   ),
-                                )
-                              );
-                            }
-                            if (contacts.isEmpty) {
-                              return Center(
-                                child: Text(
-                                  "Oops something went wrong, try again later",
-                                  style: TextStyle(
-                                    color: HexColor.fromHex("272C3C"),
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500
-                                  ),
-                                )
-                              );
-                            }
-                            return _contactListView(contacts, _aspectRatio);
-                            },
-                        ),
-                      )
+                                ),
+                              ],
+                            )
+                        )],
+                        body: Container(
+                            height: boxConstraints.minHeight,
+                            child: StreamBuilder<List<PpldoContact>>(
+                              stream: _contactsBloc.contactsStream,
+                              builder: (ctx, snapshot) {
+                                final contacts = snapshot.data;
+                                if (snapshot == null || !snapshot.hasData) {
+                                  return Center(
+                                    child: CircularProgressIndicator(
+                                      valueColor: AlwaysStoppedAnimation<Color>(HexColor.fromHex("7CB342")),
+                                    ),
+                                  );
+                                }
+                                if (snapshot.hasError) {
+                                  return Center(
+                                    child: Text(
+                                      "No one found",
+                                      style: TextStyle(
+                                        color: HexColor.fromHex("272C3C"),
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500
+                                      ),
+                                    )
+                                  );
+                                }
+                                if (contacts.isEmpty) {
+                                  return Center(
+                                    child: Text(
+                                      "Oops something went wrong, try again later",
+                                      style: TextStyle(
+                                        color: HexColor.fromHex("272C3C"),
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500
+                                      ),
+                                    )
+                                  );
+                                }
+                                return _contactListView(contacts, _aspectRatio);
+                                },
+                            ),
+                          ),
+                        )
+                      ),
                     ),
-                  ),
                 ],),
             ),
           ),
@@ -215,40 +217,43 @@ class _ContactsScreenState extends State<ContactsScreen> {
           final contact = contacts[index];
           return Column(
             children: [
-              ListTile(
-                leading: CircleAvatar(
-                  child: contact.avatarUrl == null
-                   ? Icon(
-                      Icons.person_rounded,
-                      size: 24,
-                      color: Colors.white.withOpacity(0.4),
-                     )
-                   : null,
-                  backgroundImage: contact.avatarUrl != null
-                  ? NetworkImage(
-                      ResizeHelper().getResizedUrlForAvatar(globals.resizeBaseUrl, contact.avatarKey, contact.area),
-                  )
-                  : null,
-                ),
-                title: Text(
-                  contact.name,
-                  style: TextStyle(
-                    color: HexColor.fromHex("272C3C"),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500
+              Container(
+                height: 73.0,
+                child: ListTile(
+                  leading: CircleAvatar(
+                    child: contact.avatarUrl == null
+                     ? Icon(
+                        Icons.person_rounded,
+                        size: 24,
+                        color: Colors.white.withOpacity(0.4),
+                       )
+                     : null,
+                    backgroundImage: contact.avatarUrl != null
+                    ? NetworkImage(
+                        ResizeHelper().getResizedUrlForAvatar(globals.resizeBaseUrl, contact.avatarKey, contact.area),
+                    )
+                    : null,
                   ),
-                ),
-                subtitle: Text(
-                  contact.inPPLDO ? "Registered" : _contactsHelper.e164ToBeautifulInternational(contact.phone),
-                  style: TextStyle(
-                      color: HexColor.fromHex(contact.inPPLDO ? "007AFF" : "7D808A"),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400
+                  title: Text(
+                    contact.name,
+                    style: TextStyle(
+                      color: HexColor.fromHex("272C3C"),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500
+                    ),
                   ),
+                  subtitle: Text(
+                    contact.inPPLDO ? "Registered" : _contactsHelper.e164ToBeautifulInternational(contact.phone),
+                    style: TextStyle(
+                        color: HexColor.fromHex(contact.inPPLDO ? "007AFF" : "7D808A"),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400
+                    ),
+                  ),
+                  trailing: contact.inPPLDO
+                      ? _addButton(contact.id, contact.isContact)
+                      : _inviteButton(contact.phone)
                 ),
-                trailing: contact.inPPLDO
-                    ? _addButton(contact.id, contact.isContact)
-                    : _inviteButton(contact.phone)
               ),
               Divider(
                 color: HexColor.fromHex("EFEFEF"),

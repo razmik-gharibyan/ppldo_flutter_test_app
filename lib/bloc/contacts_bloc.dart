@@ -57,7 +57,7 @@ class ContactsBloc implements Bloc {
       return 0;
     });
     _contacts = resultContacts;
-    _inContactsController.add(resultContacts);
+    if (!_contactsController.isClosed) _inContactsController.add(resultContacts);
   }
 
   List<PpldoContact> _checkMultiplePhoneNumbers(List<Contact> contacts) {
