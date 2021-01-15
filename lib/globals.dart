@@ -13,4 +13,6 @@ final String initialUrl =
 // Tools
 String userToken;
 String resizeBaseUrl;
+// Language
+String language;
 

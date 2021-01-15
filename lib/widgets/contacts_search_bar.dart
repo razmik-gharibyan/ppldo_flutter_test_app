@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:ppldo_flutter_test_app/bloc/bloc_provider.dart';
@@ -111,7 +112,7 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
                       fontWeight: FontWeight.w400
                     ),
                     decoration: InputDecoration.collapsed(
-                      hintText: "Search contact",
+                      hintText: tr("mobile_contacts.search_bar.hint"),
                       hintStyle: TextStyle(
                         color: HexColor.fromHex("7D808A"),
                         fontSize: 14,
@@ -162,7 +163,7 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
                       .popUntil((route) => route.settings.name == "/");
                 }),
             Text(
-              "Contacts",
+              tr("mobile_contacts.search_bar.title"),
               style: TextStyle(
                   color: HexColor.fromHex("272C3C"),
                   fontSize: 22,

@@ -1,0 +1,18 @@
+{
+  "mobile_contacts": {
+    "search_bar": {
+      "title": "Contacts",
+      "hint": "Find contact"
+    },
+    "phone_contacts_label": "CONTACTS FROM TELEPHONE BOOK",
+    "invite_button_text": "Invite",
+    "registered": "Registered",
+    "snackbar": {
+      "user_added": "User added to contacts"
+    },
+    "errors": {
+      "no_one_found": "No one found",
+      "internalization_error_text": "Oops something went wrong, try again later"
+    }
+  }
+}

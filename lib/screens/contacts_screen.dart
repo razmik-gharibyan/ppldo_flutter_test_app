@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:ppldo_flutter_test_app/bloc/bloc_provider.dart';
 import 'package:ppldo_flutter_test_app/bloc/contacts_bloc.dart';
@@ -7,7 +8,6 @@ import 'package:ppldo_flutter_test_app/extensions/hext_to_color.dart';
 import 'package:ppldo_flutter_test_app/helper/contacts_helper.dart';
 import 'package:ppldo_flutter_test_app/helper/resize_helper.dart';
 import 'package:ppldo_flutter_test_app/model/ppldo_contact.dart';
-import 'package:ppldo_flutter_test_app/services/avatar_service.dart';
 import 'package:ppldo_flutter_test_app/widgets/add_contact_button.dart';
 import 'package:ppldo_flutter_test_app/widgets/contacts_search_bar.dart';
 
@@ -103,7 +103,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                                     child: Align(
                                       alignment: Alignment.centerLeft,
                                       child: Text(
-                                        "CONTACTS FROM TELEPHONE BOOK",
+                                        tr("mobile_contacts.phone_contacts_label"),
                                         style: TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.w400,
@@ -141,7 +141,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                                         Padding(
                                           padding: const EdgeInsets.only(left: 25.0),
                                           child: Text(
-                                            "Invite",
+                                            tr("mobile_contacts.invite_button_text"),
                                             style: TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w500,
@@ -176,7 +176,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                                 if (snapshot.hasError) {
                                   return Center(
                                     child: Text(
-                                      "No one found",
+                                      tr("mobile_contacts.errors.internalization_error_text"),
                                       style: TextStyle(
                                         color: HexColor.fromHex("272C3C"),
                                         fontSize: 16,
@@ -188,7 +188,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                                 if (contacts.isEmpty) {
                                   return Center(
                                     child: Text(
-                                      "Oops something went wrong, try again later",
+                                      tr("mobile_contacts.errors.no_one_found"),
                                       style: TextStyle(
                                         color: HexColor.fromHex("272C3C"),
                                         fontSize: 16,
@@ -245,7 +245,9 @@ class _ContactsScreenState extends State<ContactsScreen> {
                     ),
                   ),
                   subtitle: Text(
-                    contact.inPPLDO ? "Registered" : _contactsHelper.e164ToBeautifulInternational(contact.phone),
+                    contact.inPPLDO ?
+                    tr("mobile_contacts.registered")
+                    : _contactsHelper.e164ToBeautifulInternational(contact.phone),
                     style: TextStyle(
                         color: HexColor.fromHex(contact.inPPLDO ? "007AFF" : "7D808A"),
                         fontSize: 14,
@@ -296,7 +298,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
         child: Align(
           alignment: Alignment.center,
           child: Text(
-            "User added to contacts",
+            tr("mobile_contacts.snackbar.user_added"),
             style: TextStyle(
                 fontSize: 14.0,
                 fontWeight: FontWeight.w400

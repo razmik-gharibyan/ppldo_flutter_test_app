@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:clipboard/clipboard.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -197,7 +198,10 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
   }
   
   void _listenForAddContacts() {
-    _controller.addJavaScriptHandler(handlerName: "syncContacts", callback: (_) async {
+    _controller.addJavaScriptHandler(handlerName: "syncContacts", callback: (arguments) async {
+      globals.language = arguments[0];
+      // Change locale
+      EasyLocalization.of(context).locale = Locale(globals.language);
       _askOrGetContactPermissions();
       //await _controller.evaluateJavascript(source: "app.vms.modals.openInvite()");
     });

@@ -1,13 +1,12 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_libphonenumber/flutter_libphonenumber.dart';
 import 'package:ppldo_flutter_test_app/bloc/bloc_provider.dart';
 import 'package:ppldo_flutter_test_app/bloc/connectivity_bloc.dart';
-import 'package:ppldo_flutter_test_app/extensions/hext_to_color.dart';
 import 'package:ppldo_flutter_test_app/globals.dart' as globals;
 import 'package:ppldo_flutter_test_app/screens/web_screen.dart';
-import 'package:ppldo_flutter_test_app/services/avatar_service.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 void main() async {
@@ -26,7 +25,15 @@ void main() async {
 void runFlutterApp() async {
   await Firebase.initializeApp();
   await FlutterLibphonenumber().init();
-  runApp(MyApp());
+  runApp(EasyLocalization(
+      supportedLocales: [
+        Locale("en"), Locale("ru"),
+      ],
+      path: "assets/lang",
+      fallbackLocale: Locale("en"),
+      useOnlyLangCode: true,
+      child: MyApp())
+  );
 }
 
 class MyApp extends StatelessWidget {

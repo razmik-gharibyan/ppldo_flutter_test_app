@@ -1,0 +1,18 @@
+{
+  "mobile_contacts": {
+    "search_bar": {
+      "title": "Контакты",
+      "hint": "Найти контакт"
+    },
+    "phone_contacts_label": "КОНТАКТЫ ИЗ ТЕЛЕФОННОЙ КНИГИ",
+    "invite_button_text": "Пригласить",
+    "registered": "Зарегистрирован",
+    "snackbar": {
+      "user_added": "Пользователь добавлен в контакты"
+    },
+    "errors": {
+      "no_one_found": "Никого не найдено",
+      "internalization_error_text": "Упс, что то пошло не так, попробуйте позже"
+    }
+  }
+}
