@@ -105,17 +105,20 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
                   child: TextField(
                     controller: _controller,
                     style: TextStyle(
+                      height: 1.5,
                       color: Colors.black87,
-                      fontSize: 23,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400
                     ),
                     decoration: InputDecoration.collapsed(
                       hintText: "Search contact",
                       hintStyle: TextStyle(
-                        color: Colors.grey,
-                        fontSize: 22,
+                        color: HexColor.fromHex("7D808A"),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400
                       ),
                     ),
-                    cursorColor: Colors.black,
+                    cursorColor: HexColor.fromHex("272C3C"),
                     focusNode: _focusNode,
                     onChanged: (String data) => _searchContactsBloc.inSearchContactsController.add(data),
                   ),

@@ -112,6 +112,8 @@ class _ContactsScreenState extends State<ContactsScreen> {
                                     ),
                                   ),
                                 ),
+                                _isSearchBarActive ?
+                                Container() :
                                 Container(
                                   height: 56.0,
                                   decoration: BoxDecoration(

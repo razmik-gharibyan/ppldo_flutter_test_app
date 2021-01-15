@@ -41,7 +41,7 @@ class _AddContactButtonState extends State<AddContactButton> {
           icon: Icon(
               Icons.check_circle,
               color: HexColor.fromHex("7CB342"),
-              size: 24,
+              size: 24.0,
             ),
           onPressed: () {},
         )

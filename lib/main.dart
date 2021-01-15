@@ -7,6 +7,7 @@ import 'package:ppldo_flutter_test_app/bloc/connectivity_bloc.dart';
 import 'package:ppldo_flutter_test_app/extensions/hext_to_color.dart';
 import 'package:ppldo_flutter_test_app/globals.dart' as globals;
 import 'package:ppldo_flutter_test_app/screens/web_screen.dart';
+import 'package:ppldo_flutter_test_app/services/avatar_service.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 void main() async {
