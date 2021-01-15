@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter_sim_country_code/flutter_sim_country_code.dart';
@@ -40,7 +41,14 @@ class ContactsBloc implements Bloc {
     final nonDuplicatedContacts = _removeContactsWithDuplicatePhoneNumbers(multipleNumberContactList);
     final formattedContacts = await ContactsHelper().formatContactList(nonDuplicatedContacts);
     final phones = formattedContacts.map((contact) => contact.phone).toList();
-    final countryCode = await FlutterSimCountryCode.simCountryCode;
+    String countryCode;
+    try {
+      countryCode = await FlutterSimCountryCode.simCountryCode;
+    } catch (e) {
+      // CountryCode unavailable, get it from phone Settings ,ie if locale = en_GB
+      // function below will take only GB from that string, assuming that locale is always 5 character
+      countryCode = Platform.localeName.substring(3);
+    }
     final remoteContacts = await _contactService.sendLocalContacts(globals.userToken, phones, countryCode);
     final resultContacts = _compareLocalAndRemoteContacts(formattedContacts, remoteContacts);
     resultContacts.sort((a, b) {

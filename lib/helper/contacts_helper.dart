@@ -8,9 +8,9 @@ class ContactsHelper {
   final _libPhoneNumber = FlutterLibphonenumber();
 
   Future<List<PpldoContact>> formatContactList(List<PpldoContact> contacts) async {
-    final code = await FlutterSimCountryCode.simCountryCode;
-    final countries = CountryManager().countries;
-    final phoneCode = countries.firstWhere((country) => country.countryCode == code).phoneCode;
+    //final code = await FlutterSimCountryCode.simCountryCode;
+    //final countries = CountryManager().countries;
+    //final phoneCode = countries.firstWhere((country) => country.countryCode == code).phoneCode;
     List<PpldoContact> formattedContacts = List<PpldoContact>();
     /*
     for (var contact in contacts) {
