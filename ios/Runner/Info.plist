@@ -10,6 +10,11 @@
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>ru</string>
+	</array>
 	<key>CFBundleName</key>
 	<string>People Do</string>
 	<key>CFBundlePackageType</key>
@@ -18,11 +23,6 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
-	<key>CFBundleLocalizations</key>
-    <array>
-    	<string>en</string>
-    	<string>ru</string>
-    </array>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -54,10 +54,10 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>This app requires camera access to send pictures to chat or change user or chat avatars</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>This app requires microphone access to record the sound of a video to send it to chat</string>
 	<key>NSContactsUsageDescription</key>
 	<string>This app requires contacts access to invite users to the service at your request</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app requires microphone access to record the sound of a video to send it to chat</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>

@@ -12,7 +12,7 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Choose Application Mode (DEVELOPMENT / PRODUCTION)
-  globals.applicationMode = globals.Mode.DEVELOPMENT;
+  globals.applicationMode = globals.Mode.PRODUCTION;
   // Set default Locale
   globals.language = "en";
   if (kReleaseMode) {
