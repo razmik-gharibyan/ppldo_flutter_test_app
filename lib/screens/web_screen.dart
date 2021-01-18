@@ -199,9 +199,11 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
   
   void _listenForAddContacts() {
     _controller.addJavaScriptHandler(handlerName: "syncContacts", callback: (arguments) async {
-      globals.language = arguments[0];
-      // Change locale
-      EasyLocalization.of(context).locale = Locale(globals.language);
+      if (arguments.isNotEmpty) {
+        globals.language = arguments[0];
+        // Change locale
+        EasyLocalization.of(context).locale = Locale(globals.language);
+      }
       _askOrGetContactPermissions();
       //await _controller.evaluateJavascript(source: "app.vms.modals.openInvite()");
     });

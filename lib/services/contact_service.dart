@@ -5,7 +5,7 @@ import 'package:ppldo_flutter_test_app/model/area.dart';
 import 'package:ppldo_flutter_test_app/model/ppldo_contact.dart';
 
 class ContactService {
-  /// request validated contact list from server by giving local [phones]  and [countryCode] from
+  /// Request validated contact list from server by giving local [phones]  and [countryCode] from
   /// sim card
   Future<List<PpldoContact>> sendLocalContacts(String userToken, List<String> phones, String countryCode) async {
     final mutationRequest = """mutation (\$phones: [String!]!, \$countryCode: String!) {
@@ -43,7 +43,7 @@ class ContactService {
       "query": mutationRequest,
       "variables": {
         "phones": phones,
-        "countryCode": "AM" //TODO change to sim country code
+        "countryCode": countryCode
       }
     });
     final result = await http.post(

@@ -11,7 +11,10 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Choose Application Mode (DEVELOPMENT / PRODUCTION)
   globals.applicationMode = globals.Mode.DEVELOPMENT;
+  // Set default Locale
+  globals.language = "en";
   if (kReleaseMode) {
     await SentryFlutter.init(
           (options) => options.dsn = 'https://912e6010faf6495d8dd13d623d85da5b@o48617.ingest.sentry.io/5559292',
@@ -30,7 +33,7 @@ void runFlutterApp() async {
         Locale("en"), Locale("ru"),
       ],
       path: "assets/lang",
-      fallbackLocale: Locale("en"),
+      fallbackLocale: Locale(globals.language),
       useOnlyLangCode: true,
       child: MyApp())
   );
