@@ -1,4 +1,9 @@
 {
+  "webview": {
+    "errors": {
+      "no_internet": "No connection available..."
+    }
+  },
   "mobile_contacts": {
     "search_bar": {
       "title": "Contacts",

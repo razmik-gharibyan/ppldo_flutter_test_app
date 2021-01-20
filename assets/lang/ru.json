@@ -1,4 +1,9 @@
 {
+  "webview": {
+    "errors": {
+      "no_internet": "Нет доступа к сети..."
+    }
+  },
   "mobile_contacts": {
     "search_bar": {
       "title": "Контакты",

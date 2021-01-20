@@ -13,8 +13,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Choose Application Mode (DEVELOPMENT / PRODUCTION)
   globals.applicationMode = globals.Mode.PRODUCTION;
-  // Set default Locale
-  globals.language = "en";
   if (kReleaseMode) {
     await SentryFlutter.init(
           (options) => options.dsn = 'https://912e6010faf6495d8dd13d623d85da5b@o48617.ingest.sentry.io/5559292',
@@ -33,7 +31,7 @@ void runFlutterApp() async {
         Locale("en"), Locale("ru"),
       ],
       path: "assets/lang",
-      fallbackLocale: Locale(globals.language),
+      fallbackLocale: Locale("en"),
       useOnlyLangCode: true,
       child: MyApp())
   );
@@ -42,6 +40,8 @@ void runFlutterApp() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    globals.language = EasyLocalization.of(context).locale.languageCode;
+
     return BlocProvider<ConnectivityBloc>(
       bloc: ConnectivityBloc(),
       child: MaterialApp(

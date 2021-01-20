@@ -13,6 +13,7 @@ import 'package:ppldo_flutter_test_app/bloc/cloud_messaging_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/connectivity_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/deeplink_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/js_communication_bloc.dart';
+import 'package:ppldo_flutter_test_app/extensions/hext_to_color.dart';
 import 'package:ppldo_flutter_test_app/helper/permission_helper.dart';
 import 'package:ppldo_flutter_test_app/screens/contacts_screen.dart';
 import 'package:ppldo_flutter_test_app/services/avatar_service.dart';
@@ -279,14 +280,19 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Platform.isAndroid ? CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
-          ) : CupertinoActivityIndicator(),
+          CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(HexColor.fromHex("7CB342")),
+          ),
           SizedBox(
             height: 10.0,
           ),
           Text(
-            "No connection available..."
+            tr("webview.errors.no_internet"),
+            style: TextStyle(
+                color: HexColor.fromHex("272C3C"),
+                fontSize: 16,
+                fontWeight: FontWeight.w500
+            ),
           )
         ],
       ),
