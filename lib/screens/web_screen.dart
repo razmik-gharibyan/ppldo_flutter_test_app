@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:clipboard/clipboard.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
@@ -13,7 +12,6 @@ import 'package:ppldo_flutter_test_app/bloc/cloud_messaging_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/connectivity_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/deeplink_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/js_communication_bloc.dart';
-import 'package:ppldo_flutter_test_app/extensions/hext_to_color.dart';
 import 'package:ppldo_flutter_test_app/helper/permission_helper.dart';
 import 'package:ppldo_flutter_test_app/screens/contacts_screen.dart';
 import 'package:ppldo_flutter_test_app/services/avatar_service.dart';
@@ -281,7 +279,7 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(HexColor.fromHex("7CB342")),
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF7CB342)),
           ),
           SizedBox(
             height: 10.0,
@@ -289,7 +287,7 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
           Text(
             tr("webview.errors.no_internet"),
             style: TextStyle(
-                color: HexColor.fromHex("272C3C"),
+                color: Color(0xFF272C3C),
                 fontSize: 16,
                 fontWeight: FontWeight.w500
             ),
@@ -299,6 +297,8 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
     );
   }
 
+  /// Reacting when user press back button on Android,or swipes back on iOS
+  /// return [true] to go pop screen or return [false] to not react
   Future<bool> _onBackPressed() async {
     var canGoBack = await _controller.canGoBack();
     if(canGoBack) {

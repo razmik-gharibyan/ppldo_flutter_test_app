@@ -4,7 +4,6 @@ import 'package:ppldo_flutter_test_app/bloc/bloc_provider.dart';
 import 'package:ppldo_flutter_test_app/bloc/contacts_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/js_communication_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/search_contacts_bloc.dart';
-import 'package:ppldo_flutter_test_app/extensions/hext_to_color.dart';
 import 'package:ppldo_flutter_test_app/helper/contacts_helper.dart';
 import 'package:ppldo_flutter_test_app/helper/resize_helper.dart';
 import 'package:ppldo_flutter_test_app/model/ppldo_contact.dart';
@@ -97,7 +96,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                                 Container(
                                   width: double.infinity,
                                   height: 32.0,
-                                  color: HexColor.fromHex("F1F1F1"),
+                                  color: Color(0xFFF1F1F1),
                                   child: Padding(
                                     padding: const EdgeInsets.only(left: 16.0),
                                     child: Align(
@@ -120,7 +119,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                                     color: Colors.white,
                                     boxShadow: [
                                       BoxShadow(
-                                        color: HexColor.fromHex("EFEFEF"),
+                                        color: Color(0xFFEFEFEF),
                                         spreadRadius: 0,
                                         blurRadius: 0,
                                         offset: Offset(0, 1), // changes position of shadow
@@ -135,7 +134,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                                           child: Icon(
                                             Icons.person_add,
                                             size: 24,
-                                            color: HexColor.fromHex("7D808A"),
+                                            color: Color(0xFF7D808A),
                                           ),
                                         ),
                                         Padding(
@@ -145,7 +144,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                                             style: TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w500,
-                                                color: HexColor.fromHex("2D3245")
+                                                color: Color(0xFF2D3245)
                                             ),
                                           ),
                                         ),
@@ -169,7 +168,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                                 if (snapshot == null || !snapshot.hasData) {
                                   return Center(
                                     child: CircularProgressIndicator(
-                                      valueColor: AlwaysStoppedAnimation<Color>(HexColor.fromHex("7CB342")),
+                                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF7CB342)),
                                     ),
                                   );
                                 }
@@ -178,7 +177,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                                     child: Text(
                                       tr("mobile_contacts.errors.internalization_error_text"),
                                       style: TextStyle(
-                                        color: HexColor.fromHex("272C3C"),
+                                        color: Color(0xFF272C3C),
                                         fontSize: 16,
                                         fontWeight: FontWeight.w500
                                       ),
@@ -190,7 +189,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                                     child: Text(
                                       tr("mobile_contacts.errors.no_one_found"),
                                       style: TextStyle(
-                                        color: HexColor.fromHex("272C3C"),
+                                        color: Color(0xFF272C3C),
                                         fontSize: 16,
                                         fontWeight: FontWeight.w500
                                       ),
@@ -239,7 +238,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                   title: Text(
                     contact.name,
                     style: TextStyle(
-                      color: HexColor.fromHex("272C3C"),
+                      color: Color(0xFF272C3C),
                       fontSize: 16,
                       fontWeight: FontWeight.w500
                     ),
@@ -249,7 +248,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                     tr("mobile_contacts.registered")
                     : _contactsHelper.e164ToBeautifulInternational(contact.phone),
                     style: TextStyle(
-                        color: HexColor.fromHex(contact.inPPLDO ? "007AFF" : "7D808A"),
+                        color: contact.inPPLDO ? Color(0xFF007AFF) : Color(0xFF7D808A),
                         fontSize: 14,
                         fontWeight: FontWeight.w400
                     ),
@@ -260,7 +259,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                 ),
               ),
               Divider(
-                color: HexColor.fromHex("EFEFEF"),
+                color: Color(0xFFEFEFEF),
                 height: 1 / aspectRatio,
                 indent: 74.0,
                 thickness: 1,
@@ -278,7 +277,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
   Widget _inviteButton(String phone) {
     return IconButton(
         icon: Icon(Icons.person_add),
-        color: HexColor.fromHex("7D808A"),
+        color: Color(0xFF7D808A),
         iconSize: 24,
         onPressed: () {
           widget._jsCommunicationBloc.addContactNumber(phone);

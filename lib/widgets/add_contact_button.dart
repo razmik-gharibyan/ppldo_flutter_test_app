@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:ppldo_flutter_test_app/bloc/contacts_bloc.dart';
-import 'package:ppldo_flutter_test_app/extensions/hext_to_color.dart';
 
 class AddContactButton extends StatefulWidget {
   final ContactsBloc _contactsBloc;
@@ -40,14 +39,14 @@ class _AddContactButtonState extends State<AddContactButton> {
         ? IconButton(
           icon: Icon(
               Icons.check_circle,
-              color: HexColor.fromHex("7CB342"),
+              color: Color(0xFF7CB342),
               size: 24.0,
             ),
           onPressed: () {},
         )
         : IconButton(
             icon: Icon(Icons.person_add),
-            color: HexColor.fromHex("6D7278"),
+            color: Color(0xFF6D7278),
             iconSize: 24.0,
             onPressed: () async {
               widget._contactsBloc.addContact(widget._id);

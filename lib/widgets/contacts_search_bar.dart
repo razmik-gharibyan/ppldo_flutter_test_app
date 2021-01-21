@@ -4,7 +4,6 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:ppldo_flutter_test_app/bloc/bloc_provider.dart';
 import 'package:ppldo_flutter_test_app/bloc/contacts_bloc.dart';
 import 'package:ppldo_flutter_test_app/bloc/search_contacts_bloc.dart';
-import 'package:ppldo_flutter_test_app/extensions/hext_to_color.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 class ContactsSearchBar extends StatefulWidget {
@@ -71,7 +70,7 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: HexColor.fromHex("EFEFEF"),
+              color: Color(0xFFEFEFEF),
               offset: Offset(0, 1), // changes position of shadow
             ),
           ],
@@ -96,7 +95,7 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
                 padding: const EdgeInsets.only(left: 16.0),
                 child: Icon(
                   Icons.search,
-                  color: HexColor.fromHex("7D808A"),
+                  color: Color(0xFF7D808A),
                   size: 24,
                 ),
               ),
@@ -114,12 +113,12 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
                     decoration: InputDecoration.collapsed(
                       hintText: tr("mobile_contacts.search_bar.hint"),
                       hintStyle: TextStyle(
-                        color: HexColor.fromHex("7D808A"),
+                        color: Color(0xFF7D808A),
                         fontSize: 14,
                         fontWeight: FontWeight.w400
                       ),
                     ),
-                    cursorColor: HexColor.fromHex("272C3C"),
+                    cursorColor: Color(0xFF272C3C),
                     focusNode: _focusNode,
                     onChanged: (String data) => _searchContactsBloc.inSearchContactsController.add(data),
                   ),
@@ -133,7 +132,7 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
           child: IconButton(
             icon: Icon(
               Icons.close,
-              color: HexColor.fromHex("7D808A"),
+              color: Color(0xFF7D808A),
               size: 24,
             ),
             onPressed: () {
@@ -155,7 +154,7 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
             IconButton(
                 icon: Icon(
                   Icons.arrow_back,
-                  color: HexColor.fromHex("7D808A"),
+                  color: Color(0xFF7D808A),
                   size: 24,
                 ),
                 onPressed: () {
@@ -165,7 +164,7 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
             Text(
               tr("mobile_contacts.search_bar.title"),
               style: TextStyle(
-                  color: HexColor.fromHex("272C3C"),
+                  color: Color(0xFF272C3C),
                   fontSize: 22,
                   fontWeight: FontWeight.w500),
             ),
@@ -176,7 +175,7 @@ class _ContactsSearchBarState extends State<ContactsSearchBar> {
           child: IconButton(
             icon: Icon(
               Icons.search,
-              color: HexColor.fromHex("7D808A"),
+              color: Color(0xFF7D808A),
               size: 24,
             ),
             onPressed: () {
