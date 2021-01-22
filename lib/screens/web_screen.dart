@@ -30,8 +30,6 @@ class WebScreen extends StatefulWidget {
 
 class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
 
-  // Constants
-  final String _initialUrl = globals.initialUrl;
   // Tools and Services
   PermissionHelper _permissionHelper;
   InAppWebViewController _controller;
@@ -49,6 +47,9 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
   PermissionStatus _contactsPermissionStatus;
   bool _permissionCheckedOnce = false;
   String _deviceToken;
+  bool _isDeveloperMode = false;
+  bool _isLoggedIn = false;
+  var _mode = globals.applicationMode;
 
   @override
   void initState() {
@@ -104,6 +105,8 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    var _mediaQuery = MediaQuery.of(context);
+
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: Scaffold(
@@ -123,7 +126,7 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
                       builder: (c, errorSnapshot) {
                         if (!errorSnapshot.hasData || !errorSnapshot.data) {
                           return InAppWebView(
-                            initialUrl: _initialUrl,
+                            initialUrl: globals.initialUrl,
                             initialOptions: _options,
                             onWebViewCreated: (InAppWebViewController webViewController) {
                               if (_controller != null) {
@@ -147,20 +150,7 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
                         }
                       },
                     ),
-                    /*
-                    Positioned(
-                      left: 10.0,
-                      child: DropdownButton(
-                        items: <String>["DEV","PROD"].map((String value){
-                          return DropdownMenuItem(
-                            child: Text(value),
-                          );
-                        }).toList(),
-                        onChanged: (_) {},
-                      ),
-                    )
-
-                     */
+                    _isDeveloperMode ? _switchModeWidget(_mediaQuery) : Container(),
                   ],
                 )
               );
@@ -187,6 +177,9 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
           globals.userToken = token.value;
           globals.resizeBaseUrl = await _avatarService.getResizeBaseUrl();
           _deviceToken = await _cloudMessagingBloc.getDeviceToken();
+          setState(() {
+            _isLoggedIn = true;
+          });
           if (_deviceToken != null && _deviceToken.isNotEmpty) {
             await _cloudMessagingService.postDeviceToken(token.value, _deviceToken);
           }
@@ -196,6 +189,9 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
         await _cloudMessagingBloc.deleteDeviceToken();
         _deviceToken = null;
         _permissionCheckedOnce = false;
+        setState(() {
+          _isLoggedIn = false;
+        });
       }
     } catch (e) {
       print(e);
@@ -242,7 +238,9 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
 
   void _listenForSiteSwitch() {
     _controller.addJavaScriptHandler(handlerName: "switchSite", callback: (_) {
-      //TODO switch sites
+      setState(() {
+        _isDeveloperMode = true;
+      });
     });
   }
 
@@ -293,6 +291,63 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
     }
   }
 
+  /// This method takes [MediaQueryData] as input and returns dropdown button
+  /// positioned at top-center for switching between site modes such as DEV/RC/PROD.
+  /// This method will work only if user entered developer mode.
+  Widget _switchModeWidget(MediaQueryData mediaQueryData) {
+    return Positioned(
+      top: 0,
+      child: Container(
+        width: mediaQueryData.size.width,
+        child: Align(
+          alignment: Alignment.center,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 5.0),
+            decoration:  BoxDecoration(
+              color: Colors.black,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey,
+                  offset: Offset(2, 2), // changes position of shadow
+                ),
+              ],
+            ),
+            child: _isLoggedIn
+             ? Text(
+                globals.applicationMode.toString().replaceAll("Mode.", ""),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 10.0,
+                ),
+               )
+             : DropdownButton(
+                dropdownColor: Colors.black,
+                isDense: true,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 10.0,
+                ),
+                items: globals.Mode.values.map((globals.Mode value) {
+                  return DropdownMenuItem(
+                    value: value,
+                    child: Text(value.toString().replaceAll("Mode.", "")),
+                  );
+                }).toList(),
+                value: _mode,
+                onChanged: (mode) {
+                  setState(() {
+                    _mode = mode;
+                    globals.changeMode(mode);
+                    _controller.loadUrl(url: globals.initialUrl);
+                  });
+                },
+              ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _errorWidget() {
     return Center(
       child: Column(
@@ -308,9 +363,9 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
           Text(
             tr("webview.errors.no_internet"),
             style: TextStyle(
-                color: Color(0xFF272C3C),
-                fontSize: 16,
-                fontWeight: FontWeight.w500
+              color: Color(0xFF272C3C),
+              fontSize: 16,
+              fontWeight: FontWeight.w500
             ),
           )
         ],
