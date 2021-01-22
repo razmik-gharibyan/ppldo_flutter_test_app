@@ -1,0 +1,20 @@
+query getSettings {
+    result: settings {
+        backendBaseUrl
+        chatDeleteInterval
+        frontendBaseUrl
+        maxDraftLength
+        maxFieldLength
+        maxForwardChats
+        maxForwardMessages
+        maxMessageLength
+        messageDeleteInterval
+        messageUpdateInterval
+        resizeBaseUrl
+        scrapperBaseUrl
+        typingTimeout
+        version
+        zipperBaseUrl
+        __typename
+    }
+}

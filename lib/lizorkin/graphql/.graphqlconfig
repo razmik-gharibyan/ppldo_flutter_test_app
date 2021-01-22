@@ -1,0 +1,15 @@
+{
+  "name": "PeopleDo GraphQL Schema",
+  "schemaPath": "schema.graphql",
+  "extensions": {
+    "endpoints": {
+      "RC GraphQL Endpoint": {
+        "url": "https://api-rc.ppl.do/graphql",
+        "headers": {
+          "user-agent": "JS GraphQL"
+        },
+        "introspect": true
+      }
+    }
+  }
+}

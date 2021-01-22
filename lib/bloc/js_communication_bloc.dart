@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:ppldo_flutter_test_app/bloc/bloc.dart';
+import 'package:people_do/bloc/bloc.dart';
 
 class JSCommunicationBloc implements Bloc {
 

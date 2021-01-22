@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:ppldo_flutter_test_app/model/area.dart';
+import 'package:people_do/model/area.dart';
 
 class PpldoContact {
 

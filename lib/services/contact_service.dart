@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:ppldo_flutter_test_app/globals.dart' as globals;
-import 'package:ppldo_flutter_test_app/model/area.dart';
-import 'package:ppldo_flutter_test_app/model/ppldo_contact.dart';
+import 'package:people_do/globals.dart' as globals;
+import 'package:people_do/model/area.dart';
+import 'package:people_do/model/ppldo_contact.dart';
 
 class ContactService {
   /// Request validated contact list from server by giving local [phones]  and [countryCode] from

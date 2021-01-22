@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:ppldo_flutter_test_app/globals.dart' as globals;
+import 'package:people_do/globals.dart' as globals;
 
 class AvatarService {
 
@@ -8,10 +8,10 @@ class AvatarService {
   Future<String> getResizeBaseUrl() async {
     final queryRequest = """query {
                                  settings {
-                                  resizeBaseUrl 
-                                 }
-                               }
-                            """;
+                                 resizeBaseUrl 
+                              }
+                            }
+                         """;
     final request = jsonEncode({
       "query": queryRequest,
     });

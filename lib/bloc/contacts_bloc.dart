@@ -3,12 +3,12 @@ import 'dart:io';
 
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter_sim_country_code/flutter_sim_country_code.dart';
-import 'package:ppldo_flutter_test_app/bloc/bloc.dart';
-import 'package:ppldo_flutter_test_app/helper/contacts_helper.dart';
-import 'package:ppldo_flutter_test_app/model/ppldo_contact.dart';
-import 'package:ppldo_flutter_test_app/services/contact_service.dart';
+import 'package:people_do/bloc/bloc.dart';
+import 'package:people_do/helper/contacts_helper.dart';
+import 'package:people_do/model/ppldo_contact.dart';
+import 'package:people_do/services/contact_service.dart';
 
-import 'package:ppldo_flutter_test_app/globals.dart' as globals;
+import 'package:people_do/globals.dart' as globals;
 
 class ContactsBloc implements Bloc {
 

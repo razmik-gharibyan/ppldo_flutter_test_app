@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
-import 'package:ppldo_flutter_test_app/bloc/bloc.dart';
+import 'package:people_do/bloc/bloc.dart';
 import 'package:uni_links/uni_links.dart';
 
 class DeepLinkBloc implements Bloc {

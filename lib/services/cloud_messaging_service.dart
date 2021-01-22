@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:ppldo_flutter_test_app/globals.dart' as globals;
+import 'package:people_do/globals.dart' as globals;
 
 class CloudMessagingService {
 

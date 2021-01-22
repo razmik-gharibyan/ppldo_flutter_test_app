@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ppldo_flutter_test_app/bloc/contacts_bloc.dart';
+import 'package:people_do/bloc/contacts_bloc.dart';
 
 class AddContactButton extends StatefulWidget {
   final ContactsBloc _contactsBloc;

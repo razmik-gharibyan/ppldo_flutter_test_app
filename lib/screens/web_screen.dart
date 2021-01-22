@@ -7,18 +7,18 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:ppldo_flutter_test_app/bloc/bloc_provider.dart';
-import 'package:ppldo_flutter_test_app/bloc/cloud_messaging_bloc.dart';
-import 'package:ppldo_flutter_test_app/bloc/connectivity_bloc.dart';
-import 'package:ppldo_flutter_test_app/bloc/deeplink_bloc.dart';
-import 'package:ppldo_flutter_test_app/bloc/js_communication_bloc.dart';
-import 'package:ppldo_flutter_test_app/helper/permission_helper.dart';
-import 'package:ppldo_flutter_test_app/screens/contacts_screen.dart';
-import 'package:ppldo_flutter_test_app/services/avatar_service.dart';
-import 'package:ppldo_flutter_test_app/services/cloud_messaging_service.dart';
+import 'package:people_do/bloc/bloc_provider.dart';
+import 'package:people_do/bloc/cloud_messaging_bloc.dart';
+import 'package:people_do/bloc/connectivity_bloc.dart';
+import 'package:people_do/bloc/deeplink_bloc.dart';
+import 'package:people_do/bloc/js_communication_bloc.dart';
+import 'package:people_do/helper/permission_helper.dart';
+import 'package:people_do/screens/contacts_screen.dart';
+import 'package:people_do/services/avatar_service.dart';
+import 'package:people_do/services/cloud_messaging_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:ppldo_flutter_test_app/globals.dart' as globals;
+import 'package:people_do/globals.dart' as globals;
 
 class WebScreen extends StatefulWidget {
 
@@ -147,6 +147,20 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
                         }
                       },
                     ),
+                    /*
+                    Positioned(
+                      left: 10.0,
+                      child: DropdownButton(
+                        items: <String>["DEV","PROD"].map((String value){
+                          return DropdownMenuItem(
+                            child: Text(value),
+                          );
+                        }).toList(),
+                        onChanged: (_) {},
+                      ),
+                    )
+
+                     */
                   ],
                 )
               );
@@ -226,6 +240,12 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
     });
   }
 
+  void _listenForSiteSwitch() {
+    _controller.addJavaScriptHandler(handlerName: "switchSite", callback: (_) {
+      //TODO switch sites
+    });
+  }
+
   void _askOrGetContactPermissions() async {
     _contactsPermissionStatus = await _permissionHelper.getPermissionStatus();
     if (_contactsPermissionStatus == PermissionStatus.granted) {
@@ -241,6 +261,7 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
     _listenForClipboardCopy();
     _listenForAddContacts();
     _listenForAddPhoneNumber();
+    _listenForSiteSwitch();
   }
 
   Future<ShouldOverrideUrlLoadingAction> _handleUrlRequests(ShouldOverrideUrlLoadingRequest request) async {

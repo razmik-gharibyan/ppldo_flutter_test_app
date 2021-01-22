@@ -1,9 +1,9 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
-import 'package:ppldo_flutter_test_app/bloc/bloc_provider.dart';
-import 'package:ppldo_flutter_test_app/bloc/contacts_bloc.dart';
-import 'package:ppldo_flutter_test_app/bloc/search_contacts_bloc.dart';
+import 'package:people_do/bloc/bloc_provider.dart';
+import 'package:people_do/bloc/contacts_bloc.dart';
+import 'package:people_do/bloc/search_contacts_bloc.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 class ContactsSearchBar extends StatefulWidget {

@@ -1,0 +1,3379 @@
+# This file was generated based on ".graphqlconfig". Do not edit manually.
+
+schema {
+    query: Query
+    mutation: Mutation
+    subscription: Subscription
+}
+
+"Интерфейс чата"
+interface IChat {
+    "файлы, прикрепленные к данному чату, но еще не отправленные"
+    attached_files(after: String, before: String, first: Int, last: Int): AttachedFileConnection! @deprecated(reason : "от данного механизма в продукте отказались, ждем решения по новому видению")
+    "статус прочтенности/доставленности"
+    check_status: CheckStatus!
+    "дата создания чата"
+    created_at: DateTime!
+    "сохраненный черновик. интерпертировать пустую строку как отсутствие черновика"
+    draft: String!
+    "избранные сообщения данного чата"
+    favorite_messages(after: String, before: String, first: Int, last: Int): ChatFavoriteMessagesConnection!
+    "файлы, прикрепленные к сообщениям данного чата"
+    files(after: String, around: ID, before: String, filter: ChatFilesFilterInput, first: Int, last: Int): MessageFileConnection!
+    "чат скрыт"
+    hidden: Boolean
+    id: ID!
+    "ссылки в сообщениях"
+    links(after: String, before: String, first: Int, last: Int): LinkInfoConnection!
+    "сообщения чата"
+    messages(after: String, around: ID, around_bookmark: Bookmark, before: String, first: Int, last: Int): IChatMessageConnection!
+    "*[несобственное поле](https://gudexco.atlassian.net/wiki/spaces/PD/pages/294913)*  Уровень назойливости событий чата"
+    notification: ChatNotificationState!
+    """
+
+    *[несобственное поле](https://gudexco.atlassian.net/wiki/spaces/PD/pages/294913)*  Ограничить состояние notification датой, например - отлючить звук до...
+    Если устанавливаетсу notification_disabled_till,
+    то при наступлении указанного времени,
+    состояние notification снова возвращается в ON.
+    При наступлении указанного времени,
+    придет сабскрипшн chatUpdated,
+    где будет notification = 'ON', notification_disabled_till = null .
+    """
+    notification_disabled_till: DateTime
+    "индекс сортировки *поле индивидуально для пользователя*"
+    rank: LexoRank
+    "дела, прикрепленные к чату"
+    todos(after: String, before: String, first: Int, last: Int): TodoConnection!
+    "пользователи в чате"
+    users: IChatUserConnection!
+}
+
+interface IFile {
+    "размер файла"
+    content_length: LongInt!
+    "mime-тип"
+    content_type: String!
+    "id файла"
+    id: ID!
+    "ключ на s3"
+    key: String!
+    "дата загрузки файла"
+    timestamp: DateTime!
+    "url оригинала"
+    url: String!
+}
+
+"Интерфейс сообщений"
+interface IMessage {
+    "чат, в который отправили сообщение, может быть null в процитированных сообщениях"
+    chat: IChat!
+    id: ID!
+    """
+
+    Флаг того, что сообщение в избранных.
+    Гарантируется, что будет установлено в запросе сообщений чата,
+    в остальных случаях не гарантируется.
+    """
+    is_favorite: Boolean
+    "флаг того, что сообщение отправил текущий пользователь"
+    is_my: Boolean!
+    "глобальный порядок сообщения 53-bits, сравнивая данные числа легко определить в каком порядке они были созданы аналог twitter snowflake"
+    order: LongInt!
+    timestamp: DateTime!
+    "пользователь, отправивший сообщение"
+    user: RegisteredUser!
+    "идентификаторы пользователей, прочитавших сообщение"
+    viewed_by: [ID!]!
+}
+
+interface INotificationText {
+    text: String!
+}
+
+"интерфейс пользователь"
+interface IUser {
+    id: ID!
+}
+
+union FlowItem = Chat | PrivateChat | Reminder
+
+union ForwardedMessage = DeletedMessage | FileMessage | RegularMessage
+
+union MyUser = ActiveUser | RegisteringUser
+
+union NotificationDSL = NotificationText | NotificationTodo | NotificationUser
+
+union QuotedMessage = DeletedMessage | FileMessage | ForwardMessage | RegularMessage
+
+union RegisteredUser = ActiveUser
+
+union User = ActiveUser | InvitedUser
+
+"Грань активный пользователь/чат"
+type ActiveChatMember {
+    "чат"
+    chat: IChat!
+    "пользователь"
+    user: ActiveUser!
+}
+
+"активный пользователь"
+type ActiveUser implements IUser {
+    "аватар пользователя"
+    avatar: UserImage
+    id: ID!
+    "флаг того, что это текущий пользователь"
+    is_my: Boolean!
+    """
+
+    является ли пользователь "оператором",
+    оператору отправляются сервисные сообщения,
+    также оператор поумолчанию добавляется к пользователям в контакты
+    """
+    is_operator: Boolean!
+    "дата регистрации"
+    join_date: DateTime!
+    "время когда пользователь был последний раз онлайн"
+    last_seen: DateTime
+    "состояние пользователя"
+    online: Boolean!
+    "телефон"
+    phone: PhoneNumber
+    "профиль"
+    profile: UserProfile!
+}
+
+"Измененные сущности мутации addUserToChat"
+type AddUserToChatResult {
+    "вновь созданная грань пользователь/чат"
+    createdChatUserEdge: ChatMember!
+    "созданное сервисное сообщение"
+    createdNotificationMessage: IChatNootificationMessageEdge!
+}
+
+"Прикрепленый файл"
+type AttachedFile implements IFile {
+    "чат, к которому прикреплен файл"
+    attached_to: IChat!
+    "размер файла"
+    content_length: LongInt!
+    "mime-тип"
+    content_type: String!
+    "имя файла"
+    file_name: String!
+    "id файла"
+    id: ID!
+    "ключ на s3"
+    key: String!
+    "дата загрузки файла"
+    timestamp: DateTime!
+    "тип файла"
+    type: FileType!
+    "url оригинала"
+    url: String!
+}
+
+type AttachedFileConnection {
+    edges: [AttachedFileEdge!]!
+    pageInfo: PageInfo!
+}
+
+type AttachedFileEdge {
+    cursor: String!
+    node: AttachedFile!
+}
+
+"токен аутентификации"
+type AuthToken {
+    "количество секунд жизни токена"
+    expiration: Int!
+    "окончание валидности"
+    expiration_date: DateTime!
+    "токен"
+    token: String!
+}
+
+"Чат"
+type Chat implements IChat {
+    "файлы, прикрепленные к данному чату, но еще не отправленные"
+    attached_files(after: String, before: String, first: Int, last: Int): AttachedFileConnection!
+    "описание чата"
+    caption: String!
+    "статус прочтенности/доставленности"
+    check_status: CheckStatus!
+    "дата создания чата"
+    created_at: DateTime!
+    "пользователь-создатель чата"
+    creator: RegisteredUser!
+    "сохраненный черновик. интерпертировать пустую строку как отсутствие черновика"
+    draft: String!
+    "избранные сообщения данного чата"
+    favorite_messages(after: String, before: String, first: Int, last: Int): ChatFavoriteMessagesConnection!
+    "файлы, прикрепленные к сообщениям данного чата"
+    files(after: String, around: ID, before: String, filter: ChatFilesFilterInput, first: Int, last: Int): MessageFileConnection!
+    "чат скрыт"
+    hidden: Boolean
+    id: ID!
+    "изображение чата"
+    image: ChatImage
+    "задача, свзанная с данным чатом"
+    issue: Issue
+    "ссылки в сообщениях"
+    links(after: String, before: String, first: Int, last: Int): LinkInfoConnection!
+    "сообщения чата"
+    messages(after: String, around: ID, around_bookmark: Bookmark, before: String, first: Int, last: Int): IChatMessageConnection!
+    "*[несобственное поле](https://gudexco.atlassian.net/wiki/spaces/PD/pages/294913)*  Уровень назойливости событий чата"
+    notification: ChatNotificationState!
+    """
+
+    *[несобственное поле](https://gudexco.atlassian.net/wiki/spaces/PD/pages/294913)*  Ограничить состояние notification датой, например - отлючить звук до...
+    Если устанавливаетсу notification_disabled_till,
+    то при наступлении указанного времени,
+    состояние notification снова возвращается в ON.
+    При наступлении указанного времени,
+    придет сабскрипшн chatUpdated,
+    где будет notification = 'ON', notification_disabled_till = null .
+    """
+    notification_disabled_till: DateTime
+    "индекс сортировки *поле индивидуально для пользователя*"
+    rank: LexoRank
+    "состояние чата"
+    state: ChatState!
+    "заголовок чата"
+    title: String!
+    "дела, прикрепленные к чату"
+    todos(after: String, before: String, first: Int, last: Int): TodoConnection!
+    "пользователи в чате"
+    users: IChatUserConnection!
+}
+
+type ChatFavoriteMessagesConnection {
+    "# Количество избранных сообщений"
+    count: Int!
+    edges: [IMessageEdge!]!
+    pageInfo: PageInfo!
+}
+
+"Коннекшн чат/пересланное сообщения"
+type ChatForwardMessageConnection {
+    edges: [ChatFrowardMessageEdge!]!
+    pageInfo: PageInfo!
+}
+
+"Грань чат/пересланное сообщение"
+type ChatFrowardMessageEdge {
+    """
+
+    букмарк, используется для учета прочтенности доставленности
+    см. CheckStatus
+    для bookmark гарантируется лексикографическая отсортированность
+    """
+    bookmark: Bookmark!
+    cursor: String!
+    node: ForwardMessage!
+}
+
+"Изображение чата"
+type ChatImage implements IFile {
+    "выбранная пользователем зона изображения"
+    area: ImageArea
+    "размер файла"
+    content_length: LongInt!
+    "mime-тип"
+    content_type: String!
+    "id файла"
+    id: ID!
+    "ключ на s3"
+    key: String!
+    "дата загрузки файла"
+    timestamp: DateTime!
+    "url оригинала"
+    url: String!
+}
+
+type ChatImageUploadedResult {
+    "идентификатор чата, для которого загружено изображение"
+    chat_id: ID!
+    "аватар"
+    image: ChatImage!
+}
+
+"Грань пользователь/чат"
+type ChatMember {
+    "чат"
+    chat: IChat!
+    "пользователь"
+    user: User!
+}
+
+"сущность, содержащая информацию о прочтенности сообщений"
+type CheckStatus {
+    "чат"
+    chat: IChat!
+    """
+
+    букмарк последнего сообщения, прочитанного другими пользователями
+
+    считать прочитанными сообщение при условии strcmp(IChatMessageEdge.bookmark, last_viewed) <= 0
+    """
+    last_viewed: Bookmark!
+    """
+
+    пользователь был упомянут после позиции букмарка
+    (был упомянут после последнего прочтеного сообщения)
+    """
+    mentioned: Boolean!
+    """
+
+    букмарк последнего прочитанное мною сообщение,
+    служит для отображения новых сообщений при загрузке чата
+
+    считать прочитанными сообщение при условии strcmp(IChatMessageEdge.bookmark, my_last_viewed) <= 0
+    """
+    my_last_viewed: Bookmark!
+    "количество непрочитанных сообщений в чате"
+    unread_messages_count: Int!
+}
+
+"Измененные сущности мутации createChat"
+type CreateChatResult {
+    "вновь созданный чат"
+    createdChat: Chat!
+    "вновь созданная задача"
+    createdIssue: Issue
+}
+
+"склонения"
+type Declention {
+    "винительный (кого? что?)"
+    accusative: String
+    "дательный (кому? чему?)"
+    dative: String
+    "родительный (кого? чего?)"
+    genitive: String
+    "творительный (кем? чем?)"
+    instrumental: String
+    "именительный (кто? что?)"
+    nominative: String
+    "предложный (о ком? о чем?)"
+    prepositional: String
+}
+
+type DeletedMessage {
+    "поле-заглушка - graphql не допускает типы без полей"
+    _: Boolean
+}
+
+type DraftSetResult {
+    chat_id: ID!
+    draft: String!
+}
+
+"сообщение-файл"
+type FileMessage implements IMessage {
+    "чат, в который отправили сообщение, может быть null в процитированных сообщениях"
+    chat: IChat!
+    "файлы, прикрепленные к данной задаче, но еще не отправленные"
+    file: MessageFile!
+    id: ID!
+    """
+
+    Флаг того, что сообщение в избранных.
+    Гарантируется, что будет установлено в запросе сообщений чата,
+    в остальных случаях не гарантируется.
+    """
+    is_favorite: Boolean
+    "флаг того, что сообщение отправил текущий пользователь"
+    is_my: Boolean!
+    "глобальный порядок сообщения 53-bits, сравнивая данные числа легко определить в каком порядке они были созданы аналог twitter snowflake"
+    order: LongInt!
+    quoted_message: QuotedMessage
+    timestamp: DateTime!
+    "пользователь, отправивший сообщение"
+    user: RegisteredUser!
+    "идентификаторы пользователей, прочитавших сообщение"
+    viewed_by: [ID!]!
+}
+
+type FlowConnection {
+    edges: [FlowEdge!]!
+    pageInfo: PageInfo!
+}
+
+type FlowEdge {
+    cursor: String!
+    node: FlowItem!
+}
+
+"пересланное сообщение"
+type ForwardMessage implements IMessage {
+    "чат, в который отправили сообщение, может быть null в процитированных сообщениях"
+    chat: IChat!
+    "пересланное сообщение"
+    forwarded_message: ForwardedMessage!
+    id: ID!
+    """
+
+    Флаг того, что сообщение в избранных.
+    Гарантируется, что будет установлено в запросе сообщений чата,
+    в остальных случаях не гарантируется.
+    """
+    is_favorite: Boolean
+    "флаг того, что сообщение отправил текущий пользователь"
+    is_my: Boolean!
+    "глобальный порядок сообщения 53-bits, сравнивая данные числа легко определить в каком порядке они были созданы аналог twitter snowflake"
+    order: LongInt!
+    timestamp: DateTime!
+    "пользователь, отправивший сообщение"
+    user: RegisteredUser!
+    "идентификаторы пользователей, прочитавших сообщение"
+    viewed_by: [ID!]!
+}
+
+"Колонка задач"
+type Group {
+    id: ID!
+    "индекс сортировки"
+    rank: LexoRank!
+    state: GroupState
+    "заголовок группы"
+    title: String!
+}
+
+type GroupConnection {
+    edges: [GroupEdge!]!
+    pageInfo: PageInfo!
+}
+
+type GroupEdge {
+    cursor: String!
+    node: Group!
+}
+
+type IChatConnection {
+    edges: [IChatEdge!]!
+    pageInfo: PageInfo!
+}
+
+type IChatEdge {
+    cursor: String!
+    node: IChat!
+}
+
+"Коннекшн чат/сообщения"
+type IChatMessageConnection {
+    edges: [IChatMessageEdge!]!
+    pageInfo: PageInfo!
+}
+
+"Грань чат/сообщение"
+type IChatMessageEdge {
+    """
+
+    букмарк, используется для учета прочтенности доставленности
+    см. CheckStatus
+    для bookmark гарантируется лексикографическая отсортированность
+    """
+    bookmark: Bookmark!
+    cursor: String!
+    node: IMessage!
+}
+
+"Грань чат/нотфикационное сообщение"
+type IChatNootificationMessageEdge {
+    """
+
+    букмарк, используется для учета прочтенности доставленности
+    см. CheckStatus
+    для bookmark гарантируется лексикографическая отсортированность
+    """
+    bookmark: Bookmark!
+    cursor: String!
+    node: NotificationMessage!
+}
+
+type IChatUserConnection {
+    edges: [IChatUserEdge!]!
+    pageInfo: PageInfo!
+}
+
+type IChatUserEdge {
+    cursor: String!
+    node: User!
+}
+
+type IMessageConnection {
+    edges: [IMessageEdge!]!
+    pageInfo: PageInfo!
+}
+
+type IMessageEdge {
+    cursor: String!
+    node: IMessage!
+}
+
+"используется для сохранения данных для выбора области на изображении"
+type ImageArea {
+    height: Int!
+    width: Int!
+    x: Int!
+    y: Int!
+}
+
+"приглашенный пользователь"
+type InvitedUser implements IUser {
+    "email приглашенного пользователя, отображается только пригласившему пользователю"
+    email: Email
+    id: ID!
+    "телефон приглашенного пользователя, отображается только пригласившему пользователю"
+    phone: PhoneNumber
+}
+
+"Задача"
+type Issue {
+    "чат"
+    chat: Chat!
+    "дата создания задачи"
+    created_at: DateTime!
+    "дата завершения"
+    end_date: DateTime
+    "исполнитель"
+    executor: User
+    "колонка"
+    group: Group!
+    id: ID!
+    """
+
+    индекс сортировки *поле индивидуально для пользователя*
+    для закрытой задачи может быть равен z
+    """
+    rank: LexoRank!
+    "дата начала"
+    start_date: DateTime!
+    tags: TagConnection!
+}
+
+type IssueConnection {
+    edges: [IssueEdge!]!
+    pageInfo: PageInfo!
+}
+
+type IssueEdge {
+    cursor: String!
+    node: Issue!
+}
+
+"Коннекшн поиска задач"
+type IssueSearchConnection {
+    edges: [IssueSearchEdge!]!
+}
+
+"Грань поиска задач"
+type IssueSearchEdge {
+    by_file: MessageFile!
+    node: Issue!
+}
+
+"метаданные ссылки"
+type LinkInfo {
+    "A human-readable representation of the author's name."
+    author: String
+    "An representation of the date the article was published."
+    date: DateTime
+    "The publisher's chosen description of the article."
+    description: String
+    "Флаг ошибки скраппинга"
+    error: Boolean!
+    "An image URL that best represents the article."
+    image: String
+    "An ISO 639-1 representation of the url content language."
+    lang: String
+    "An image URL that best represents the publisher brand."
+    logo: String
+    message: IMessage
+    "Флаг выполнения скрапинга в данный момент (жди в сабскрипшне)"
+    pending: Boolean!
+    "A human-readable representation of the publisher's name."
+    publisher: String
+    "The publisher's chosen title of the article."
+    title: String
+    "The URL of the article."
+    url: String!
+    "A video URL that best represents the article."
+    video: String
+}
+
+type LinkInfoConnection {
+    edges: [LinkInfoEdge!]!
+    pageInfo: PageInfo!
+}
+
+type LinkInfoEdge {
+    cursor: String!
+    node: LinkInfo!
+}
+
+type MakeOTPResult {
+    "время, до которого для данного номера запросы не принимаются"
+    nextBackoffTime: DateTime
+    "одноразовый логин"
+    oneTimeLogin: String!
+}
+
+type MakePosibleContactsConnection {
+    edges: [MakePosibleContactsEdge!]!
+}
+
+type MakePosibleContactsEdge {
+    "Интернационализированный номер телефона"
+    internationalized_phone: PhoneNumber
+    "Пользователь в контактах у текущего"
+    is_contact: Boolean!
+    "Если пользователь найден, будет представлен"
+    node: User
+    "Телефон из телефонной книги"
+    raw_phone: String!
+}
+
+"Файл отправленый сообщением"
+type MessageFile implements IFile {
+    "размер файла"
+    content_length: LongInt!
+    "mime-тип"
+    content_type: String!
+    "имя файла"
+    file_name: String!
+    "id файла"
+    id: ID!
+    "ключ на s3"
+    key: String!
+    "сообщение, к которому прикреплен файл"
+    message: FileMessage!
+    "дата загрузки файла"
+    timestamp: DateTime!
+    "тип файла"
+    type: FileType!
+    "url оригинала"
+    url: String!
+}
+
+type MessageFileConnection {
+    edges: [MessageFileEdge!]!
+    pageInfo: PageInfo!
+}
+
+type MessageFileEdge {
+    cursor: String!
+    node: MessageFile!
+}
+
+type Mutation {
+    """
+
+    # Явное добавление пользователя в контакты
+    Пользователь, после добавления в контакты, будет возвращаться
+    в списке пользователей при запросе ` query { users { ... }} `.
+    Эффект не симметричен.
+    ## Возвращает
+    Пользователя, добавленного в контакты
+    ## Доступ
+    Любой аутентифицированный, активный пользователь
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *403 Forbidden*, попытка добавить пользователя в контакты дважды
+    - *404 Not Found*, добавляемый в контакты пользователь не найден
+    """
+    addContact(user_id: ID!): User!
+    """
+
+    # Добавить пуш-токен
+    Для получения пуш-нотификаций, клиент должен передать
+    сервису пуш-токен, полученный из firebase. О способах
+    получения пуш-токена можно прочесть в
+    (документации к FCM)[https://firebase.google.com/docs/cloud-messaging/]
+    ## Возвращает
+    null
+    ## Доступ
+    Любой аутентифицированный пользователь
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован
+    """
+    addPushToken(
+        "значение пуш-токена"
+        token: String!
+    ): Boolean
+    """
+
+    # Добавление пользователя в чат
+    ## Доступ
+    Текущий пользователь должен быть создателем чата
+    ## Ошибки
+    - *401 Unauthorized*: пользователь не аутентифицирован или не активен
+    - *404 NotFound*:
+    - чат не найден
+    - текущий пользователь не участник чата
+    - *422 ForbiddenError*:
+    - пользователь не является создателем чата
+    - попытка добавить пользователя, который уже существует
+    - личный чат
+    """
+    addUserToChat(chat_id: ID!, user_id: ID!): ChatMember!
+    """
+
+    # Добавление пользователя в напоминание
+    ## Возвращает
+    Добавленную грань пользователь/напоминание
+    ## Доступ
+    Только создатель напоминания может добавлять пользователей в напоминение
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *403 Forbidden*, текущий пользователь не является создателем
+    - *404 Not Found*:
+    - напоминание не найдено
+    - добавляемый пользователь не найден
+    """
+    addUserToReminder(reminder_id: ID!, user_id: ID!): ReminderMember!
+    """
+
+    # Установка нового "создателя"
+  ## Доступ
+    текущий пользователь должен быть в роле "создателя"
+  ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *403 ForbiddenError*:
+    - попытка изменить создателя в приватном чата
+    - чат закрыт
+    - текущий пользователь не создатель
+    - новый пользователь не активный участник
+    - *404 NotFound*:
+    - чат не найден
+    - текущий пользователь не участник чата
+    - не найден участник, которому передаются права
+    """
+    changeChatCreator(
+        "идентификатор чата"
+        chat_id: ID!,
+        "идентификатор пользователя, которому передается роль создателя"
+        user_id: ID!
+    ): Null
+    """
+
+    # Отметить напоминание
+    При наступлении времени оповещения напоминание
+    должно быть отображено пользователю. Данный момент фиксирует
+    факт получения напоминания пользователем.
+    ## Возвращает
+    Отмеченное напоминание
+    ## Доступ
+    Только получатель напоминание может отметить напоминание
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *403 Forbidden*:
+    - TODO: пользователь не является участником оповещения
+    - *404 Not Found*:
+    - TODO: напоминание не найдено
+    """
+    checkReminder(
+        "идентификатор оповещения"
+        id: ID!
+    ): Reminder!
+    """
+
+    # Закрытие чата
+    ## Доступ
+    Текущий пользователь должен быть создателем чата
+    ## Ошибки
+    - *401 Unauthorized*: пользователь не аутентифицирован или не активен
+    - *404 NotFound*:
+    - чат не найден
+    - текущий пользователь не участник чата
+    - *422 ForbiddenError*:
+    - пользователь не является создателем чата
+    - попытка закрыть уже закрытый чат
+    - попытка закрыть личный чат
+    """
+    closeChat(chat_id: ID!): Null
+    """
+
+    # Удаление чата
+    ## Доступ
+    участник должен быть создателем чата, не важно в каком статусе
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *403 ForbiddenError*:
+    - пользователь не является создателем чата
+    - попытка удалить личку
+    - *404 NotFound*, чат не найден, либо текущий пользователь не участник чата
+    """
+    deleteChat(
+        "идентификатор чата"
+        id: ID!
+    ): ID!
+    """
+
+    # Удаление файла
+    ## Доступ
+    Для удаления доступны только файлы прикрепленные к чату (AttachedFile)
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *404 NotFound*: файл не найден
+    """
+    deleteFile(id: ID!): ID!
+    """
+
+    # Удаление колонки задач
+    ## Доступ
+    Пользователь может удалить пустую колонку
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *403 Forbidden*, попытка удалить дефолтную колонку
+    - *404 Not Found*, колонка не найдена
+    """
+    deleteGroup(
+        "идентификатор группы"
+        id: ID!
+    ): ID!
+    """
+
+    # Удаление сообщений
+    Удаление сообщений доступно в течение ограниченного времени после создания сообщения.
+    Данное время в можно получить из запроса query { settings { messageDeleteTimeDelta } }
+    К удалению доступно ограниченное количество сообщений.
+    Данное количество можно получить из запроса query { settings { maxDeleteMessagesCount } }
+    Если одно из сообщений не найдено, оно будет молча пропущено, остальные будут удалены,
+    клиенту не будет возвращена ошибка.
+    # Доступ
+    Пользователь должен быть отправителем сообщения и активным участником чата
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *403 Forbidden*:
+    - вы не создатель сообщения
+    - пользователь не является активным участником чата
+    - время удаления сообщения превышено
+    """
+    deleteMessages(
+        "идентификатор чата, откуда удаляются сообщения"
+        chat_id: ID!,
+        "идентификатор удаляемых сообщений"
+        message_ids: [ID!]!
+    ): [ID]!
+    """
+
+    # Удаление напоминания
+    ## Возвращает
+    Удаленное напоминание
+    ## Доступ
+    Только создатель напоминания может удалить напоминание
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *404 Not Found*:
+    - напоминание не найдено
+    - пользователь не является создателем напоминания
+    """
+    deleteReminder(
+        "идентификатор напоминания"
+        id: ID!
+    ): Boolean @deprecated(reason : "используйте Mutation.deleteReminders")
+    """
+
+    # Удаление напоминаний
+    ## Возвращает
+    Идентификаторы удаленных напоминаний
+    ## Доступ
+    Только создатель напоминания может удалить напоминание
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *404 Not Found*:
+    - напоминание не найдено
+    - пользователь не является создателем напоминания
+    """
+    deleteReminders(
+        "идентификатор напоминания"
+        ids: [ID!]!
+    ): [ID!]!
+    """
+
+    # Удаление тега
+    ## Доступ
+    Пользователь может удалить любой свой тег
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *403 Not Found*, тег не найден
+    """
+    deleteTag(
+        "идентификатор группы"
+        id: ID!
+    ): ID!
+    """
+
+    # Удаление дела
+    ## Доступ
+    Пользователь должен быть участником чата, связанного с задачей
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *404 Not Found*:
+    - задача не найдена
+    - пользователь не является участником связанного чата
+    """
+    deleteTodo(id: ID!): Todo!
+    """
+
+    # пересылка сообщений
+    Пользователь может переслать только те сообщения,
+    к которым он имеет доступ
+    Максимально пользователь может переслать `settings.maxForwardMessages` сообщений
+    в `settings.maxForwardChats` чатов
+    """
+    forwardMessages(
+        "идентификаторы сообщений"
+        message_ids: [ID!]!,
+        "идентификаторы чатов-получателей"
+        to_chat_ids: [ID!]!
+    ): ChatForwardMessageConnection!
+    """
+
+    # Скрытие дефолтной колонки
+    ## Доступ
+    У всех пользователей есть дефолтная колонка и они могут ее скрыть
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    hideDefaultGroup: Group!
+    """
+
+    # Отправка приглашения по email
+    Поведение повторяет `inviteByPhone`
+    """
+    inviteByEmail(
+        "комментарий к инвайту"
+        comment: String,
+        "email получателя"
+        email: Email!
+    ): Null
+    """
+
+    # Отправка приглашения по телефону
+    Возможна рассылка максимум 10 получетелю(-ям)
+    максимум по 3 повтора(-ов) в час
+    ## Доступ
+    Пользователь активен
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *422 UnprocessableEntity*: комментарий слишком длинный
+    - *429 TooManyRequests*: превышен лимит отправок
+    """
+    inviteByPhone(
+        "комментарий к инвайту"
+        comment: String,
+        "телефон получателя"
+        phone: PhoneNumber!
+    ): Null
+    """
+
+    # Выход из чата
+    ## Доступ
+    Текущий пользователь должен быть обычным участником чата (не создатель)
+    ## Ошибки
+    - *401 Unauthorized*: пользователь не аутентифицирован или не активен
+    - *404 NotFound*:
+    - чат не найден
+    - текущий пользователь не участник чата
+    - *422 ForbiddenError*:
+    - пользователь является создателем чата
+    - чат закрыт
+    - попытка выйти из уже покинутого чата
+    - личный чат
+    """
+    leaveFromChat(chat_id: ID!): Null
+    """
+
+    # Запрос одноразового пароля
+    Для того, чтобы аутентифицироваться на сервисе, необходимо
+    запросить одноразовый пароль. Одноразовый пароль высылается на телефон,
+    указанный в качестве аргумента. Если номер не найден в системе,
+    создается новый пользователь. Одноразовый логин и код ожидаются для
+    поля otpToToken
+    ## Доступ
+    любой неаутентифицированный пользователь
+    ## Ошибки
+    - *429 TooManyRequests*, если на данный номер повторно запрошен одноразовый пароль
+    до истечения времени из поля nextBackoffTime. Одно из полей ошибки содержит время,
+    оставшееся до разрешения следующего запроса.
+    """
+    makeOTP(
+        "Мобильный телефон"
+        phone: PhoneNumber!
+    ): MakeOTPResult!
+    """
+
+    # Получение пользователей по записям из телефонной книги
+    Клиент отправляет список телефонных номеров из книги,
+    в ответ сервер возвращает список зарегистрированных пользователей
+    с пометкой о наличии контакта
+    ## Возвращает
+    Список зарегистрированных пользователей
+    ## Доступ
+    Любой аутентифицированный, активный пользователь
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    makePosibleContacts(
+        "двухбуквенный код страны (любой кейс)"
+        countryCode: String,
+        "список номеров телефонной книги"
+        phones: [String!]!
+    ): MakePosibleContactsConnection!
+    """
+
+    # Создание отметки о прочитанных сообщениях
+    данным методом клиент уведомляет сервис, что пользователь прочел
+    указанный чат (chat_id) до указанного сообщения (bookmark_message_id)
+    ## Доступ
+    пользователь должен быть активным участником чата
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *404 NotFound*:
+    - чат не найден
+    - текущий пользователь не участник чата
+    - сообщение не найдено
+    - *422 ForbiddenError*:
+    - попытка переустановить отметку на более раннее сообщение
+    - попытка переустановить отметку на то-же сообщение
+    """
+    moveBookmark(
+        "букмарк последнего прочитанного сообщения (IChatMessageEdge.bookmark)"
+        bookmark: Bookmark!,
+        "идентификатор чата"
+        chat_id: ID!
+    ): CheckStatus!
+    """
+
+    # создание чата
+    участниками вновь созданного чата являются текущий пользователь и
+    указанные пользователи (user_ids)
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *403 Forbidden*, id создаваемого чата уже существует
+    """
+    newChat(
+        "поля вновь создаваемого чата"
+        input: NewChatInput!,
+        "поля вновь создаваемой задачи, связанной с чатом"
+        issue_input: NewIssueInput,
+        "идентификаторы пользователей"
+        user_ids: [ID!]! = []
+    ): Chat!
+    """
+
+    # Создание колонок для задач
+    ## Доступ
+    Любой пользователь может создавать колонки
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    newGroup(
+        "поля создаваемой группы"
+        input: NewGroupInput!
+    ): Group!
+    """
+
+    # создание сообщений
+    Доступны к созданию текстовые и файловые сообщения.
+    Для создания файловых сообщений, файлы необходимо предварительно загрузить
+    в методе uploadFiles.
+    # Доступ
+    Пользователь должен быть активным участником чата, в котором
+    создаются файлы.
+    ## Ошибки
+    - *400 BadRequest*, передан пустой список сообщений
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *403 Forbidden*:
+    - создается текстовое сообщение без текста и цитаты
+    - пользователь не является активным участником чата
+    - *404 Not Found*:
+    - чат не найден
+    - файл не найден
+    - цитируемое сообщение не найдено
+    - *429 TooManyRequests*, возвращается в случае попытки отправки более
+    30 сообщений в секунду.
+    """
+    newMessages(
+        "идентификатор чата"
+        chat_id: ID!,
+        "поля создаваемых сообщений"
+        input: [NewMessageInput!]!
+    ): [IMessage!]! @deprecated(reason : "используйте Mutation.newMessages2")
+    """
+
+    # создание сообщений
+    Доступны к созданию текстовые и файловые сообщения.
+    Для создания файловых сообщений, файлы необходимо предварительно загрузить
+    в методе uploadFiles.
+    # Доступ
+    Пользователь должен быть активным участником чата, в котором
+    создаются файлы.
+    ## Ошибки
+    - *400 BadRequest*, передан пустой список сообщений
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *403 Forbidden*:
+    - создается текстовое сообщение без текста и цитаты
+    - пользователь не является активным участником чата
+    - *404 Not Found*:
+    - чат не найден
+    - файл не найден
+    - цитируемое сообщение не найдено
+    """
+    newMessages2(
+        "идентификатор чата"
+        chat_id: ID!,
+        "поля создаваемых сообщений"
+        input: [NewMessageInput!]!
+    ): IChatMessageConnection!
+    """
+
+    # создание приватного чата (переговорка)
+    Приватный чат создается для текущего пользователя и указанного пользователя (user_id)
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *403 Forbidden*, приватный чат между пользователями уже существует
+    """
+    newPrivateChat(
+        "свойства вновь создаваемого чата"
+        input: NewPrivateChatInput!,
+        "идентификатор пользователя"
+        user_id: ID!
+    ): PrivateChat!
+    """
+
+    # Создание напоминания
+    ## Возвращает
+    Вновь созданное напоминание
+    ## Доступ
+    Если напоминание ассоциируется с задачей,
+    пользователь должен быть активным участником задачи.
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *403 Forbidden*:
+    - чат не найден
+    - пользователь не активный участник чата
+    - идентификатор уже существует в системе
+    """
+    newReminder(
+        "поля вновь создаваемого напоминания"
+        input: NewReminderInput!
+    ): Reminder!
+    """
+
+    # Создание тегов
+    ## Доступ
+    Любой пользователь может создавать теги
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    newTag(
+        "поля создаваемой группы"
+        input: NewTagInput!
+    ): Tag!
+    """
+
+    # Обновление дела
+    Дело должно быть привязано к существующей задаче
+    ## Доступ
+    Пользователь должен быть участником чата, связанного с делом
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *403 Forbidden*:
+    - пользователь не является активным участником
+    соответствующего чата
+    - идентификатор уже существует в системе
+    - *404 Not Found*: соответствующий чат не найден в систем
+    либо текущий пользователь не является участником чата
+    """
+    newTodo(input: NewTodoInput!): Todo!
+    """
+
+    # токен аутентификации по одноразовому паролю
+    Обмен одноразового логина, полученного при вызове мутации makeOTP,
+    и одноразового пароля, высланного в смс на токен аутентификации
+    ## Доступ
+    любой неаутентифицированный пользователь
+    ## Ошибки
+    - *401 Unauthorized*, одноразовый логин не найден
+    - *429 TooManyRequests*, последняя попытка использована, следует запросить новый код
+    """
+    otpToToken(
+        "одноразовый логин"
+        login: String!,
+        "одноразовый пароль"
+        password: String!
+    ): OTPToTokenResult!
+    """
+
+    # Подписка запроса на загрузку изображения чата
+    ## Доступ
+    Любой активный участник чата
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или находится в неверном статусе
+    - *403 Forbidden*:
+    - попытка загрузить изображение в несуществующий чат,
+    либо пользователь не является активным участником чата
+    """
+    presignChatImage(input: PresignChatImageInput!): PresignedRequest!
+    """
+
+    # Подписка файла для сообщения
+    ## Доступ
+    Любой активный участник чата
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или находится в неверном статусе
+    - *403 Forbidden*:
+    - попытка прикрепить файл к несуществующему чату,
+    либо пользователь не является активным участником чата
+    """
+    presignMessageFile(input: PresignMessageFileInput!): PresignedRequest!
+    """
+
+    # Подписка запроса на загрузку аватара пользователя
+    ## Доступ
+    Любой активный пользователь
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или находится в неверном статусе
+    """
+    presignUserImage(input: PresignUserImageInput!): PresignedRequest!
+    """
+
+    # обновление токена аутентификации
+    Время жизни токена ограничено, время жизни можно получить при создании токена
+    ## Доступ
+    любой аутентифицированный пользователь может обменять старый токен
+    на новый с продленным временем действия,
+    причем старый токен становится не действительным
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    refreshToken: AuthToken!
+    """
+
+    # Регистрация пользователя
+    После регистрации для текущей сессии создается активный пользователь 'ActiveUser'
+    далее все действия происходят от имени этого пользователя
+    ## Возвращает
+    Сущность текущего пользователя
+    ## Доступ
+    Только регистрирующийся пользователь, находящийся на шаге PROFILE_FILLING
+    ## Ошибки
+    - *401 Unauthorized*, сессия не находится в состоянии регистрации
+    - *403 Forbidden*:
+    - регистрация не находится на шаге PROFILE_FILLING
+    - UserWithSamePhoneExists: существует пользователь с тем же телефоном
+    - UserWithSameEmailExists: существует пользователь с тем же email-адресом
+    """
+    registerUser(
+        "идентификатор аватара"
+        avatar_id: ID,
+        "поля вновь создаваемого профиля"
+        input: RegisterUserInput!
+    ): ActiveUser!
+    """
+
+    # Явное удаление пользователя из контактов
+    Пользователь, после удаления из контактов, будет возвращаться
+    в списке пользователей при запросе ` query { users { ... }} `.
+    Эффект не симметричен.
+    ## Доступ
+    Любой аутентифицированный, активный пользователь
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *404 Not Found*, удаляумый из контактов пользователь не найден
+    """
+    removeContact(user_id: ID!): Null
+    """
+
+    # Выход из напоминания
+    ## Возвращает
+    Удаленная грань пользователь/напоминание
+    ## Доступ
+    Только обычный участник напоминания (не создатель) может произвести данное действие
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *403 Forbidden*:
+    - текущий пользователь является создателем
+    - *404 Not Found*:
+    - напоминание не найдено
+    """
+    removeSelfFromReminder(reminder_id: ID!): RemoveUserFromReminderResult! @deprecated(reason : "используйте Mutation.removeSelfFromReminders")
+    """
+
+    # Выход из напоминаний
+    ## Доступ
+    Только обычный участник напоминания (не создатель) может произвести данное действие
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *403 Forbidden*:
+    - текущий пользователь является создателем (должен удалить напоминание)
+    - текущий пользователь не является участником напоминания
+    """
+    removeSelfFromReminders(reminder_ids: [ID!]!): Null
+    """
+
+    # Исключение пользователя из чата
+    ## Доступ
+    Текущий пользователь должен быть создателем чата
+    ## Ошибки
+    - *401 Unauthorized*: пользователь не аутентифицирован или не активен
+    - *404 NotFound*:
+    - чат не найден
+    - текущий пользователь не участник чата
+    - исключаемый пользователь не найден
+    - *422 ForbiddenError*:
+    - пользователь не является создателем чата
+    - попытка добавить пользователя, который уже существует
+    """
+    removeUserFromChat(chat_id: ID!, user_id: ID!): ChatMember!
+    """
+
+    # Удаление пользователя из напоминания
+    ## Возвращает
+    Удаленная грань пользователь/напоминание
+    ## Доступ
+    Только создатель напоминания может произвести данное действие
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *403 Forbidden*:
+    - reminder.checked != true
+    - текущий пользователь не является создателем
+    - текущий пользователь удаляет себя из напоминания
+    - *404 Not Found*:
+    - напоминание не найдено
+    - удаляемый пользователь не найден
+    """
+    removeUserFromReminder(reminder_id: ID!, user_id: ID!): RemoveUserFromReminderResult!
+    """
+
+    # Запрос на изменение телефонного номера
+    На указанный номер телефона отправляется код подтвержения.
+    Если вновь указанный номер телефона уже привязан к другому пользователю,
+    другой пользователь переводится в статус DISABLED, его номер телефона заменяется
+    на null. Возвращает время, до которого сервис не принимает от данного пользователя
+    данных запросов.
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *429 TooManyRequests*, если данным пользователем повторно запрошен код
+    до истечения времени из поля nextBackoffTime. Одно из полей ошибки содержит время,
+    оставшееся до разрешения следующего запроса.
+    """
+    requestPhoneUpdate(
+        "Новое значение телефона пользователя"
+        phone: PhoneNumber!
+    ): DateTime
+    """
+
+    # Возобновление чата
+    ## Доступ
+    Текущий пользователь должен быть создателем чата
+    ## Ошибки
+    - *401 Unauthorized*: пользователь не аутентифицирован или не активен
+    - *404 NotFound*:
+    - чат не найден
+    - текущий пользователь не участник чата
+    - *422 ForbiddenError*:
+    - пользователь не является создателем чата
+    - попытка возобновить незакрытый чат
+    """
+    resumeChat(chat_id: ID!): Null
+    """
+
+    # Возвращение в чат
+    ## Доступ
+    Текущий пользователь должен быть обычным участником чата (не создатель)
+    ## Ошибки
+    - *401 Unauthorized*: пользователь не аутентифицирован или не активен
+    - *404 NotFound*:
+    - чат не найден
+    - текущий пользователь не участник чата
+    - *422 ForbiddenError*:
+    - пользователь является создателем чата
+    - чат закрыт
+    - попытка вернуться в чат, в котором вы уже состоите
+    - личный чат
+    """
+    returnToChat(chat_id: ID!): Null
+    """
+
+    # Установить статус клиента
+    Явное оповещение сервиса о статусе клиента. Если пользователь не находится
+    в статусе онлайн ни с одного клиента, считается, что он офлайн.
+    По-умолчанию клиент становится онлайн при создании вебсокет канала с
+    сервисом и офлайн при разрыве. Явно указать статус клиента можно с использованием
+    данного метода.
+    ## Доступ
+    Пользователь активен, клиент для вызова метода использует вебсокет.
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *422 Unprocessable entity*, метод вызван не используя вебсокет в качестве транспорта
+    """
+    setClientStatus(
+        "статус клиента"
+        online: Boolean!
+    ): Null
+    """
+
+    # Сохранение черновика сообщения
+    ## Доступ
+    пользователь должен быть активным участником чата
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *404 NotFound*:
+    - чат не найден, либо текущий пользователь не участник чата
+    - *422 UnprocessableEntity*:
+    - черновик слишком большой (более 50000)
+    """
+    setDraft(chat_id: ID!, draft: String!): Null
+    """
+
+    # Установка тегов задачи
+    При установке нового списка тегов, прежний сбрасывается
+    ## Доступ
+    Пользователь может прикреплять к задаче только собственные теги
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *403 Not Found*, тег не найден
+    """
+    setIssueTags(
+        "идентификатор задачи"
+        issue_id: ID!,
+        "идентификаторы тегов"
+        tag_ids: [ID!]!
+    ): Issue!
+    """
+
+    # Установка локали
+    Локаль используется для формирования имени пользователя и сервисных сообщений.
+    ## Доступ
+    Пользователь активен
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    setLocale(
+        "новая локаль клиента"
+        locale: Locale!
+    ): Null
+    """
+
+    # Изменение отметки "избранное" для сообщения
+    Пользователь может добавлять и удалять сообщения в "избранное"
+  # Доступ
+    Пользователь должен состоять в соответсвующем чате в момент создания сообщения.
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *404 Not Found*, сообщение не найдено
+    """
+    setMessageFavorite(
+        "флаг избранного"
+        favorite: Boolean!,
+        "идентификатор сообщения"
+        message_id: ID!
+    ): Boolean
+    """
+
+    # установка токена
+    действует для последующих мутаций,
+    при использовании ws, для всех последующих операций
+    ## Доступ
+    любой пользователь
+    """
+    setToken(
+        "токен аутентификации"
+        token: String!
+    ): Boolean
+    """
+
+    # Установить настройки пользователя
+    Данные настройки используются исключительно клиентами,
+    никак не влияют на поведение сервера.
+    ## Доступ
+    Пользователь аутентифицирован и активен
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *422 Unprocessable entity*, переданный json > 32000 символов
+    """
+    setUserSettings(
+        """
+
+        настройки пользователя,
+        допускается любой валидный json, ограничение в 32000 символов
+        """
+        data: JSON!
+    ): Null
+    """
+
+    # Погашение регистрационного промокода
+    Если включена регистрация по промокодам, то перед
+    заполнением профиля, необходимо указать промокод
+    ## Возвращает
+    новое состояние регистрации
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован
+    или не находится в состоянии 'VAUCHER_WAITING'
+    - *403 Forbidden*, если код не корректен
+    """
+    setVoucher(
+        "Промокод"
+        voucher: String!
+    ): RegistrationStep!
+    """
+
+    # Оповещение "печатает"
+  Клиент сообщает сервису, что пользователь набирает текст.
+    При наборе текста клиент должен вызывать данный метод каждые n секунд
+    до тех пор, пока пользователь не завершил набор. n следует получить из
+    { settings { typingTimeout } }.
+    ## Доступ
+    Пользователь должен быть активным участником чата.
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *403 Forbidden*: пользователь не является активным участником чата
+    """
+    typing(
+        "идентификатор чата"
+        chat_id: ID!
+    ): Null
+    """
+
+    # Обновление чата
+    ## Доступ
+    пользователь должен быть участником чата
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *403 ForbiddenError*:
+    - попытка обновить собственные поля приватного чата
+    - статус участника текущего пользователя не позволяет обновить указанные поля
+    - *404 NotFound*, чат не найден, либо текущий пользователь не участник чата
+    """
+    updateChat(
+        "идентификатор чата"
+        id: ID!,
+        "значения полей чата"
+        input: UpdateChatInput!
+    ): IChat!
+    """
+
+    # Обновление свойств колонки задач
+    ## Доступ
+    Пользователь может обновить любую созданную им колонку
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    updateGroup(
+        "идентификатор обновляемой колонки"
+        id: ID!,
+        "поля создаваемой группы"
+        input: UpdateGroupInput!
+    ): Group!
+    """
+
+    # Обновление задачи
+    Задача связывается с уже созданным чатом (chat_id).
+    ## Доступ
+    Пользователь должен быть участником чата, связанного с задачей
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *403 Forbidden*, не создатель пытается установить исполнителя
+    - *404 Not Found*:
+    - задача не найдена
+    - пользователь не является участником связанного чата
+    """
+    updateIssue(
+        "идентификатор задачи"
+        id: ID!,
+        "обновляемые поля задачи"
+        input: UpdateIssueInput!
+    ): Issue!
+    """
+
+    # Обновление полей текущего пользователя
+    ## Возвращает
+    Сущность текущего пользователя
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *403 Forbidden*:
+    - ~~UserWithSamePhoneExists: существует пользователь с тем же телефоном~~
+    - UserWithSameEmailExists: существует пользователь с тем же email-адресом
+    """
+    updateMe(
+        "обновляемые поля текущего пользователя"
+        input: UpdateUserInput!
+    ): ActiveUser!
+    """
+
+    # Обновление текстового сообщения
+    Обновление сообщение доступно в течение ограниченного времени.
+    Данное время в можно получить из запроса query { settings { messageEditTimeDelta } }
+    # Доступ
+    Пользователь должен быть отправителем сообщения и активным участником чата
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *403 Forbidden*:
+    - вы не создатель сообщения
+    - пользователь не является активным участником чата
+    - время обновления сообщения превышено
+    - *404 Not Found*:
+    - сообщение не найдено
+    """
+    updateRegularMessage(
+        "поля обновляемого сообщения"
+        input: UpdateMessageInput!,
+        "идентификатор сообщения"
+        message_id: ID!
+    ): RegularMessage!
+    """
+
+    # Обновление напоминания
+    ## Возвращает
+    Обновленное напоминание
+    ## Доступ
+    Только создатель может обновить напоминание
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *403 Forbidden*:
+    - пользователь не является владельцем оповещения
+    - чат, с которым ассоциируется оповещение, не найден
+    - пользователь не является активным участником, ассоциируемого чата
+    - *404 Not Found*:
+    - напоминание не найдено
+    """
+    updateReminder(
+        "идентификатор оповещения"
+        id: ID!,
+        "изменяемые поля оповещения"
+        input: UpdateReminderInput!
+    ): Reminder!
+    """
+
+    # Обновление свойств тегов
+    ## Доступ
+    Пользователь может обновить любую созданнуй им тег
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    updateTag(
+        "идентификатор обновляемого тега"
+        id: ID!,
+        "поля создаваемой группы"
+        input: UpdateTagInput!
+    ): Tag!
+    "обновление дела"
+    updateTodo(id: ID!, input: UpdateTodoInput!): Todo!
+    """
+
+    # подтверждение телефона
+    Подтверждение телефона происходит путем передачи в качестве аргумента кода,
+    высланного в смс при запросе мутации requestPhoneUpdate.
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *403 Forbidden*, если код не корректен.
+    - *429 TooManyRequests*, если данным пользователем повторно запрошен код
+    до истечения времени, возвращенного прошлым заросом. Одно из полей ошибки содержит время,
+    оставшееся до разрешения следующего запроса.
+    """
+    verifyPhone(
+        "Код подтверждения"
+        code: String!
+    ): PhoneNumber!
+}
+
+"сообщение-уведомление"
+type NotificationMessage implements IMessage {
+    "чат, в который отправили сообщение, может быть null в процитированных сообщениях"
+    chat: IChat!
+    "данные для формирования сообщения"
+    data: [NotificationDSL!]!
+    id: ID!
+    """
+
+    Флаг того, что сообщение в избранных.
+    Гарантируется, что будет установлено в запросе сообщений чата,
+    в остальных случаях не гарантируется.
+    """
+    is_favorite: Boolean
+    "флаг того, что сообщение отправил текущий пользователь"
+    is_my: Boolean!
+    "глобальный порядок сообщения 53-bits, сравнивая данные числа легко определить в каком порядке они были созданы аналог twitter snowflake"
+    order: LongInt!
+    timestamp: DateTime!
+    "пользователь, отправивший сообщение"
+    user: RegisteredUser!
+    "идентификаторы пользователей, прочитавших сообщение"
+    viewed_by: [ID!]!
+}
+
+type NotificationText implements INotificationText {
+    text: String!
+}
+
+type NotificationTodo implements INotificationText {
+    id: ID
+    text: String!
+}
+
+type NotificationUser implements INotificationText {
+    id: ID!
+    text: String!
+}
+
+type OTPToTokenResult {
+    "пользователь, под которым текущая сессия стала аутентифицирована"
+    me: MyUser!
+    "токен аутентификации"
+    token: AuthToken!
+}
+
+type OnlineChangeResult {
+    "Идентификатор пользователя изменившего статус онлайн"
+    id: ID!
+    "время когда пользователь был последний раз онлайн"
+    last_seen: DateTime
+    "состояние пользователя"
+    online: Boolean!
+}
+
+"Информация о пагинации в коннекшне"
+type PageInfo {
+    "Последний курсор на странице. Может использоваться для получения следующей страницы"
+    endCursor: String
+    "Существует ли еще следующая страница?"
+    hasNextPage: Boolean!
+    "Существует ли предыдущая страница?"
+    hasPreviousPage: Boolean!
+    "Первый курсор со следующей страницы"
+    nextPageStartCursor: String
+    "Последний курсор с предыдущей страницы"
+    prevPageEndCursor: String
+    "Первый курсор на странице. Может использоваться для получения предыдущей страницы"
+    startCursor: String
+}
+
+type PresignedField {
+    name: String!
+    value: String!
+}
+
+"""
+
+Подписаный запрос, содержит и необходимые поля, которые необходимо отправить
+в виде FormData.
+Также должно быть добавлено поле "file", содержащее контент загружаемого файла
+"""
+type PresignedRequest {
+    fields: [PresignedField!]!
+    url: String!
+}
+
+"Приватный чат (личка)"
+type PrivateChat implements IChat {
+    "второй пользователь переговорки"
+    another_user: User!
+    "файлы, прикрепленные к данному чату, но еще не отправленные"
+    attached_files(after: String, before: String, first: Int, last: Int): AttachedFileConnection!
+    "статус прочтенности/доставленности"
+    check_status: CheckStatus!
+    "дата создания чата"
+    created_at: DateTime!
+    "сохраненный черновик. интерпертировать пустую строку как отсутствие черновика"
+    draft: String!
+    "избранные сообщения данного чата"
+    favorite_messages(after: String, before: String, first: Int, last: Int): ChatFavoriteMessagesConnection!
+    "файлы, прикрепленные к сообщениям данного чата"
+    files(after: String, around: ID, before: String, filter: ChatFilesFilterInput, first: Int, last: Int): MessageFileConnection!
+    "чат скрыт"
+    hidden: Boolean
+    id: ID!
+    "ссылки в сообщениях"
+    links(after: String, before: String, first: Int, last: Int): LinkInfoConnection!
+    "сообщения чата"
+    messages(after: String, around: ID, around_bookmark: Bookmark, before: String, first: Int, last: Int): IChatMessageConnection!
+    "*[несобственное поле](https://gudexco.atlassian.net/wiki/spaces/PD/pages/294913)*  Уровень назойливости событий чата"
+    notification: ChatNotificationState!
+    """
+
+    *[несобственное поле](https://gudexco.atlassian.net/wiki/spaces/PD/pages/294913)*  Ограничить состояние notification датой, например - отлючить звук до...
+    Если устанавливаетсу notification_disabled_till,
+    то при наступлении указанного времени,
+    состояние notification снова возвращается в ON.
+    При наступлении указанного времени,
+    придет сабскрипшн chatUpdated,
+    где будет notification = 'ON', notification_disabled_till = null .
+    """
+    notification_disabled_till: DateTime
+    "индекс сортировки *поле индивидуально для пользователя*"
+    rank: LexoRank
+    "дела, прикрепленные к чату"
+    todos(after: String, before: String, first: Int, last: Int): TodoConnection!
+    "пользователи в чате"
+    users: IChatUserConnection!
+}
+
+type Query {
+    """
+
+    # Чат по идентификатору
+    ## Доступ
+    пользователь является участником чата
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *404 Not Found*, объект не найден
+    """
+    chat(id: ID!): IChat!
+    """
+
+    # Список чатов
+    ## Доступ
+    пользователь является участником чата
+    если это личка - в нее были созданы сообщения
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    chats(after: String, before: String, filter: ChatsFilterInput, first: Int, last: Int): IChatConnection!
+    """
+
+    # Избранные сообщения
+    Сообщения выводятся по убыванию времени добавления в избранные
+    ## Доступ
+    пользователь добавил сообщение в избанные
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    favoriteMessages(after: String, before: String, first: Int, last: Int): IMessageConnection!
+    """
+
+    # Список элементов потока
+    В списке сначала возвращаются актуальные напоминания,
+    затем закрепленные чаты/задачи в порядке сортировки,
+    затем чаты/задачи упорядоченные по дате создания последнего сообщения
+    от самых новых к самым старым.
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    flow(after: String, first: Int): FlowConnection!
+    """
+
+    # Колонка по идентификатору
+    ## Доступ
+    Пользователь - создатель группы
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *404 Not Found*, объект не найден
+    """
+    group(id: ID!): Group!
+    """
+
+    # Список колонок
+    ## Доступ
+    Пользователь - создатель группы
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    groups: GroupConnection!
+    """
+
+    # Задача по идентификатору
+    ## Доступ
+    задача связана с чатом, к которому пользователь имеет доступ
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *404 Not Found*, объект не найден
+    """
+    issue(id: ID!): Issue!
+    """
+
+    # Список задач
+    ## Доступ
+    задача связана с чатом, к которому пользователь имеет доступ
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    issues(after: String, before: String, filter: IssuesFilterInput, first: Int, last: Int): IssueConnection!
+    "Локаль текущего соединения"
+    locale: Locale!
+    """
+
+    # Текущий пользователь
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован
+    """
+    me: MyUser!
+    """
+
+    # Сообщение по идентификатору
+    ## Доступ
+    пользователь был активным участником чата на момент создания сообщения
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *404 Not Found*, объект не найден
+    """
+    message(id: ID!): IMessage!
+    """
+
+    # Напоминание по идентификатору
+    ## Доступ
+    пользователь является получателем напоминания
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *404 Not Found*, объект не найден
+    """
+    reminder(id: ID!): Reminder!
+    """
+
+    # Список напоминаний
+    ## Доступ
+    пользователь является получателем напоминания
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    reminders(after: String, before: String, filter: ReminderFilterInput, first: Int, last: Int): ReminderConnection!
+    """
+
+    # Поиск пользователей
+    Поиск производится по полям last_name, first_name, job_title, city, email
+    по полному соответствию.
+    По email также происходит поиск по триграммам, а также по подстроке.
+    ## Доступ
+    все пользователи доступны
+    """
+    search(
+        "исключить пользователей по id"
+        exclude: [ID!],
+        "количество пользователей в поисковой выдаче"
+        first: Int,
+        "строка поиска"
+        q: String!
+    ): [ActiveUser!]!
+    searchIssue(q: String!): IssueSearchConnection!
+    """
+
+    # Полнотекстовый поиск по тексту сообщений
+    ## Доступ
+    пользователь был активным участником чата на момент создания сообщения
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    searchMessages(
+        after: String,
+        filter: SearchMessageFilter,
+        first: Int! = 20,
+        "Текст поиска"
+        query: String!
+    ): SearchMessagesConnection!
+    "# Конфигурация сервера"
+    settings: Settings!
+    """
+
+    # Тег по идентификатору
+    ## Доступ
+    Пользователь - создатель группы
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *404 Not Found*, объект не найден
+    """
+    tag(id: ID!): Tag!
+    """
+
+    # Список тегов
+    ## Доступ
+    Пользователь - создатель группы
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    tags: TagConnection!
+    """
+
+    # Время сервера
+    Используется для синхронизации времени клиента и сервера.
+    Для синхронизации рекомендуется использовать алгоритм компенсации, аналогичный SNTP.
+    [пример использования, rest заменить на graphql](
+    https://github.com/enmasseio/timesync/blob/master/examples/advanced/express/index.html
+    )
+    """
+    timesync: DateTime!
+    """
+
+    # Пользователь по идентификатору
+    ## Доступ
+    текущий пользователь и искомый имеют общий чат/задачу/напоминание
+    либо явно добавлены с использованием addContact
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    - *404 Not Found*, объект не найден
+    """
+    user(id: ID!): User!
+    "# Параметры пользователя"
+    userSettings: JSON
+    """
+
+    # Список пользователей
+    ## Доступ
+    текущий пользователь и искомый имеют общий чат/задачу/напоминание
+    либо явно добавлены с использованием addContact
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    users: RootUserConnection!
+    """
+
+    # установка токена
+    действует для внутренних полей,
+    с сестринскими полями поведение не определено
+    ## Доступ
+    любой анонимный пользователь
+    """
+    withToken(
+        "токен аутентификации"
+        token: String!
+    ): Query!
+}
+
+"пользователь, находящийся в процессе регистрации"
+type RegisteringUser {
+    "аватар пользователя"
+    avatar: UserImage
+    "телефон пользователя"
+    phone: PhoneNumber!
+    "шаг регистрации"
+    registration_step: RegistrationStep!
+}
+
+type RegisteringUserImageUploadedResult {
+    "аватар"
+    image: UserImage!
+}
+
+"обычное сообщение"
+type RegularMessage implements IMessage {
+    "чат, в который отправили сообщение, может быть null в процитированных сообщениях"
+    chat: IChat!
+    "флаг того, что сообщение было отредактировано"
+    edited: Boolean!
+    id: ID!
+    """
+
+    Флаг того, что сообщение в избранных.
+    Гарантируется, что будет установлено в запросе сообщений чата,
+    в остальных случаях не гарантируется.
+    """
+    is_favorite: Boolean
+    "флаг того, что сообщение отправил текущий пользователь"
+    is_my: Boolean!
+    "информация о ссылках в данном сообщении"
+    links: [LinkInfo!]!
+    """
+
+    Пользователи, упомянутые в сообщении.
+    Сейчас - возвращаются все упомянутые пользователи,
+    в дальнейшем будут возвращаться только пользователи,
+    не являющиеся участниками чата
+    """
+    mentioned_users: UserConnection!
+    "текст сообщения"
+    message: String!
+    "глобальный порядок сообщения 53-bits, сравнивая данные числа легко определить в каком порядке они были созданы аналог twitter snowflake"
+    order: LongInt!
+    quoted_message: QuotedMessage
+    timestamp: DateTime!
+    "пользователь, отправивший сообщение"
+    user: RegisteredUser!
+    "идентификаторы пользователей, прочитавших сообщение"
+    viewed_by: [ID!]!
+}
+
+"Напоминание"
+type Reminder {
+    "чат, к которому привязано напоминание"
+    chat: IChat
+    "флаг получения оповещения для текущего пользователя"
+    checked: Boolean!
+    "дата создания напоминания"
+    created_at: DateTime!
+    "пользователь-создатель чата"
+    creator: RegisteredUser!
+    id: ID!
+    "авторизованный пользователь - создатель напоминания"
+    is_my: Boolean!
+    "время срабатывания напоминания"
+    timestamp: DateTime!
+    "название напоминания"
+    title: String!
+    "пользователи в чате"
+    users: ReminderUserConnection!
+}
+
+type ReminderConnection {
+    edges: [ReminderEdge!]!
+    pageInfo: PageInfo!
+}
+
+type ReminderEdge {
+    cursor: String!
+    node: Reminder!
+}
+
+"Грань пользователь/оповещение"
+type ReminderMember {
+    "напоминание"
+    reminder: Reminder!
+    "пользователь"
+    user: User!
+}
+
+"Коннекшн напоминание/пользователь"
+type ReminderUserConnection {
+    edges: [ReminderUserEdge!]!
+    pageInfo: PageInfo!
+}
+
+"Грань напоминание/сообщение"
+type ReminderUserEdge {
+    cursor: String!
+    node: User!
+}
+
+"Результат удалениея пользователя из напоминания"
+type RemoveUserFromReminderResult {
+    "ID напоминания"
+    reminder_id: ID!
+    "ID пользователя"
+    user_id: ID!
+}
+
+type RootUserConnection {
+    edges: [RootUserEdge!]!
+    pageInfo: PageInfo!
+}
+
+type RootUserEdge {
+    cursor: String!
+    "Пользователь в контактах у текущего"
+    is_contact: Boolean!
+    node: User!
+}
+
+type SearchMessagesConnection {
+    "# Количество найденных сообщений"
+    count: Int!
+    edges: [SearchMessagesEdge!]!
+    pageInfo: PageInfo!
+}
+
+type SearchMessagesEdge {
+    cursor: String!
+    node: RegularMessage!
+}
+
+"настройки"
+type Settings {
+    "адрес сервиса бизнес-логики"
+    backendBaseUrl: String!
+    "количество секунд с создания чата, в течение которых доступно удаление"
+    chatDeleteInterval: Int!
+    "адрес фронт-енда для данного окрежения"
+    frontendBaseUrl: String!
+    "Максимальный размер изображения чата"
+    maxChatImageLength: LongInt!
+    "Ограничение на количество участников чата (задачи)"
+    maxChatMembersCount: Int!
+    "Максимальное количество сообщений, которые можно удалить одновременно"
+    maxDeleteMessagesCount: Int!
+    "Максимальный размер черновика (chat.draft)"
+    maxDraftLength: Int!
+    "Максимальный размер поля ввода, кроме размера текста сообщения"
+    maxFieldLength: Int!
+    "Максимальное количество чатов для пересылки сообщений"
+    maxForwardChats: Int!
+    "Максимальное сообщений для пересылки"
+    maxForwardMessages: Int!
+    "Ограничение на количество тегов, которые можно прикрепить к задаче"
+    maxIssueTags: Int!
+    "Максимальный размер файла, загружаемого в сообщения"
+    maxMessageFileLength: LongInt!
+    "Максимальный размер файла, загружаемого в сообщения"
+    maxMessageImageLength: LongInt!
+    "Максимальный размер текста сообщения"
+    maxMessageLength: Int!
+    "Максимальное количество сообщений, которые можно отправить в секунду"
+    maxMessagesPerSecond: Int!
+    "Ограничение на количество участников напоминания"
+    maxReminderMembersCount: Int!
+    "Максимальный размер изображения чата"
+    maxUserImageLength: LongInt!
+    "Ограничение на количество тегов, которые может создать пользователь"
+    maxUserTags: Int!
+    "количество секунд с создания сообщения в течение которого доступно его удаление"
+    messageDeleteInterval: Int!
+    "количество секунд с создания сообщения в течение которого доступно его обновление"
+    messageUpdateInterval: Int!
+    "адрес сервиса ресайза изображений"
+    resizeBaseUrl: String!
+    "адрес сервиса веб-скрапинга"
+    scrapperBaseUrl: String!
+    "рекомендованный таймаут для отправки информации о том, что пользователь набирает сообщение"
+    typingTimeout: Int!
+    "версия сервиса бизнес-логики"
+    version: String
+    "адрес сервиса множественного скачивания файлов"
+    zipperBaseUrl: String!
+}
+
+type Subscription {
+    """
+
+    # Чат создан
+    ## Возвращает
+    Вновь созданный чат
+    ## Доступ
+    Доставляется всем участникам вновь созданного чата
+    ## Мутации, генерирующие данное событие
+    - newPrivateChat
+    - newChat
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    chatCreated: IChat! @deprecated(reason : "используйте pmChatActivated и groupChatCreated")
+    """
+
+    # Чат удален
+    Оповещает об удалении чата.
+    ## Возвращает
+    Идентификатор удаленного чата
+    ## Доступ
+    Доставляется всем участникам удаленного чата
+    ## Мутации, генерирующие данное событие
+    - deleteChat
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    chatDeleted: ID!
+    """
+
+    # Обновлено изображение чата
+    ## Возвращает
+    Загруженное изображение чата
+    ## Доступ
+    Все участники задачи в любом статусе
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    chatImageUploaded: ChatImageUploadedResult!
+    """
+
+    # Чат обновлен
+    Оповещает об обновлении чата. Если при обновлении задачи
+    было установлено поле notification_disabled_till,
+    оповещение также срабатывает при наступлении указанного срока.
+    ## Возвращает
+    Обновленный чат
+    ## Доступ
+    Доставляется всем участникам вновь созданного чата
+    ## Мутации, генерирующие данное событие
+    - updateChat
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    chatUpdated: IChat!
+    """
+
+    # Обновлена статуса доставки сообщений
+    ## Возвращает
+    Статус доставки
+    ## Доступ
+    Доставляется всем *активным* участникам соответствующего чата
+    ## Мутации, генерирующие данное событие
+    - moveBookmark
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    checkStatusUpdated: CheckStatus!
+    """
+
+    # Пользователь удалён из контактов
+    ## Возвращает
+    Идентификатор пользователя, удаленный из контактов
+    ## Доступ
+    Доставляется всем клиентам, удалившего
+    ## Мутации, генерирующие данное событие
+    - removeContact
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    contactRemoved: ID!
+    """
+
+    # Пользователи добавлены в контакты
+    ## Возвращает
+    Список пользователей, добавленных в контакты
+    ## Доступ
+    Доставляется всем клиентам, добавившего
+    ## Мутации, генерирующие данное событие
+    - addContact
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    contactsAdded: [User!]!
+    """
+
+    # В чат установлен черновик
+    ## Возвращает
+    Черновик и идентификатор соответствующего чата
+    ## Доступ
+    Доставляется всем клиентам пользователя, установивщего черновик
+    ## Мутации, генерирующие данное событие
+    - setDraft
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    draftSet: DraftSetResult
+    """
+
+    # Чат создан
+    ## Возвращает
+    Вновь созданный чат
+    Вновь созданную задачу (при наличии)
+    Вновь созданное сервисное сообщение
+    ## Доступ
+    Доставляется всем участникам вновь созданного чата
+    ## Мутации, генерирующие данное событие
+    - newChat
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    fChatCreated: CreateChatResult!
+    """
+
+    # В чат добавлен пользователь
+    ## Возвращает
+    Новую грань пользователь/чат
+    Вновь созданное нотификационное сообщение
+    ## Доступ
+    Доставляется всем *активным* участникам соответствующего чата
+    ## Мутации, генерирующие данное событие
+    - addUserToChat
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    fUserAddedToChat: AddUserToChatResult!
+    """
+
+    # Файл прикреплен к чату
+    ## Возвращает
+    Прикрепленный файл
+    ## Доступ
+    После прикрепления файла к чату оповещает все клиенты, загрузившего пользователя
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    fileAttached: AttachedFile!
+    """
+
+    # Файл удален
+    ## Возвращает
+    Удаленный файл
+    ## Доступ
+    После удаления файла все клиенты, загрузившего пользователя
+    ## Мутации, генерирующие данное событие
+    - deleteFile
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    fileDeleted: ID!
+    """
+
+    # Создан групповой чат
+    ## Возвращает
+    Вновь созанный групповой чат чат
+    ## Доступ
+    Доставляется всем чата
+    ## Мутации, генерирующие данное событие
+    - newChat
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    groupChatCreated: Chat!
+    """
+
+    # Колонка создана
+    ## Возвращает
+    Вновь созданную группу
+    ## Доступ
+    Доставляется всем клиентам, пользователя создавшего колонку
+    ## Мутации, генерирующие данное событие
+    - newGroup
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    groupCreated: Group!
+    """
+
+    # Колонка удалена
+    ## Возвращает
+    Идентификатор удаленной колонки
+    ## Доступ
+    Доставляется всем клиентам, пользователя - создателя колонки
+    ## Мутации, генерирующие данное событие
+    - deleteGroup
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    groupDeleted: ID!
+    """
+
+    # Колонка обновлена
+    ## Возвращает
+    Вновь обновленную группу
+    ## Доступ
+    Доставляется всем клиентам, пользователя - создателя колонки
+    ## Мутации, генерирующие данное событие
+    - updateGroup
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    groupUpdated: Group!
+    """
+
+    # У задачи установлены теги
+    ## Возвращает
+    Задачу
+    ## Доступ
+    Доставляется всем клиентам, пользователя, установившего теги
+    ## Мутации, генерирующие данное событие
+    - setIssueTags
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    issueTagsSetted: Issue!
+    """
+
+    # Задача обновлена
+    ## Возвращает
+    Вновь созданную задачу
+    ## Доступ
+    Доставляется всем участникам чата, связанного с задачей
+    ## Мутации, генерирующие данное событие
+    - updateIssue
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    issueUpdated: Issue!
+    """
+
+    # Сообщениe создано
+    ## Возвращает
+    Вновь созданное сообщение
+    ## Доступ
+    Доставляется всем *активным* участникам чата, в которое публикуется сообщение
+    ## Мутации, генерирующие данное событие
+    - newMessage
+    - множество мутаций по созданию и изменению сущностей генерирующих сервимные сообщения
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    messageCreated: IChatMessageEdge! @deprecated(reason : "используйте Subscription.messagesCreated")
+    """
+
+    # Сообщение обновлено
+    ## Возвращает
+    Обнавленное сообщение
+    ## Доступ
+    Доставляется всем участникам чата, имеющим доступ к обновленному сообщению
+    ## Мутации, генерирующие данное событие
+    - updateRegularMessage
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    messageUpdated: IMessage!
+    """
+
+    # Сообщения созданы
+    ## Возвращает
+    Вновь созданное сообщение
+    ## Доступ
+    Доставляется всем *активным* участникам чата, в которое публикуется сообщение
+    ## Мутации, генерирующие данное событие
+    - newMessage
+    - множество мутаций по созданию и изменению сущностей генерирующих сервимные сообщения
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    messagesCreated: IChatMessageConnection!
+    """
+
+    # Сообщения удалены
+    ## Возвращает
+    Идентификатор удаленных сообщений
+    ## Доступ
+    Доставляется всем участникам чата, имеющим доступ к удаленному сообщению
+    ## Мутации, генерирующие данное событие
+    - deleteMessages
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    messagesDeleted: [ID!]!
+    """
+
+    # В личный чат было создано сообщение
+    ## Возвращает
+    Активированный личный чат
+    ## Доступ
+    Доставляется всем чата
+    ## Мутации, генерирующие данное событие
+    - newMessages
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    privateChatActivated: PrivateChat!
+    """
+
+    # Обновлен аватар на этапе регистрации
+    ## Возвращает
+    Обновленный аватар
+    ## Доступ
+    Поле доступно только для пользователей на этапе регистрации
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не находится на этапе регистрации
+    """
+    registeringUserImageUploaded: RegisteringUserImageUploadedResult!
+    """
+
+    # Напоминание активировано
+    ## Возвращает
+    Напоминание, срок которого подошел
+    ## Доступ
+    Доставляется всем участникам напоминания
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    reminderActivated: Reminder!
+    """
+
+    # Создано напоминание
+    ## Возвращает
+    Вновь созданное напоминание
+    ## Доступ
+    Доставляется всем участникам напоминания
+    ## Мутации, генерирующие данное событие
+    - newReminder
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    reminderCreated: Reminder!
+    """
+
+    # Напоминание обновлено
+    ## Возвращает
+    Обновленное напоминание
+    ## Доступ
+    Доставляется всем участникам напоминания
+    ## Мутации, генерирующие данное событие
+    - updateReminder
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    reminderUpdated: Reminder!
+    """
+
+    # Напоминания удалены
+    ## Возвращает
+    Идентификаторы удаленных напоминаний
+    ## Доступ
+    Доставляется всем участникам напоминания
+    ## Мутации, генерирующие данное событие
+    - deleteReminders
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    remindersDeleted: [ID!]!
+    """
+
+    # Тег создана
+    ## Возвращает
+    Вновь созданную группу
+    ## Доступ
+    Доставляется всем клиентам, пользователя создавшего тег
+    ## Мутации, генерирующие данное событие
+    - newTag
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    tagCreated: Tag!
+    """
+
+    # Тег удален
+    ## Возвращает
+    Идентификатор удаленного тега
+    ## Доступ
+    Доставляется всем клиентам, пользователя - создателя тега
+    ## Мутации, генерирующие данное событие
+    - deleteTag
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    tagDeleted: ID!
+    """
+
+    # Тег обновлен
+    ## Возвращает
+    Вновь обновленную группу
+    ## Доступ
+    Доставляется всем клиентам, пользователя - создателя тег
+    ## Мутации, генерирующие данное событие
+    - updateTag
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    tagUpdated: Tag!
+    """
+
+    # Дело создано
+    ## Возвращает
+    Вновь созданное дело
+    ## Доступ
+    Доставляется всем участникам чата, связанного с делом
+    ## Мутации, генерирующие данное событие
+    - newTodo
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    todoCreated: Todo!
+    """
+
+    # Дело удалено
+    ## Возвращает
+    Удаленное дело
+    ## Доступ
+    Доставляется всем участникам чата, связанного с делом
+    ## Мутации, генерирующие данное событие
+    - deleteTodo
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    todoDeleted: Todo!
+    """
+
+    # Дело обновлено
+    ## Возвращает
+    Обновленное дело
+    ## Доступ
+    Доставляется всем участникам чата, связанного с делом
+    ## Мутации, генерирующие данное событие
+    - updateTodo
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    todoUpdated: Todo!
+    """
+
+    # Участник чата набирает текст
+    Если chat_id передан, то оповещение происходит только для
+    явно переданного чата, иначе для всех чатов, в которых
+    участвует пользователь.
+    ## Возвращает
+    Грань пользователь/чат
+    ## Доступ
+    Доставляется всем активным участникам чата
+    ## Мутации, генерирующие данное событие
+    - typing
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    typing(
+        "идентификатор чата"
+        chat_id: ID
+    ): ActiveChatMember!
+    """
+
+    # url обработан
+    Событие инициализируется запросом необработанной ссылки,
+    а также при создании сообщения, содержащего ссылки.
+    ## Возвращает
+    Метаданные url
+    ## Доступ
+    Доставляется всем *активным* участникам чата, в которое было опубликовано
+    сообщение, содержащее ссылку.
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    urlScraped: LinkInfo!
+    """
+
+    # В чат добавлен пользователь
+    ## Возвращает
+    Грань пользователь/чат
+    ## Доступ
+    Доставляется всем *активным* участникам соответствующего чата
+    ## Мутации, генерирующие данное событие
+    - leavedFromChat
+    - returnToChat
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    userAddedToChat: ChatMember!
+    """
+
+    # В напоминание добавлен пользователь
+    ## Возвращает
+    Грань пользователь/напоминание
+    ## Доступ
+    Доставляется всем участникам, соответствующего напоминания
+    ## Мутации, генерирующие данное событие
+    - addUserToReminder
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    userAddedToReminder: ReminderMember!
+    """
+
+    # Обновлен аватар (ваш или вашего контакта)
+    ## Возвращает
+    Обновленный аватар
+    ## Доступ
+    После успешной загрузке аватара оповещает всех пользователей, имеющих
+    общий чат, либо общее напоимнание либо явно находящегося в контактах у
+    получателя сабскрипшна.
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    userImageUploaded: UserImageUploadedResult!
+    """
+
+    # Пользователь перешел в статус "офлайн"
+  ## Возвращает
+    Соответствующего пользователя
+    ## Доступ
+    Доставляется всем смежным пользователям
+    ## Мутации, генерирующие данное событие
+    - setClientStatus
+    - также безусловно генерируется при аутентификации, если статус изменился
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    userOffline: OnlineChangeResult!
+    """
+
+    # Пользователь перешел в статус "онлайн"
+  ## Возвращает
+    Соответствующего пользователя
+    ## Доступ
+    Доставляется всем смежным пользователям
+    ## Мутации, генерирующие данное событие
+    - setClientStatus
+    - также безусловно генерируется при аутентификации, если статус изменился
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    userOnline: OnlineChangeResult!
+    """
+
+    # Из чата удален пользователь
+    ## Возвращает
+    Грань пользователь/чат
+    ## Доступ
+    Доставляется всем *активным* участникам соответствующего чата
+    ## Мутации, генерирующие данное событие
+    - removeUserFromChat
+    - leaveFromChat
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    userRemovedFromChat: ChatMember!
+    """
+
+    # Из напоминания удален пользователь
+    ## Возвращает
+    Грань пользователь/напоминание
+    ## Доступ
+    Доставляется всем участникам, соответствующего напоминания
+    ## Мутации, генерирующие данное событие
+    - removeUserFromReminder
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    userRemovedFromReminder: RemoveUserFromReminderResult!
+    """
+
+    # Пользователь обновлен
+    ## Возвращает
+    Обновленный пользователь
+    ## Доступ
+    Доставляется всем [смежным пользователям](https://gudexco.atlassian.net/wiki/spaces/PD/pages/294913)
+    ## Мутации, генерирующие данное событие
+    - updateMe
+    - verifyPhone
+    ## Ошибки
+    - *401 Unauthorized*, пользователь не аутентифицирован или не активен
+    """
+    userUpdated: ActiveUser!
+}
+
+"Тэг задачи"
+type Tag {
+    color: Int!
+    id: ID!
+    issues: IssueConnection!
+    title: String!
+}
+
+type TagConnection {
+    edges: [TagEdge!]!
+    pageInfo: PageInfo!
+}
+
+type TagEdge {
+    cursor: String!
+    node: Tag!
+}
+
+"Подзадача"
+type Todo {
+    "описание задачи"
+    caption: String!
+    "чат"
+    chat: IChat!
+    "дата создания задачи"
+    created_at: DateTime!
+    "дата завершения"
+    end_date: DateTime
+    id: ID!
+    "индекс сортировки"
+    rank: LexoRank!
+    "дата начала"
+    start_date: DateTime!
+    "состаяние задачи"
+    state: TodoState!
+    "название задачи"
+    title: String!
+}
+
+type TodoConnection {
+    edges: [TodoEdge!]!
+    pageInfo: PageInfo!
+}
+
+type TodoEdge {
+    cursor: String!
+    node: Todo!
+}
+
+type UserConnection {
+    edges: [UserEdge!]!
+    pageInfo: PageInfo!
+}
+
+type UserEdge {
+    cursor: String!
+    node: User!
+}
+
+"Аватар пользователя"
+type UserImage implements IFile {
+    "выбранная пользователем зона изображения"
+    area: ImageArea
+    "размер файла"
+    content_length: LongInt!
+    "mime-тип"
+    content_type: String!
+    "id файла"
+    id: ID!
+    "ключ на s3"
+    key: String!
+    "дата загрузки файла"
+    timestamp: DateTime!
+    "url оригинала"
+    url: String!
+}
+
+type UserImageUploadedResult {
+    "аватар"
+    image: UserImage!
+    "идентификатор пользователя, для которого загружено изображение"
+    user_id: ID!
+}
+
+"профиль пользователя"
+type UserProfile {
+    "город"
+    city: String
+    "склонения"
+    declension: UserProfileDeclension
+    "email пользователя"
+    email: Email!
+    "имя"
+    first_name: String!
+    "пол"
+    gender: Gender!
+    "специальность"
+    job_title: String
+    "фамилия"
+    last_name: String!
+}
+
+"склонения города пользователя"
+type UserProfileCityDeclension {
+    "из Санкт-Петербурга"
+    from: String
+    "в Санкт-петербурге"
+    in: String
+    "в Санкт-Петербург"
+    to: String
+}
+
+"склонения профиля пользователя"
+type UserProfileDeclension {
+    "склонения города пользователя"
+    city: UserProfileCityDeclension
+    "склонения имени"
+    first_name: Declention
+    "склонения фамилии"
+    last_name: Declention
+}
+
+type UsersMergedResult {
+    convertedChatId: ID
+    invitedUserIds: [ID!]!
+    registeredUser: ActiveUser!
+}
+
+"уровень назойливости событий чата"
+enum ChatNotificationState {
+    "не создают звуков в клиенте, не создают звуков в пуш уведомлении"
+    MUTE
+    "не создают звуков в клиенте, не создают пуш уведомлений"
+    OFF
+    "звук в клиенту включен, приходят пуши со звуком"
+    ON
+}
+
+"статус вашего участия в чате"
+enum ChatState {
+    "активен"
+    ACTIVE
+    "создатель завершил чат"
+    CLOSED
+    "вы удалены из чата"
+    DELETED
+    "вы покинули чат"
+    LEAVED
+}
+
+"возможные варианты ошибок"
+enum ErrorType {
+    BAD_CREDENTIALS
+    BadRequestError
+    ClientClosedRequestError
+    ForbiddenError
+    LimitRequiredError
+    MembersLimitExceded
+    NotFoundError
+    TOO_MANY_ATTEMPTS
+    TooManyInvitesError
+    TooManyInvitesPerContactError
+    TooManyRequestsError
+    USER_INACTIVE
+    UnauthorizedError
+    UnprocessableEntityError
+    UserWithSameEmailExists
+    UserWithSamePhoneExists
+    ValidationError
+}
+
+"тип файла"
+enum FileType {
+    "документ"
+    DOCUMENT
+    "изображение"
+    IMAGE
+}
+
+"пол пользователя"
+enum Gender {
+    "не определен"
+    ANDROGYNOUS
+    "женщина"
+    FEMALE
+    "мужчина"
+    MALE
+}
+
+"статус колонки"
+enum GroupState {
+    DEFAULT
+    DEFAULT_HIDDEN
+    REGULAR
+}
+
+"локаль"
+enum Locale {
+    "английская"
+    EN
+    "русская"
+    RU
+}
+
+"текущий шаг регистрации"
+enum RegistrationStep {
+    "ожидает заполнения профиля"
+    PROFILE_FILLING
+    "ожидается ввод регистрационнаго кода"
+    VOUCHER_FILLING
+}
+
+enum SearchMessageWhere {
+    CHAT
+    ISSUE
+    PM_CHAT
+}
+
+"статус подзадачи"
+enum TodoState {
+    "подзадача активна"
+    ACTIVE
+    "подзадача закрыта"
+    CLOSED
+}
+
+input ChatFilesFilterInput {
+    "исключить по mime"
+    exclude_mime: [String!]
+    "включить по mime"
+    include_mime: [String!]
+    "тип файла"
+    type: FileType
+}
+
+"Фильтр по списку чатов"
+input ChatsFilterInput {
+    """
+
+    фильтровать по активности, если передан true, будут выбраны активные чаты,
+    если false, неактивные
+    """
+    active: Boolean
+    "исключить личные чаты"
+    exclude_pm: Boolean
+    "фильтр по флагу скрытия"
+    hidden: Boolean
+    "фильтровать по идентификаторам чатов"
+    ids: [ID!]
+    "последнее сообщение создано после"
+    last_message_after: DateTime
+    "последнее сообщение создано до"
+    last_message_before: DateTime
+}
+
+"используется для сохранения данных для выбора области на изображении"
+input ImageAreaInput {
+    height: Int!
+    width: Int!
+    x: Int!
+    y: Int!
+}
+
+input IssuesFilterInput {
+    "фильтровать по активности"
+    active: Boolean
+    "фильтровать по id"
+    ids: [ID!]
+}
+
+input NewChatInput {
+    "описание задачи"
+    caption: String
+    "чат скрыт"
+    hidden: Boolean
+    "id чата"
+    id: ID
+    """
+
+    *[несобственное поле](https://gudexco.atlassian.net/wiki/spaces/PD/pages/294913)*
+    уровень назойливости событий чата,
+    """
+    notification: ChatNotificationState
+    """
+
+    *[несобственное поле](https://gudexco.atlassian.net/wiki/spaces/PD/pages/294913)*    Ограничить состояние notification датой, например - отлючить звук до...
+    Если устанавливаетсу notification_disabled_till,
+    то при наступлении указанного времени,
+    состояние notification снова возвращается в ON.
+    При наступлении указанного времени,
+    придет сабскрипшн chatUpdated,
+    где будет notification = 'ON', notification_disabled_till = null .
+    """
+    notification_disabled_till: DateTime
+    "название задачи"
+    title: String!
+}
+
+input NewFileMessageInput {
+    "id отправляемого файла"
+    file_id: ID!
+    "id сообщения"
+    id: ID
+    "id цитируемого сообщения"
+    quoted_message_id: ID
+}
+
+input NewGroupInput {
+    id: ID
+    "индекс сортировки"
+    rank: LexoRank
+    "заголовок группы"
+    title: String!
+}
+
+input NewIssueInput {
+    "дата завершения"
+    end_date: DateTime
+    "id исполнителя"
+    executor_user_id: ID
+    "id колонки"
+    group_id: ID
+    "id задачи"
+    id: ID
+    "индекс сортировки *поле индивидуально для пользователя*"
+    rank: LexoRank
+    "дата начала"
+    start_date: DateTime
+}
+
+input NewMessageInput {
+    "для сообщения-файла"
+    file_message: NewFileMessageInput
+    "для текстового сообщения"
+    text_message: NewTextMessageInput
+}
+
+input NewPrivateChatInput {
+    "id чата"
+    id: ID
+}
+
+input NewReminderInput {
+    "id чата"
+    chat_id: ID
+    "id напоминания"
+    id: ID
+    "время срабатывания напоминания"
+    timestamp: DateTime!
+    "название задачи"
+    title: String!
+}
+
+input NewTagInput {
+    color: Int!
+    id: ID
+    title: String!
+}
+
+input NewTextMessageInput {
+    "id сообщения"
+    id: ID
+    "текст сообщения"
+    message: String!
+    "id цитируемого сообщения"
+    quoted_message_id: ID
+}
+
+input NewTodoInput {
+    "описание задачи"
+    caption: String
+    "id чата"
+    chat_id: ID!
+    "дата завершения"
+    end_date: DateTime
+    "id задачи"
+    id: ID
+    "индекс сортировки"
+    rank: LexoRank
+    "дата начала"
+    start_date: DateTime
+    "состаяние задачи"
+    state: TodoState
+    "название задачи"
+    title: String!
+}
+
+input PresignChatImageInput {
+    area: ImageAreaInput
+    chat_id: ID!
+    content_length: LongInt!
+    content_type: String!
+    "id файла"
+    id: ID
+}
+
+input PresignMessageFileInput {
+    chat_id: ID!
+    content_length: LongInt!
+    content_type: String!
+    filename: String!
+    "id файла"
+    id: ID
+    "тип файла"
+    type: FileType!
+}
+
+input PresignUserImageInput {
+    area: ImageAreaInput
+    content_length: LongInt!
+    content_type: String!
+    "id файла"
+    id: ID
+}
+
+input RegisterUserInput {
+    "город"
+    city: String
+    "email пользователя"
+    email: Email!
+    "имя"
+    first_name: String!
+    "специальность"
+    job_title: String
+    "фамилия"
+    last_name: String!
+}
+
+"Фильтр по списку напоминаний"
+input ReminderFilterInput {
+    """
+
+    фильтровать по флагу оповещения, если передан true, будут выбраны чекнутые напоминания,
+    если false, нечекнуты
+    """
+    checked: Boolean
+}
+
+input SearchMessageFilter {
+    where: SearchMessageWhere!
+}
+
+input UpdateChatInput {
+    "описание задачи"
+    caption: String
+    "чат скрыт *поле индивидуально для пользователя*"
+    hidden: Boolean
+    """
+
+    *[несобственное поле](https://gudexco.atlassian.net/wiki/spaces/PD/pages/294913)*
+    уровень назойливости событий чата,
+    """
+    notification: ChatNotificationState
+    """
+
+    *[несобственное поле](https://gudexco.atlassian.net/wiki/spaces/PD/pages/294913)*    Ограничить состояние notification датой, например - отлючить звук до...
+    Если устанавливаетсу notification_disabled_till,
+    то при наступлении указанного времени,
+    состояние notification снова возвращается в ON.
+    При наступлении указанного времени,
+    придет сабскрипшн chatUpdated,
+    где будет notification = 'ON', notification_disabled_till = null .
+    """
+    notification_disabled_till: DateTime
+    "индекс сортировки *поле индивидуально для пользователя*"
+    rank: LexoRank
+    "название задачи"
+    title: String
+}
+
+input UpdateGroupInput {
+    "индекс сортировки"
+    rank: LexoRank
+    "заголовок группы"
+    title: String
+}
+
+input UpdateIssueInput {
+    "дата завершения"
+    end_date: DateTime
+    "id исполнителя"
+    executor_user_id: ID
+    "id группы"
+    group_id: ID
+    "индекс сортировки *поле индивидуально для пользователя*"
+    rank: LexoRank
+    "дата начала"
+    start_date: DateTime
+}
+
+input UpdateMessageInput {
+    "текст сообщения"
+    message: String!
+}
+
+input UpdateReminderInput {
+    "id чата"
+    chat_id: ID
+    "время срабатывания напоминания"
+    timestamp: DateTime
+    "название задачи"
+    title: String
+}
+
+input UpdateTagInput {
+    color: Int
+    title: String
+}
+
+input UpdateTodoInput {
+    "описание задачи"
+    caption: String
+    "дата завершения"
+    end_date: DateTime
+    "индекс сортировки"
+    rank: LexoRank
+    "дата начала"
+    start_date: DateTime
+    "состаяние задачи"
+    state: TodoState
+    "название задачи"
+    title: String
+}
+
+input UpdateUserInput {
+    "профиль пользователя"
+    profile: UserProfileUpdateInput!
+}
+
+input UserProfileUpdateInput {
+    "город"
+    city: String
+    "email пользователя"
+    email: Email
+    "имя"
+    first_name: String
+    "специальность"
+    job_title: String
+    "фамилия"
+    last_name: String
+}
+
+
+"The DateTime scalar type represents date time strings complying to ISO-8601."
+scalar DateTime
+
+"E.164 phone format (without +)"
+scalar PhoneNumber
+
+"The Email scalar type represents E-Mail addresses compliant to RFC 822."
+scalar Email
+
+"The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf)."
+scalar JSON
+
+"Bookmark value"
+scalar Bookmark
+
+"Always null"
+scalar Null
+
+"field for sorting (https://github.com/truongkhanhduy95/Lexorank)"
+scalar LexoRank
+
+"The `LongInt` scalar type represents non-fractional signed whole numeric values. LongInt can represent values between -(2^53 - 1) and 2^53 - 1. "
+scalar LongInt

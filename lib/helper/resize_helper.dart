@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:ppldo_flutter_test_app/model/area.dart';
+import 'package:people_do/model/area.dart';
 
 /// Top level function transforms [baseUrl], [key], [area] from avatar to encoded
 /// string for resize request

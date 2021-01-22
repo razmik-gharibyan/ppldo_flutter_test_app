@@ -1,0 +1,47 @@
+fragment Avatar on UserImage{
+    __typename
+    id
+    content_length
+    content_type
+    key
+    timestamp
+    url
+    area{
+        x
+        y
+        width
+        height
+    }
+}
+
+query loadMe {
+  result: me {
+      ... on ActiveUser{
+          __typename
+          id
+          phone
+          online
+          is_my
+          last_seen
+          profile {
+              first_name
+              last_name
+              city
+              job_title
+              email
+          }
+          avatar {
+              ...Avatar
+          }
+      }
+      ... on RegisteringUser{
+          __typename
+          avatar{
+              ...Avatar
+          }
+      }
+  }
+}
+
+
+

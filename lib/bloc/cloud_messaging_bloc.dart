@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:ppldo_flutter_test_app/bloc/bloc.dart';
+import 'package:people_do/bloc/bloc.dart';
 
 class CloudMessagingBloc implements Bloc {
 

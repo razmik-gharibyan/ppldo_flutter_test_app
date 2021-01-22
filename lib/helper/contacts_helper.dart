@@ -1,7 +1,7 @@
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter_libphonenumber/flutter_libphonenumber.dart';
 import 'package:flutter_sim_country_code/flutter_sim_country_code.dart';
-import 'package:ppldo_flutter_test_app/model/ppldo_contact.dart';
+import 'package:people_do/model/ppldo_contact.dart';
 
 class ContactsHelper {
 

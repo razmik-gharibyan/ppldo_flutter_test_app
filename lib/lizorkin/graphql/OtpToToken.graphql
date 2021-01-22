@@ -1,0 +1,11 @@
+
+
+mutation OtpToToken($login: String!, $password: String!) {
+    otpToToken(login: $login, password: $password) {
+        token {
+            expiration
+            expiration_date
+            token
+        }
+    }
+}

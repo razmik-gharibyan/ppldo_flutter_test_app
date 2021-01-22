@@ -1,4 +1,4 @@
-name: ppldo_flutter_test_app
+name: people_do
 description: Test application for ppldonet.
 
 # The following line prevents the package from being accidentally published to
@@ -29,7 +29,7 @@ dependencies:
       url: git://github.com/pichillilorenzo/flutter_inappwebview.git
       ref: master
   http: ^0.12.2
-  connectivity: ^2.0.2
+  connectivity: ^0.4.4
   ### Dependency and state management tools
   provider: ^4.3.2+2
   ### Helper tools
@@ -53,12 +53,43 @@ dependencies:
   contacts_service: ^0.4.6
   flutter_libphonenumber: ^0.3.11
   flutter_sim_country_code: ^0.0.3
+  ### Lizorkin old code dependencies
+  flutter_platform_widgets: ^0.60.0
+  flutter_svg: ^0.18.0
+  path_provider: ^1.6.7
+  web_socket_channel: ^1.1.0
+  mask_text_input_formatter: ^1.0.6
+  crypto: ^2.1.0
+  tinycolor: ^1.0.0
+  pin_code_fields: ^5.0.0
+  loading_overlay: ^0.2.1
+  intl: ^0.16.1
+  shared_preferences: ^0.5.7
+  random_words: any
+  popup_menu: ^1.0.5
+  graphql_flutter: ^3.1.0
+  #fluttertoast: ^7.0.0
+  dash_chat: ^1.1.0
+  tuple: ^1.0.0
+  flutter_sticky_header: ^0.5.0
+  cached_network_image: ^2.2.0
+  file_picker: ^1.9.0
+  auto_size_text: ^2.1.0
+  uuid: ^2.2.0
+  json_serializable: ^3.1.0
+  equatable: ^1.2.5
+  meta: '>=1.0.0 <2.0.0'
+  gql: '>=0.12.3 <1.0.0'
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.0
 
 dev_dependencies:
+  artemis: ^6.18.3
+  build_runner: ^1.10.4
+  gql_pedantic: ^1.0.1
+  gql_build: ^0.0.1
   flutter_test:
     sdk: flutter
 

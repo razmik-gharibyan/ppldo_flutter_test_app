@@ -1,0 +1,6 @@
+mutation MakeOTP($phone: PhoneNumber!) {
+    makeOTP(phone: $phone) {
+        nextBackoffTime
+        oneTimeLogin
+    }
+}

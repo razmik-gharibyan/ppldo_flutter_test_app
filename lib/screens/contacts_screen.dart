@@ -1,16 +1,16 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:ppldo_flutter_test_app/bloc/bloc_provider.dart';
-import 'package:ppldo_flutter_test_app/bloc/contacts_bloc.dart';
-import 'package:ppldo_flutter_test_app/bloc/js_communication_bloc.dart';
-import 'package:ppldo_flutter_test_app/bloc/search_contacts_bloc.dart';
-import 'package:ppldo_flutter_test_app/helper/contacts_helper.dart';
-import 'package:ppldo_flutter_test_app/helper/resize_helper.dart';
-import 'package:ppldo_flutter_test_app/model/ppldo_contact.dart';
-import 'package:ppldo_flutter_test_app/widgets/add_contact_button.dart';
-import 'package:ppldo_flutter_test_app/widgets/contacts_search_bar.dart';
+import 'package:people_do/bloc/bloc_provider.dart';
+import 'package:people_do/bloc/contacts_bloc.dart';
+import 'package:people_do/bloc/js_communication_bloc.dart';
+import 'package:people_do/bloc/search_contacts_bloc.dart';
+import 'package:people_do/helper/contacts_helper.dart';
+import 'package:people_do/helper/resize_helper.dart';
+import 'package:people_do/model/ppldo_contact.dart';
+import 'package:people_do/widgets/add_contact_button.dart';
+import 'package:people_do/widgets/contacts_search_bar.dart';
 
-import 'package:ppldo_flutter_test_app/globals.dart' as globals;
+import 'package:people_do/globals.dart' as globals;
 
 class ContactsScreen extends StatefulWidget {
 
