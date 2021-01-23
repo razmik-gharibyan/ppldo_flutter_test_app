@@ -301,30 +301,19 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
         width: mediaQueryData.size.width,
         child: Align(
           alignment: Alignment.center,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 5.0),
-            decoration:  BoxDecoration(
-              color: Colors.black,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey,
-                  offset: Offset(2, 2), // changes position of shadow
-                ),
-              ],
-            ),
-            child: _isLoggedIn
-             ? Text(
+          child: _isLoggedIn
+            ? Text(
                 globals.applicationMode.toString().replaceAll("Mode.", ""),
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Color(0xFF7CB342),
                   fontSize: 10.0,
                 ),
                )
-             : DropdownButton(
+            : DropdownButton(
                 dropdownColor: Colors.black,
                 isDense: true,
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Color(0xFF7CB342),
                   fontSize: 10.0,
                 ),
                 items: globals.Mode.values.map((globals.Mode value) {
@@ -343,7 +332,6 @@ class _WebScreenState extends State<WebScreen> with WidgetsBindingObserver {
                 },
               ),
           ),
-        ),
       ),
     );
   }
